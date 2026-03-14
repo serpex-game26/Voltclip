@@ -989,6 +989,10 @@ let saved=JSON.parse(localStorage.getItem('vc_saved')||'[]');
 let currentCommentVideoId=null;
 let shareVideoId=null;
 
+// ── Détection plateforme (global, une seule fois) ──
+
+const isAndroid=/Android/.test(navigator.userAgent);
+
 // ══════════════════════════════════════
 // FILTERS COLOR
 // ══════════════════════════════════════
@@ -1399,7 +1403,7 @@ async function startCamera(){
     return;
   }
 
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  
 
   // iOS : contraintes simplifiées — trop de constraints = refus systématique
   const videoConstraints=isIOS?[
@@ -1449,7 +1453,7 @@ async function startCamera(){
   // iOS nécessite un appel explicite à play() après srcObject
   vid.play().catch(e=>console.warn('cam preview play:', e));
   // Sur iOS : adapter le bouton REC si MediaRecorder non supporté
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  
   if(isIOS&&typeof MediaRecorder==='undefined'){
     const recBtn=document.getElementById('rec-btn');
     if(recBtn){
@@ -1980,7 +1984,7 @@ async function renderFeed(){
   if(!videos.length){feed.innerHTML=`<div class="empty-feed"><div class="icon">🎬</div><p>${L().no_vids}</p></div>`;return;}
   videos.forEach(v=>feed.appendChild(buildCard(v)));
   // Détection iOS
-  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+  
   const obs=new IntersectionObserver(entries=>{
     entries.forEach(e=>{
       const vid=e.target.querySelector('video');
@@ -2644,7 +2648,7 @@ async function publishClip(){
     const canvas=document.getElementById('prev-photo-canvas');
     let photoBlob=null;
     // Vérifier si captureStream est disponible (pas sur iOS Safari)
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream;
+    
     const canCapture=!isIOS&&typeof canvas.captureStream==='function'&&typeof MediaRecorder!=='undefined';
     if(canCapture){
       try{
