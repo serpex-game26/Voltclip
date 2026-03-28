@@ -729,6 +729,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
     <div id="uploadStep2Body">
       <div id="uploadStep2PreviewWrap">
         <video id="uploadPreviewVideo" autoplay loop muted playsinline></video>
+        <canvas id="uploadFxCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0.72"></canvas>
         <div class="upload-step2-badge" id="uploadTypeBadge">🎬 VIDÉO</div>
       </div>
       <div id="uploadStep2Form">
@@ -2058,20 +2059,20 @@ function closeUpload() {
   document.getElementById('uploadBgPreview').src = ''
   document.getElementById('uploadBgPreview').style.display = 'none'
   uploadFile = null
-  // Stop FX previews
   Object.values(introFxAnimFrames).forEach(id => cancelAnimationFrame(id))
   introFxAnimFrames = {}
   selectedIntroFx = 'none'
+  if (previewFxAnimFrame) { cancelAnimationFrame(previewFxAnimFrame); previewFxAnimFrame = null }
 }
 function uploadGoBack() {
   document.getElementById('uploadStep1').style.display = 'flex'
   document.getElementById('uploadStep2').style.display = 'none'
   document.getElementById('uploadPreviewVideo').src = ''
   uploadFile = null
-  // Stop FX previews
   Object.values(introFxAnimFrames).forEach(id => cancelAnimationFrame(id))
   introFxAnimFrames = {}
   selectedIntroFx = 'none'
+  if (previewFxAnimFrame) { cancelAnimationFrame(previewFxAnimFrame); previewFxAnimFrame = null }
 }
 
 function setUploadType(type) {
@@ -2159,6 +2160,32 @@ function selectIntroFx(id) {
     c.classList.toggle('selected', c.dataset.fxId === id)
   })
   haptic(30)
+  // Apply FX overlay on main preview
+  startPreviewFxOverlay(id)
+}
+
+let previewFxAnimFrame = null
+function startPreviewFxOverlay(id) {
+  const canvas = document.getElementById('uploadFxCanvas')
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  if (previewFxAnimFrame) { cancelAnimationFrame(previewFxAnimFrame); previewFxAnimFrame = null }
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  if (id === 'none') return
+  const fx = INTRO_FX.find(f => f.id === id)
+  if (!fx || !fx.preview) return
+  // Resize canvas to match display size
+  const wrap = document.getElementById('uploadStep2PreviewWrap')
+  canvas.width = wrap.offsetWidth || 300
+  canvas.height = wrap.offsetHeight || 400
+  let t = 0
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    fx.preview(ctx, canvas.width, canvas.height, t)
+    t += 0.04
+    previewFxAnimFrame = requestAnimationFrame(loop)
+  }
+  loop()
 }
 
 // ── PREVIEW DRAW FUNCTIONS ──
