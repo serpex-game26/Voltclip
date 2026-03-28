@@ -80,7 +80,6 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .vbtn.bookmarked .vi{color:#ffd700}
 
 /* ── ANIMATIONS ── */
-.video-item{position:relative;height:calc(100dvh - 60px);scroll-snap-align:start;scroll-snap-stop:always;background:#000;overflow:hidden;flex-shrink:0}
 .video-item video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
 .video-grad{position:absolute;inset:0;background:linear-gradient(transparent 25%,rgba(10,10,15,0.95));pointer-events:none}
 .video-pause-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -92,6 +91,8 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .vbtn .vc{font-size:11px;font-weight:700;color:#fff;font-family:var(--font-mono);text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .vbtn.liked .vi{animation:likePop .3s ease}
 @keyframes likePop{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+@keyframes floatReaction{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(1.4)}}
+@keyframes fakeFeedIn{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
 
 .video-info{position:absolute;bottom:18px;left:14px;right:80px}
 .video-user{font-family:var(--font-mono);font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;cursor:pointer;display:flex;align-items:center;gap:6px}
@@ -1040,6 +1041,8 @@ async function loadFeed(append = false) {
         // Intro FX playback
         const introFxId = e.target.dataset.introFx
         if (introFxId && vidId) playIntroFxOnVideo(vidId, introFxId, e.target)
+        // Live reactions
+        startLiveReactions(vidId)
         // Vibration légère au changement de vidéo
         if (navigator.vibrate) navigator.vibrate(8)
         // Preload 2 prochaines vidéos
@@ -1049,6 +1052,7 @@ async function loadFeed(append = false) {
         if (next2) { const nv2 = next2.querySelector('video'); if(nv2) nv2.preload = 'auto' }
       } else {
         vid?.pause()
+        stopLiveReactions()
         if (vidId && watchTimers[vidId] && !watchTimers[vidId].sent) {
           const watchSec = Math.round((Date.now()-watchTimers[vidId].start)/1000)
           const skippedFast = watchSec < 2
@@ -1378,7 +1382,17 @@ async function toggleLike(videoId, isLiked) {
 
   btn.setAttribute('onclick', `toggleLike('${videoId}',${newLiked})`)
 
+  // Auto-track interests from liked video tags
   if (newLiked) {
+    const item = document.querySelector(`[data-video-id="${videoId}"]`)
+    if (item) {
+      const tags = Array.from(item.querySelectorAll('.video-tag')).map(t => t.textContent.replace('#','').toLowerCase())
+      if (tags.length) {
+        const stored = new Set(JSON.parse(localStorage.getItem('voltclip_interests') || '[]'))
+        tags.forEach(t => stored.add(t))
+        localStorage.setItem('voltclip_interests', JSON.stringify([...stored].slice(0, 50)))
+      }
+    }
     await sb.from('likes').insert({ user_id: currentUser.id, video_id: videoId })
   } else {
     await sb.from('likes').delete().eq('user_id', currentUser.id).eq('video_id', videoId)
@@ -1606,7 +1620,6 @@ async function loadRank(period, tabEl) {
 // ── Notifications virales : alerte quand une vidéo explose ──
 const _viralChecked = new Set()
 async function checkViralMilestone(videoId) {
-  // Évite de checker 50x la même vidéo
   if (_viralChecked.has(videoId)) return
   _viralChecked.add(videoId)
   setTimeout(() => _viralChecked.delete(videoId), 60000)
@@ -1622,7 +1635,6 @@ async function checkViralMilestone(videoId) {
   const hit = milestones.find(m => v.views_count >= m && v.views_count < m * 1.05)
   if (!hit) return
 
-  // Insère une notif dans Supabase
   await sb.from("notifications").insert({
     user_id: currentUser.id,
     type: "milestone",
@@ -1631,6 +1643,61 @@ async function checkViralMilestone(videoId) {
   })
   toast(`🔥 ${hit >= 1000 ? (hit/1000)+"k" : hit} vues sur ta vidéo !`)
   document.getElementById("notifDot").style.display = "block"
+
+  // Fake feedback dopamine — "tu vas percer"
+  const fakeMsgs = [
+    '⚡ Ton contenu cartonne en ce moment !',
+    '🚀 L\'algo pousse ta vidéo — continue !',
+    '🔥 Tu es dans le top des créateurs actifs !',
+    '💥 Ta vidéo est en train d\'exploser !',
+    '🎯 L\'algo t\'a repéré — publie plus souvent !'
+  ]
+  setTimeout(() => {
+    showFakeFeedback(fakeMsgs[Math.floor(Math.random() * fakeMsgs.length)])
+  }, 3000)
+}
+
+function showFakeFeedback(msg) {
+  const existing = document.getElementById('fakeFeedbackBanner')
+  if (existing) existing.remove()
+  const el = document.createElement('div')
+  el.id = 'fakeFeedbackBanner'
+  el.style.cssText = `position:fixed;top:max(60px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    z-index:9999;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);color:#fff;
+    font-family:'Space Mono',monospace;font-size:12px;font-weight:700;
+    padding:10px 20px;border-radius:20px;box-shadow:0 4px 20px rgba(124,92,252,.5);
+    animation:fakeFeedIn .4s ease;white-space:nowrap;max-width:90vw;text-align:center`
+  el.textContent = msg
+  document.body.appendChild(el)
+  setTimeout(() => { el.style.transition = 'opacity .5s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 500) }, 4000)
+}
+
+// ── LIVE REACTIONS flottantes ──
+const LIVE_REACTIONS = ['🔥','❤️','😂','💀','🤯','👏','💯','🚀']
+let _liveReactionInterval = null
+
+function startLiveReactions(videoId) {
+  stopLiveReactions()
+  const item = document.querySelector(`[data-video-id="${videoId}"]`)
+  if (!item) return
+  // Simule des reactions aléatoires toutes les 1.5-4s
+  function spawnReaction() {
+    const emoji = LIVE_REACTIONS[Math.floor(Math.random() * LIVE_REACTIONS.length)]
+    const el = document.createElement('div')
+    el.textContent = emoji
+    const x = 10 + Math.random() * 60
+    el.style.cssText = `position:absolute;bottom:80px;left:${x}%;font-size:${22+Math.random()*14}px;
+      pointer-events:none;z-index:100;animation:floatReaction 2.5s ease forwards`
+    item.appendChild(el)
+    setTimeout(() => el.remove(), 2500)
+    _liveReactionInterval = setTimeout(spawnReaction, 1500 + Math.random() * 2500)
+  }
+  _liveReactionInterval = setTimeout(spawnReaction, 800)
+}
+
+function stopLiveReactions() {
+  clearTimeout(_liveReactionInterval)
+  _liveReactionInterval = null
 }
 
 async function loadNotifs() {
