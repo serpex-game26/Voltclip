@@ -2802,13 +2802,12 @@ function startDmWithUser(userId, username, avatarUrl) {
 // ══════════════════════════════════════════
 let reportTarget = { type: null, id: null }
 
-// ── Admin : vrkill peut bannir un user depuis son profil public ──
-const ADMIN_USERNAME = 'vrkill'
+// ── Admin : check UUID direct (plus fiable que le username) ──
+const ADMIN_UUID = '1e7d3a10-fca7-4507-aabe-541fca23b1f5'
 let _isAdmin = false
 async function checkAdmin() {
   if (!currentUser) return
-  const { data } = await sb.from('profiles').select('username').eq('id', currentUser.id).single()
-  _isAdmin = data?.username === ADMIN_USERNAME
+  _isAdmin = currentUser.id === ADMIN_UUID
   // Afficher bouton ban dans profil public si admin
   const banBtn = document.getElementById('adminBanBtn')
   if (banBtn) banBtn.style.display = _isAdmin ? 'block' : 'none'
