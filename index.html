@@ -241,12 +241,12 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .upload-pick-btn p{font-family:var(--font-mono);font-size:11px;color:#fff;font-weight:700;letter-spacing:.05em}
 
 /* Étape 2 — formulaire avec preview */
-#uploadStep2{flex:1;display:none;flex-direction:column}
-#uploadStep2Header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+#uploadStep2{flex:1;display:none;flex-direction:column;height:100%;overflow:hidden}
+#uploadStep2Header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 #uploadStep2Back{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px}
 .upload-step2-title{font-family:var(--font-mono);font-size:15px;font-weight:700;color:#fff;flex:1}
-#uploadStep2Body{flex:1;overflow-y:auto;display:flex;flex-direction:column}
-#uploadStep2PreviewWrap{position:relative;width:100%;aspect-ratio:9/16;max-height:45vh;background:#000;overflow:hidden;flex-shrink:0}
+#uploadStep2Body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch;padding-bottom:20px}
+#uploadStep2PreviewWrap{position:relative;width:100%;aspect-ratio:9/16;max-height:35vh;background:#000;overflow:hidden;flex-shrink:0}
 #uploadStep2PreviewWrap video{width:100%;height:100%;object-fit:cover}
 .upload-step2-badge{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;padding:4px 12px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fff}
 #uploadStep2Form{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
@@ -553,7 +553,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
       <button class="profile-btn" onclick="shareProfile()">🔗 Partager</button>
       <button class="profile-btn" onclick="signOut()">Déconnexion</button>
     </div>
-    <button class="profile-btn" style="width:100%;max-width:300px;margin-top:8px;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;color:#fff;font-weight:700" onclick="openAnalyse()">🔮 Analyse moi</button>
+
   </div>
   <!-- Onglets profil -->
   <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.07);background:var(--bg);position:sticky;top:0;z-index:10">
@@ -795,8 +795,8 @@ const SUPABASE_URL  = 'https://czdfoqgcjbsoupekpxpg.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6ZGZvcWdjamJzb3VwZWtweHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzQ3MzgsImV4cCI6MjA4OTAxMDczOH0.ANivcmm64cYQCZZiFrCpduigWytloZSzwJ1vi1BbOy0'
 
 // ── Cloudinary config ──
-const CLOUDINARY_CLOUD = 'REMPLACE_PAR_TON_CLOUD_NAME'  // ex: dxxxxxxx
-const CLOUDINARY_PRESET = 'REMPLACE_PAR_TON_UPLOAD_PRESET' // preset non signé
+const CLOUDINARY_CLOUD = 'dtdkrbdoo'
+const CLOUDINARY_PRESET = 'ml_default'
 
 const { createClient } = supabase
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
