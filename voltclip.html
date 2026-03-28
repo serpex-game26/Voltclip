@@ -118,7 +118,7 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .vbtn.bookmarked .vi{color:#ffd700}
 
 /* ── ANIMATIONS ── */
-.video-item video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s ease}
+.video-item video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s ease;will-change:transform}
 .video-grad{position:absolute;inset:0;background:linear-gradient(transparent 25%,rgba(10,10,15,0.95));pointer-events:none}
 .video-pause-icon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   font-size:60px;opacity:0;transition:opacity .2s;pointer-events:none}
@@ -151,9 +151,9 @@ html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-fam
 .story-uname{font-size:10px;color:var(--muted);max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 
 /* ── TRANSITIONS SMOOTH ── */
-#videoFeed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;scroll-behavior:smooth}
+#videoFeed{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:none}
 #videoFeed::-webkit-scrollbar{display:none}
-.video-item{position:relative;height:calc(100dvh - 60px);scroll-snap-align:start;scroll-snap-stop:always;background:#000;overflow:hidden;flex-shrink:0;transition:opacity .2s ease}
+.video-item{position:relative;height:calc(100dvh - 60px);scroll-snap-align:start;scroll-snap-stop:always;background:#000;overflow:hidden;flex-shrink:0;transition:opacity .2s ease;will-change:transform;contain:layout style;touch-action:pan-y}
 .video-item.entering{animation:fadeSlideIn .25s ease forwards}
 @keyframes fadeSlideIn{from{opacity:.6;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
 
@@ -1100,12 +1100,16 @@ async function loadFeed(append = false) {
       feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Abonne-toi à des créateurs<br>pour voir leur contenu ici !</p></div>'
       feedLoading = false; return
     }
-    const { data: videos } = await sb.from('videos')
+    const { data: videos, error: vidErr } = await sb.from('videos')
       .select('*, profiles(username, avatar_url)')
-      .eq('status', 'active').in('user_id', ids)
+      .in('status', ['active', 'published', 'public'])
+      .in('user_id', ids)
       .order('created_at', { ascending: false })
       .range(feedPage * 20, feedPage * 20 + 19)
-    if (!videos?.length) { feedAllLoaded = true; feedLoading = false; return }
+    if (!videos?.length) {
+      feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Les créateurs que tu suis<br>n\'ont pas encore posté de vidéos !</p></div>'
+      feedAllLoaded = true; feedLoading = false; return
+    }
     await _renderFeedVideos(videos, feed, append)
     feedLoading = false
     return
@@ -1235,28 +1239,35 @@ async function _renderFeedVideos(videos, feed, append) {
         if (e.isIntersecting) {
           if (activeVideoEl && activeVideoEl !== vid) { activeVideoEl.pause(); activeVideoEl.currentTime = 0 }
           activeVideoEl = vid
+          // Preload intelligent : actif + 2 suivants seulement
+          if (vid) { vid.preload = 'auto'; vid.load() }
+          const next = e.target.nextElementSibling
+          const next2 = next?.nextElementSibling
+          if (next) { const nv = next.querySelector('video'); if(nv && nv.preload !== 'auto') { nv.preload = 'auto'; nv.load() } }
+          if (next2) { const nv2 = next2.querySelector('video'); if(nv2 && nv2.preload !== 'auto') { nv2.preload = 'auto'; nv2.load() } }
           if (currentTab === 'feed') vid?.play().catch(()=>{})
           if (vidId) {
-            sb.rpc('increment_views', { vid_id: vidId })
-            checkViralMilestone(vidId)
-            const seen = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
-            seen.add(vidId)
-            if (seen.size > 200) { const arr = [...seen]; arr.splice(0,50); seen.clear(); arr.forEach(i=>seen.add(i)) }
-            localStorage.setItem('voltclip_seen', JSON.stringify([...seen]))
-            const sc = parseInt(localStorage.getItem('voltclip_session_count') || '0') + 1
-            localStorage.setItem('voltclip_session_count', sc)
-            if (sc === 5) toast('🔥 T\'as vu 5 vidéos — encore une ?')
-            if (sc === 15) toast('⚡ 15 vidéos ! Tu es accro 😂')
+            // Throttle : ne compter qu'une fois par video par session
+            const _viewedThisSession = window._vcViewedSession || (window._vcViewedSession = new Set())
+            if (!_viewedThisSession.has(vidId)) {
+              _viewedThisSession.add(vidId)
+              sb.rpc('increment_views', { vid_id: vidId })
+              checkViralMilestone(vidId)
+              const seen = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
+              seen.add(vidId)
+              if (seen.size > 200) { const arr = [...seen]; arr.splice(0,50); seen.clear(); arr.forEach(i=>seen.add(i)) }
+              localStorage.setItem('voltclip_seen', JSON.stringify([...seen]))
+              const sc = parseInt(localStorage.getItem('voltclip_session_count') || '0') + 1
+              localStorage.setItem('voltclip_session_count', sc)
+              if (sc === 5) toast('🔥 T\'as vu 5 vidéos — encore une ?')
+              if (sc === 15) toast('⚡ 15 vidéos ! Tu es accro 😂')
+            }
           }
           if (vidId) watchTimers[vidId] = { start: Date.now(), sent: false }
           const introFxId = e.target.dataset.introFx
           if (introFxId && vidId) playIntroFxOnVideo(vidId, introFxId, e.target)
           startLiveReactions(vidId)
           if (navigator.vibrate) navigator.vibrate(8)
-          const next = e.target.nextElementSibling
-          const next2 = next?.nextElementSibling
-          if (next) { const nv = next.querySelector('video'); if(nv) nv.preload = 'auto' }
-          if (next2) { const nv2 = next2.querySelector('video'); if(nv2) nv2.preload = 'auto' }
         } else {
           vid?.pause()
           stopLiveReactions()
@@ -1282,23 +1293,28 @@ async function _renderFeedVideos(videos, feed, append) {
     if (!el._observed) { feed._observer.observe(el); el._observed = true }
   })
 
-  // Virtualisation DOM
+  // Virtualisation DOM avec debounce
   if (!feed._virtListener) {
     feed._virtListener = true
-    feed.addEventListener('scroll', () => requestAnimationFrame(() => {
-      const items = Array.from(feed.querySelectorAll('.video-item'))
-      const feedRect = feed.getBoundingClientRect()
-      items.forEach(item => {
-        const vid = item.querySelector('video')
-        if (!vid) return
-        const dist = Math.abs(item.getBoundingClientRect().top - feedRect.top)
-        if (dist > window.innerHeight * 3) {
-          if (vid.src && !vid.dataset.srcBak) { vid.dataset.srcBak = vid.src; vid.pause(); vid.removeAttribute('src'); vid.load() }
-        } else {
-          if (vid.dataset.srcBak && !vid.src) { vid.src = vid.dataset.srcBak; delete vid.dataset.srcBak }
-        }
+    let _virtRaf = null
+    feed.addEventListener('scroll', () => {
+      if (_virtRaf) return
+      _virtRaf = requestAnimationFrame(() => {
+        _virtRaf = null
+        const items = Array.from(feed.querySelectorAll('.video-item'))
+        const feedRect = feed.getBoundingClientRect()
+        items.forEach(item => {
+          const vid = item.querySelector('video')
+          if (!vid) return
+          const dist = Math.abs(item.getBoundingClientRect().top - feedRect.top)
+          if (dist > window.innerHeight * 3) {
+            if (vid.src && !vid.dataset.srcBak) { vid.dataset.srcBak = vid.src; vid.pause(); vid.removeAttribute('src'); vid.load() }
+          } else {
+            if (vid.dataset.srcBak && !vid.src) { vid.src = vid.dataset.srcBak; delete vid.dataset.srcBak }
+          }
+        })
       })
-    }), { passive: true })
+    }, { passive: true })
   }
 }
 
@@ -1392,7 +1408,7 @@ function createVideoItem(v, i, liked, bookmarked, followingIds) {
   const pinHtml = v.is_pinned ? `<div class="video-pin-badge">📌 Épinglée</div>` : ''
 
   div.innerHTML = `
-    <video src="${v.video_url}" poster="${v.thumbnail_url||''}" loop playsinline preload="auto"></video>
+    <video src="${v.video_url}" poster="${v.thumbnail_url||''}" loop playsinline preload="none"></video>
     <canvas class="video-intro-canvas" id="ifx-${v.id}"></canvas>
     <div class="video-grad"></div>
     <div class="video-pause-icon" id="pause-${v.id}">⏸</div>
@@ -1438,12 +1454,17 @@ function createVideoItem(v, i, liked, bookmarked, followingIds) {
   `
 
   const videoEl = div.querySelector('video')
-  videoEl.preload = 'auto'
+  // Preload géré dynamiquement par l'IntersectionObserver
 
-  // Progress bar
+  // Progress bar throttlée via rAF
+  let _progRaf = null
   videoEl.addEventListener('timeupdate', function() {
-    const p = document.getElementById('prog-'+v.id)
-    if (p && this.duration) p.style.width = (this.currentTime/this.duration*100)+'%'
+    if (_progRaf) return
+    _progRaf = requestAnimationFrame(() => {
+      _progRaf = null
+      const p = document.getElementById('prog-'+v.id)
+      if (p && this.duration) p.style.width = (this.currentTime/this.duration*100)+'%'
+    })
   })
 
   // Double tap to like
@@ -3682,7 +3703,7 @@ init()
 // ══════════════════════════════════════════
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
       .then(r => console.log('SW registered:', r.scope))
       .catch(e => console.log('SW error:', e))
   })
