@@ -2766,7 +2766,7 @@ async function submitUpload() {
         description: desc + (tags.length ? ' ' + tags.map(t=>'#'+t).join(' ') : ''),
         video_url: videoUrl,
         thumbnail_url: thumbUrl,
-        duration: duration,
+        duration: Math.round(duration),
         sound_name: soundName,
         intro_fx: selectedIntroFx !== 'none' ? selectedIntroFx : null,
         status: 'active'
