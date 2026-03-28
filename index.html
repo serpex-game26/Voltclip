@@ -2200,9 +2200,16 @@ function openUpload() {
 }
 function closeUpload() {
   document.getElementById('uploadModal').classList.remove('open')
-  document.getElementById('uploadPreviewVideo').src = ''
+  const previewVid = document.getElementById('uploadPreviewVideo')
+  previewVid.pause()
+  previewVid.src = ''
   document.getElementById('uploadBgPreview').src = ''
   document.getElementById('uploadBgPreview').style.display = 'none'
+  document.getElementById('uploadSubmit').style.display = 'block'
+  document.getElementById('uploadProgress').style.display = 'none'
+  document.getElementById('uploadErr').textContent = ''
+  document.getElementById('uploadStep1').style.display = 'flex'
+  document.getElementById('uploadStep2').style.display = 'none'
   uploadFile = null
   Object.values(introFxAnimFrames).forEach(id => cancelAnimationFrame(id))
   introFxAnimFrames = {}
