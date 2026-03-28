@@ -2656,24 +2656,29 @@ async function compressVideo(file, prog) {
     const video = document.createElement('video')
     video.src = url
     video.muted = true
-    await new Promise(r => { video.onloadedmetadata = r; video.load() })
+    video.playsInline = true
 
-    // Canvas pour recompresser
+    // Timeout sécurisé pour loadedmetadata (5s max)
+    await new Promise((resolve, reject) => {
+      const t = setTimeout(() => reject(new Error('metadata timeout')), 5000)
+      video.onloadedmetadata = () => { clearTimeout(t); resolve() }
+      video.onerror = () => { clearTimeout(t); reject(new Error('video load error')) }
+      video.load()
+    })
+
     const canvas = document.createElement('canvas')
-    // Max 720p pour réduire le poids
     const maxW = 720, maxH = 1280
     const scale = Math.min(1, maxW / video.videoWidth, maxH / video.videoHeight)
-    canvas.width  = Math.round(video.videoWidth  * scale)
-    canvas.height = Math.round(video.videoHeight * scale)
+    canvas.width  = Math.round(video.videoWidth  * scale) || 720
+    canvas.height = Math.round(video.videoHeight * scale) || 1280
     const ctx = canvas.getContext('2d')
 
     const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
                    : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : null
-    if (!mimeType) return file // fallback : pas de compression possible
+    if (!mimeType) { URL.revokeObjectURL(url); return file }
 
     const chunks = []
     const stream = canvas.captureStream(30)
-    // Ajouter piste audio si possible
     try {
       const audioCtx = new AudioContext()
       const src = audioCtx.createMediaElementSource(video)
@@ -2685,17 +2690,42 @@ async function compressVideo(file, prog) {
     const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2_000_000 })
     recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data) }
 
-    return await new Promise(resolve => {
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType })
-        // Si compression n'a pas réduit suffisamment, garder original
-        resolve(blob.size < file.size ? new File([blob], file.name.replace(/\.[^.]+$/, '.webm'), { type: mimeType }) : file)
+    // Timeout global = durée vidéo * 1.5 + 10s, max 120s
+    const maxDuration = Math.min(120000, (video.duration || 60) * 1500 + 10000)
+
+    return await new Promise((resolve) => {
+      let resolved = false
+      const safeResolve = (result) => {
+        if (resolved) return
+        resolved = true
         URL.revokeObjectURL(url)
+        resolve(result)
       }
+
+      // Timeout de sécurité — évite le blocage infini sur mobile
+      const safetyTimer = setTimeout(() => {
+        console.warn('compressVideo timeout — fallback original')
+        try { recorder.stop() } catch(e) {}
+        safeResolve(file)
+      }, maxDuration)
+
+      recorder.onstop = () => {
+        clearTimeout(safetyTimer)
+        const blob = new Blob(chunks, { type: mimeType })
+        safeResolve(blob.size > 0 && blob.size < file.size
+          ? new File([blob], file.name.replace(/\.[^.]+$/, '.webm'), { type: mimeType })
+          : file)
+      }
+
       recorder.start(100)
-      video.play()
+      video.play().catch(() => {
+        // autoplay bloqué sur mobile → skip compression
+        clearTimeout(safetyTimer)
+        try { recorder.stop() } catch(e) {}
+        safeResolve(file)
+      })
       video.ontimeupdate = () => ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      video.onended = () => recorder.stop()
+      video.onended = () => { try { recorder.stop() } catch(e) {} }
     })
   } catch(e) {
     console.warn('Compression échouée, upload original', e)
@@ -2752,7 +2782,7 @@ async function submitUpload() {
       body: formData
     })
     const cdnData = await cdnRes.json()
-    if (!cdnRes.ok || cdnData.error) throw new Error(cdnData.error?.message || 'Erreur Cloudinary')
+    if (!cdnRes.ok || cdnData.error) throw new Error('Cloudinary: ' + (cdnData.error?.message || `HTTP ${cdnRes.status}`))
 
     const videoUrl = cdnData.secure_url
     // Thumbnail = 1ère frame auto générée par Cloudinary
@@ -2808,7 +2838,7 @@ async function submitUpload() {
     loadFeed()
     loadStories()
   } catch (err) {
-    document.getElementById('uploadErr').textContent = err.message
+    document.getElementById('uploadErr').textContent = '❌ ' + err.message
     document.getElementById('uploadSubmit').style.display = 'block'
   } finally {
     prog.style.display = 'none'
