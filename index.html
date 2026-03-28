@@ -2768,7 +2768,8 @@ async function submitUpload() {
         thumbnail_url: thumbUrl,
         duration: duration,
         sound_name: soundName,
-        intro_fx: selectedIntroFx !== 'none' ? selectedIntroFx : null
+        intro_fx: selectedIntroFx !== 'none' ? selectedIntroFx : null,
+        status: 'active'
       }).select().single()
 
       if (error) throw error
@@ -2789,7 +2790,8 @@ async function submitUpload() {
       const { error } = await sb.from('stories').insert({
         user_id: currentUser.id,
         video_url: videoUrl,
-        thumbnail_url: thumbUrl
+        thumbnail_url: thumbUrl,
+        status: 'active'
       })
       if (error) throw error
     }
