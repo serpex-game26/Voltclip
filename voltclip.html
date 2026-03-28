@@ -30,7 +30,7 @@
 /* ── SHARE DUEL BTN ── */
 .battle-share-duel{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);z-index:25;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;border-radius:20px;font-family:var(--font-mono);font-size:11px;font-weight:700;padding:8px 18px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px rgba(255,215,0,.4);letter-spacing:.04em;display:flex;align-items:center;gap:6px}
 .battle-share-duel:active{transform:translateX(-50%)scale(.95)}
-</style><body><div id=voltpassModal><div class=voltpass-sheet><div class=voltpass-badge>⚡ VOLTPASS</div><div class=voltpass-title>Sans pub.<br>Sans limites.</div><div class=voltpass-sub>Profite de VoltClip sans interruption publicitaire et débloque des fonctionnalités exclusives.</div><div class=voltpass-perks><div class=voltpass-perk><span class=pk>🚫</span> Zéro pub dans le feed</div><div class=voltpass-perk><span class=pk>⚡</span> Badge VoltPass exclusif sur ton profil</div><div class=voltpass-perk><span class=pk>🎨</span> Effets FX premium débloqués</div><div class=voltpass-perk><span class=pk>🚀</span> Boost algorithmique +20% sur tes clips</div><div class=voltpass-perk><span class=pk>💎</span> Support prioritaire</div></div><div class=voltpass-plans><div class="vplan selected" onclick="selectPlan('month')" id=plan-month><div class=vplan-name>MENSUEL</div><div class=vplan-price>2,99€</div><div class=vplan-period>/ mois</div></div><div onclick="selectPlan('year')" class=vplan id=plan-year><div class=vplan-name>ANNUEL</div><div class=vplan-price>19,99€</div><div class=vplan-period>/ an</div><div class=vplan-save>— 44% économisé</div></div></div><button class=voltpass-cta onclick=startVoltPass()>⚡ Commencer mon VoltPass</button><button class=voltpass-close onclick=closeVoltPass()>Pas maintenant</button><div class=voltpass-legal>Paiement sécurisé · Résiliation à tout moment<br><a href=cgu.html style=color:var(--accent);font-size:10px>CGU</a> · <a href=politique-confidentialite.html style=color:var(--accent);font-size:10px>Confidentialité</a></div></div></div><div id=toast></div><nav id=navbar><button class="nav-btn active" onclick="showTab('battle')" id=nav-battle><span class=ni>⚔️</span><span class=nl>BATTLE</span></button><button onclick="showTab('rank')" class=nav-btn id=nav-rank><span class=ni>🏆</span><span class=nl>TOP</span></button><button onclick="showTab('leaderboard')" class=nav-btn id=nav-leaderboard><span class=ni>👑</span><span class=nl>PALMARÈS</span></button><button onclick="showTab('search')" class=nav-btn id=nav-search><span class=ni>🔍</span><span class=nl>SEARCH</span></button><button onclick="showTab('notif')" class=nav-btn id=nav-notif><span class=ni>🔔</span><span class=nl>NOTIFS</span> <div id=notifDot></div></button><button onclick="showTab('profile')" class=nav-btn id=nav-profile><span class=ni>👤</span><span class=nl>PROFIL</span></button></nav><button id=fabUpload onclick=openUpload()>＋</button><div class="screen" id=feedScreen><div id=feedTopBar><button onclick="switchFeedTab('following',this)" class=feed-tab>Abonnements</button><button class="feed-tab active" onclick="switchFeedTab('foryou',this)">Pour toi</button></div><div id=storiesWrap><div id=storiesBar></div></div><div id=videoFeed></div><div style="z-index:50;padding:0 12px 8px;display:none;position:fixed;bottom:70px;left:0;right:0" id=suggestBar><div style="backdrop-filter:blur(12px);background:#0f0f1ef2;border:1px solid #ffffff1a;border-radius:16px;padding:10px 12px"><div style=justify-content:space-between;align-items:center;margin-bottom:8px;display:flex><span style="color:#ffffff80;letter-spacing:.05em;font-family:Space Mono,monospace;font-size:10px" class=suggest-label>PERSONNES À SUIVRE</span><button onclick="document.getElementById('suggestBar').style.display='none'" style="color:#ffffff4d;cursor:pointer;background:0 0;border:none;padding:0;font-size:16px">×</button></div><div id=suggestList style=gap:12px;padding-bottom:4px;display:flex;overflow-x:auto></div></div></div></div><div class=screen id=searchScreen><div class=search-header><div class=search-bar><span>🔍</span><input placeholder="Rechercher vidéos, hashtags…" id=searchInput oninput=onSearch(this.value)></div></div><div id=searchResults><div class=search-section-title>TENDANCES</div><div id=trendingTags></div><div class=search-section-title style=margin-top:20px>⚡ CHALLENGES DU MOMENT</div><div id=challengesList style=flex-direction:column;gap:8px;margin-bottom:4px;display:flex></div><div class=search-section-title style=margin-top:16px>RÉCENTES</div><div class=search-video-grid id=recentGrid></div></div></div><div class="screen active" id=battleScreen><div id=battleFeed></div></div><button id=fabBattle onclick=openBattleUpload()>⚔️</button><div id=battleUploadModal><div class=battle-upload-header><button style="color:#fff;cursor:pointer;background:0 0;border:none;font-size:22px" onclick=closeBattleUpload()>←</button><span style=font-family:var(--font-mono);color:#fff;flex:1;font-size:15px;font-weight:700>⚔️ Créer un Battle</span></div><div class=battle-upload-steps><div style=color:var(--muted);font-size:12px;font-family:var(--font-mono);letter-spacing:.08em;margin-bottom:4px>TITRE DU BATTLE</div><input placeholder="Ex: Qui a le meilleur flow ? 🎤" class=upload-input id=battleTitle style=margin-bottom:8px><div style=color:var(--muted);font-size:12px;font-family:var(--font-mono);letter-spacing:.08em;margin-bottom:8px>CATÉGORIE</div><div id=battleCatGrid style=flex-wrap:wrap;gap:8px;margin-bottom:16px;display:flex></div><div style=gap:10px;margin-bottom:8px;display:flex><div onclick="pickBattleVideo('left')" style="background:var(--surface);border:1.5px dashed var(--border);text-align:center;cursor:pointer;border-radius:14px;flex:1;padding:16px;transition:border-color .2s" id=battleLeftPick><div id=battleLeftThumb style=margin-bottom:8px;font-size:32px>📹</div><div style=font-family:var(--font-mono);color:var(--muted);font-size:11px>VIDÉO GAUCHE</div><div id=battleLeftName style=color:var(--accent);margin-top:4px;font-size:10px;display:none></div></div><div style=font-family:var(--font-mono);color:var(--accent2);align-items:center;font-size:18px;font-weight:700;display:flex>VS</div><div onclick="pickBattleVideo('right')" style="background:var(--surface);border:1.5px dashed var(--border);text-align:center;cursor:pointer;border-radius:14px;flex:1;padding:16px;transition:border-color .2s" id=battleRightPick><div id=battleRightThumb style=margin-bottom:8px;font-size:32px>📹</div><div style=font-family:var(--font-mono);color:var(--muted);font-size:11px>VIDÉO DROITE</div><div id=battleRightName style=color:var(--accent);margin-top:4px;font-size:10px;display:none></div></div></div><div style=color:var(--muted);text-align:center;margin-bottom:12px;font-size:11px>Sélectionne 2 vidéos déjà uploadées sur VoltClip</div><div id=battleUploadErr style=color:var(--accent2);text-align:center;margin-bottom:8px;font-size:12px></div><button class=upload-submit onclick=submitBattle()>⚔️ Lancer le Battle !</button><input accept=video/* id=battleFileInput onchange=handleBattleFile(this) style=display:none type=file></div></div><div id=battlePickerModal style=z-index:960;background:#000000d9;flex-direction:column;display:none;position:fixed;inset:0><div style="background:var(--surface);border-radius:20px 20px 0 0;flex-direction:column;max-height:80vh;display:flex;position:absolute;bottom:0;left:0;right:0"><div style="border-bottom:1px solid var(--border);justify-content:space-between;align-items:center;padding:14px 16px;display:flex"><span style=font-family:var(--font-mono);font-size:14px;font-weight:700>Choisir une vidéo</span><button style="color:var(--muted);cursor:pointer;background:0 0;border:none;font-size:20px" onclick=closeBattlePicker()>✕</button></div><div style="grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:60vh;padding:2px;display:grid;overflow-y:auto" id=battlePickerGrid></div></div></div><div class=screen id=rankScreen><div class=rank-header><div class=rank-title>🏆 TOP CLIPS RAP FR</div><div class=period-tabs><button class="period-tab active" onclick="loadRank('week',this)">SEMAINE</button><button onclick="loadRank('month',this)" class=period-tab>MOIS</button><button onclick="loadRank('all',this)" class=period-tab>TOUT</button></div></div><div id=rankList><div class=loader-dots><span></span><span></span><span></span></div></div></div><div class=screen id=notifScreen><div class=notif-header>🔔 NOTIFICATIONS</div><div id=notifList></div></div><div class=screen id=profileScreen><div class=profile-top><div class=profile-avatar id=profileAvatarWrap onclick=changeAvatar()><span id=profileAvatarInitial>👤</span><div class=profile-avatar-edit>✏️</div></div><div class=profile-username id=profileUsername>—</div><div style="color:gold;margin-top:-4px;font-family:Space Mono,monospace;font-size:12px;display:none" id=profileStreakBadge></div><div class=profile-bio id=profileBio>Aucune bio</div><div class=profile-stats><div class=pstat><span class=pstat-val id=pVideos>0</span><span class=pstat-lbl>VIDÉOS</span></div><div class=pstat><span class=pstat-val id=pFollowers>0</span><span class=pstat-lbl>ABONNÉS</span></div><div class=pstat><span class=pstat-val id=pFollowing>0</span><span class=pstat-lbl>ABONNEMENTS</span></div><div class=pstat><span class=pstat-val id=pTotalLikes>0</span><span class=pstat-lbl>❤️ LIKES</span></div></div><div class=profile-actions><button class="profile-btn primary" onclick=editProfile()>✏️ Modifier</button><button class=profile-btn onclick=shareProfile()>🔗 Partager</button><button class=profile-btn onclick=signOut()>Déconnexion</button></div><div style=text-align:center;margin-top:12px><button style="color:#fff;cursor:pointer;letter-spacing:.04em;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:20px;width:100%;padding:10px 22px;font-family:Space Mono,monospace;font-size:11px;font-weight:700" onclick=showVoltPass()>⚡ VoltPass — Sans pub</button></div><div id=adminPanelBtn style=text-align:center;margin-top:10px;display:none><button style="color:#fff;cursor:pointer;letter-spacing:.04em;background:linear-gradient(135deg,#f44,#fc5c7d);border:none;border-radius:20px;width:100%;padding:10px 22px;font-family:Space Mono,monospace;font-size:11px;font-weight:700" onclick=openAdminPanel()>🛡 Panneau Administrateur</button></div><div style=text-align:center;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:16px;display:flex><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=mentions-legales.html>Mentions légales</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=politique-confidentialite.html>Confidentialité</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=cgu.html>CGU</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=cookies.html>Cookies</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href="mailto:hervecaporale17@gmail.com">✉️ Contact</a></div></div><div style="background:var(--bg);z-index:10;border-bottom:1px solid #ffffff12;display:flex;position:sticky;top:0"><button class="profile-tab-btn active" onclick="switchProfileTab('videos',this)" style="color:#fff;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #7c5cfc;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" id=ptab-videos>🎬 VIDÉOS</button><button onclick="switchProfileTab('likes',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-likes>❤️ LIKES</button><button onclick="switchProfileTab('bookmarks',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-bookmarks>🔖 FAVORIS</button><button onclick="switchProfileTab('stats',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-stats>📊 STATS</button></div><div class=profile-videos-grid id=profileGrid></div><div id=profileStatsPanel style=flex-direction:column;gap:14px;padding:16px;display:none></div><div id=profileNotLoggedIn style=display:none><div class=empty-state><span class=ei>👤</span><p>Connecte-toi pour voir ton profil</p><button style="width:auto;margin-top:12px;padding:10px 28px" class=auth-btn onclick=openAuth()>Se connecter</button></div></div></div><div id=leaderboardScreen class=screen style="display:none"><div class=leaderboard-header><div class=leaderboard-title>🏆 PALMARÈS RAP FR</div><div class=leaderboard-sub>Les votants les plus actifs de la communauté</div></div><div id=leaderboardList><div class="loader-dots"><span></span><span></span><span></span></div></div></div><div id=adminPanel><div class=admin-header><button class=admin-back onclick=closeAdminPanel()>←</button><span class=admin-title>🛡 Administration</span><span class=admin-badge>ADMIN</span></div><div class=admin-tabs><button class="admin-tab active" onclick="switchAdminTab('stats',this)">📊 Stats</button><button onclick="switchAdminTab('users',this)" class=admin-tab>👥 Users</button><button onclick="switchAdminTab('videos',this)" class=admin-tab>🎬 Vidéos</button><button onclick="switchAdminTab('reports',this)" class=admin-tab>🚨 Signalements</button></div><div class=admin-body id=adminBody><div class=admin-empty>Chargement...</div></div></div><div id=dmPage><div class=dm-header><button class=dm-back onclick=closeDmPage()>←</button><span class=dm-title>💬 Messages</span><button class=dm-new onclick=openNewDm()>+ Nouveau</button></div><div class=dm-list id=dmList><div class=empty-state><span class=ei>💬</span><p>Aucun message pour l'instant.<br>Envoie un DM à quelqu'un !</div></div></div><div id=dmConvPage><div class=dm-header><button class=dm-back onclick=closeDmConv()>←</button><div class=dm-avatar id=convAvatar style=width:34px;height:34px;font-size:14px></div><span class=dm-title id=convUsername>@user</span></div><div class=conv-messages id=convMessages></div><div class=conv-input-row><input onkeydown="if(event.key==='Enter')sendDm()" class=conv-input id=convInput placeholder=Message…><button class=conv-send onclick=sendDm()>➤</button></div></div><div id=newDmModal style=z-index:870;background:#000c;align-items:flex-end;display:none;position:fixed;inset:0><div style="background:var(--surface);border-radius:20px 20px 0 0;flex-direction:column;gap:12px;width:100%;max-height:70vh;padding:20px;display:flex"><div style=font-family:var(--font-mono);font-size:15px;font-weight:700>Nouveau message</div><input placeholder="🔍 Rechercher un utilisateur…" class=conv-input id=dmSearchInput oninput=searchDmUser(this.value) style=border-radius:12px><div id=dmUserResults style=flex-direction:column;flex:1;gap:4px;display:flex;overflow-y:auto></div><button style="color:var(--muted);font-family:var(--font-mono);cursor:pointer;background:0 0;border:none;padding:8px;font-size:13px" onclick=closeNewDm()>Annuler</button></div></div><div id=publicProfilePage><div class=pub-header><button class=pub-back onclick=closePublicProfile()>←</button><button onclick="openReportModal('user', currentPublicUserId)" style="color:var(--muted);cursor:pointer;background:0 0;border:none;margin-left:auto;font-size:20px">⋯</button></div><div class=pub-top><div class=pub-avatar id=pubAvatar></div><div class=pub-username id=pubUsername>@user</div><div class=pub-bio id=pubBio></div><div class=pub-stats><div class=pstat><span class=pstat-val id=pubVideos>0</span><span class=pstat-lbl>VIDÉOS</span></div><div class=pstat><span class=pstat-val id=pubFollowers>0</span><span class=pstat-lbl>ABONNÉS</span></div><div class=pstat><span class=pstat-val id=pubFollowing>0</span><span class=pstat-lbl>ABONNEMENTS</span></div></div><div class=pub-actions><button class="pub-follow-btn follow" id=pubFollowBtn onclick=togglePublicFollow()>S'abonner</button><button onclick="startDmWithUser(currentPublicUserId, currentPublicUsername)" class=pub-dm-btn>💬 Message</button></div><button onclick="adminBanUser(currentPublicUserId,'cet utilisateur')" style="color:#f44;width:90%;font-family:var(--font-mono);cursor:pointer;background:#ff44441a;border:1.5px solid #f44;border-radius:12px;margin-top:8px;margin-left:5%;padding:10px;font-size:12px;font-weight:700;display:none" id=adminBanBtn>🚫 BANNIR CET UTILISATEUR</button></div><div class=pub-grid id=pubGrid></div></div><div id=reportModal><div class=report-box><div class=report-title>🚩 Signaler</div><button onclick="submitReport('spam')" class=report-opt>🗑 Spam ou contenu indésirable</button><button onclick="submitReport('hate')" class=report-opt>😡 Discours haineux</button><button onclick="submitReport('violence')" class=report-opt>⚠️ Violence ou contenu dangereux</button><button onclick="submitReport('nude')" class=report-opt>🔞 Nudité ou contenu sexuel</button><button onclick="submitReport('false')" class=report-opt>❌ Fausse information</button><button class=report-cancel onclick=closeReportModal()>Annuler</button></div></div><div id=soundPage><div class=sound-page-header><button class=sound-page-back onclick=closeSoundPage()>←</button><div style=flex:1><div class=sound-page-name id=soundPageName>🎵 Son</div><div class=sound-page-count id=soundPageCount>0 vidéos</div></div><button class=sound-use-btn onclick=useSoundInUpload()>+ Utiliser ce son</button></div><div class=sound-page-grid id=soundPageGrid></div></div><div id=ageGateModal style=z-index:2000;background:#0a0a0f;flex-direction:column;justify-content:center;align-items:center;gap:0;padding:20px;position:fixed;inset:0><div style=flex-direction:column;align-items:center;gap:20px;width:100%;max-width:360px;display:flex><div style=font-size:48px>⚡</div><div style="text-align:center;color:#fff;font-family:Space Mono,monospace;font-size:22px;font-weight:700">VoltClip</div><div style=color:#ffffff8c;text-align:center;font-size:13px;line-height:1.6>Conformément à la loi française,<br>tu dois avoir <strong style=color:#fff>15 ans minimum</strong><br>pour accéder à VoltClip.</div><div style=background:#13131a;border-radius:16px;flex-direction:column;gap:14px;width:100%;padding:20px;display:flex><div style="color:#ffffff80;text-align:center;font-family:Space Mono,monospace;font-size:12px">QUELLE EST TA DATE DE NAISSANCE ?</div><div style=gap:8px;display:flex><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1;padding:12px 8px;font-size:15px" id=ageDaySelect><option value>Jour</select><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1.4;padding:12px 8px;font-size:15px" id=ageMonthSelect><option value>Mois<option value=1>Janvier<option value=2>Février<option value=3>Mars<option value=4>Avril<option value=5>Mai<option value=6>Juin<option value=7>Juillet<option value=8>Août<option value=9>Septembre<option value=10>Octobre<option value=11>Novembre<option value=12>Décembre</select><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1.2;padding:12px 8px;font-size:15px" id=ageYearSelect><option value>Année</select></div><div id=ageGateErr style=color:#fc5c7d;text-align:center;font-size:12px;display:none></div><button style="color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:12px;width:100%;padding:14px;font-family:Space Mono,monospace;font-size:14px;font-weight:700" onclick=submitAgeGate()>Confirmer mon âge ⚡</button></div><div style=color:#ffffff40;text-align:center;font-size:10px;line-height:1.5>Loi n°2023-566 — Protection des mineurs<br>Tes données ne sont pas transmises à des tiers.</div></div></div><div id=onboardingModal style=z-index:1000;background:#000000d9;justify-content:center;align-items:center;padding:20px;display:none;position:fixed;inset:0><div style="background:#13131a;border-radius:20px;flex-direction:column;gap:16px;width:100%;max-width:360px;padding:28px 20px;display:flex"><div style="text-align:center;font-family:Space Mono,monospace;font-size:20px;font-weight:700">⚡ Bienvenue sur VoltClip</div><div style=color:#fff9;text-align:center;font-size:13px>Choisis tes centres d'intérêt pour un feed personnalisé</div><div id=interestGrid style=flex-wrap:wrap;justify-content:center;gap:8px;display:flex></div><button style="color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:12px;width:100%;padding:13px;font-family:Space Mono,monospace;font-size:14px;font-weight:700" onclick=saveInterests()>Continuer ⚡</button></div></div><div id=storyViewer><div id=storyProgressBar><div id=storyProgressFill></div></div><div id=storyHeader><span class=story-uname id=storyUserSpan style=color:#fff;font-size:13px;font-weight:700></span><span style=flex:1></span><button id=storyClose onclick=closeStory()>✕</button></div><video autoplay id=storyVideo loop muted playsinline></video></div><div id=authModal><div class=auth-box><button class=auth-close onclick=closeAuth()>✕</button><div class=auth-title id=authTitle>Connexion</div><input class=auth-input id=authEmail placeholder=Email type=email><input class=auth-input id=authUsername placeholder=Pseudo style=display:none><input placeholder="Mot de passe" class=auth-input id=authPassword type=password><div class=auth-err id=authErr></div><button class=auth-btn onclick=submitAuth()>Continuer</button><div class=auth-switch id=authSwitch onclick=toggleAuthMode()>Pas de compte ? <span>S'inscrire</span></div></div></div><div id=uploadModal><div id=uploadStep1><video autoplay id=uploadBgPreview loop muted playsinline style=display:none></video><div id=uploadStep1Overlay><div class=upload-pick-icon>🎬</div><div class=upload-pick-title>Balance ton clip Rap FR ⚡</div><div class=upload-pick-sub>Freestyles, punchlines, clips, sons...<br>La scène rap FR t'attend ⚡</div><div class=upload-pick-btns><button class="upload-pick-btn gallery" onclick="document.getElementById('fileInput').click()"><span>📁</span><p>GALERIE</button><button class="upload-pick-btn camera" onclick=openCamera()><span>📷</span><p>CAMÉRA</button></div><button style="color:#fff6;cursor:pointer;background:0 0;border:none;margin-top:16px;font-family:Space Mono,monospace;font-size:12px" onclick=closeUpload()>Annuler</button></div><input accept=video/* id=fileInput onchange=handleFileSelect(this) style=display:none type=file><input accept=video/* capture id=camInput onchange=handleFileSelect(this) style=display:none type=file></div><div id=uploadStep2><div id=uploadStep2Header><button id=uploadStep2Back onclick=uploadGoBack()>←</button><span class=upload-step2-title>Détails de la vidéo</span></div><div id=uploadStep2Body><div id=uploadStep2PreviewWrap><video autoplay id=uploadPreviewVideo loop muted playsinline></video><canvas id=uploadFxCanvas style=pointer-events:none;opacity:.72;width:100%;height:100%;position:absolute;inset:0></canvas><div class=upload-step2-badge id=uploadTypeBadge>🎬 VIDÉO</div></div><div id=uploadStep2Form><div class=upload-type-row><button class="upload-type-btn active" onclick="setUploadType('video')" id=typeVideo>🎬 Vidéo (60s)</button><button onclick="setUploadType('story')" class=upload-type-btn id=typeStory>⚡ Story (10s)</button></div><div id=uploadVideoFields style=flex-direction:column;gap:10px;display:flex><input placeholder="✏️ Titre *" class=upload-input id=uploadTitle><input placeholder="📝 Description (optionnel)" class=upload-input id=uploadDesc><input placeholder="#hashtag1 #hashtag2" class=upload-input id=uploadTags><input placeholder="🎵 Nom du son / musique (optionnel)" class=upload-input id=uploadSound></div><div class=intro-fx-section><div class=intro-fx-label>✨ INTRO FX <span>TENDANCE 2026</span></div><div class=intro-fx-scroll id=introFxScroll></div></div><div class=upload-err id=uploadErr></div><button class=upload-submit id=uploadSubmit onclick=submitUpload()>Publier ⚡</button><button class=upload-cancel onclick=closeUpload()>Annuler</button><div class=upload-progress id=uploadProgress style=display:none></div></div></div></div></div><div id=commentsModal><div id=commentsBg onclick=closeComments()></div><div class=comments-box><div class=comments-header><div class=comments-header-top><span class=comments-title>💬 Commentaires (<span id=commentsCount>0</span>)</span><button class=comments-close onclick=closeComments()>✕</button></div><div class=comments-sort><button class="comments-sort-btn active" onclick="sortComments('top',this)">🔥 Top</button><button onclick="sortComments('recent',this)" class=comments-sort-btn>🕐 Récents</button></div></div><div id=commentsList></div><div class=comment-input-row><div class=comment-reply-banner id=replyBanner><span id=replyBannerText>↩ Répondre à @...</span><button style="color:var(--muted);cursor:pointer;background:0 0;border:none;font-size:14px" onclick=cancelReply()>✕</button></div><div class=comment-input-inner style=position:relative><div id=mentionDropdown></div><input onkeydown="if(event.key==='Enter')sendComment()" placeholder="Ajouter un commentaire… (@user pour mentionner)" id=commentInput oninput=onCommentInput(this.value)><button class=comment-send onclick=sendComment()>➤</button></div></div></div></div><script>// ══════════════════════════════════════════
+</style><body><div id=voltpassModal><div class=voltpass-sheet><div class=voltpass-badge>⚡ VOLTPASS</div><div class=voltpass-title>Sans pub.<br>Sans limites.</div><div class=voltpass-sub>Profite de VoltClip sans interruption publicitaire et débloque des fonctionnalités exclusives.</div><div class=voltpass-perks><div class=voltpass-perk><span class=pk>🚫</span> Zéro pub dans le feed</div><div class=voltpass-perk><span class=pk>⚡</span> Badge VoltPass exclusif sur ton profil</div><div class=voltpass-perk><span class=pk>🎨</span> Effets FX premium débloqués</div><div class=voltpass-perk><span class=pk>🚀</span> Boost algorithmique +20% sur tes clips</div><div class=voltpass-perk><span class=pk>💎</span> Support prioritaire</div></div><div class=voltpass-plans><div class="vplan selected" onclick="selectPlan('month')" id=plan-month><div class=vplan-name>MENSUEL</div><div class=vplan-price>2,99€</div><div class=vplan-period>/ mois</div></div><div onclick="selectPlan('year')" class=vplan id=plan-year><div class=vplan-name>ANNUEL</div><div class=vplan-price>19,99€</div><div class=vplan-period>/ an</div><div class=vplan-save>— 44% économisé</div></div></div><button class=voltpass-cta onclick=startVoltPass()>⚡ Commencer mon VoltPass</button><button class=voltpass-close onclick=closeVoltPass()>Pas maintenant</button><div class=voltpass-legal>Paiement sécurisé · Résiliation à tout moment<br><a href=cgu.html style=color:var(--accent);font-size:10px>CGU</a> · <a href=politique-confidentialite.html style=color:var(--accent);font-size:10px>Confidentialité</a></div></div></div><div id=toast></div><nav id=navbar><button class="nav-btn active" onclick="showTab('battle')" id=nav-battle><span class=ni>⚔️</span><span class=nl>BATTLE</span></button><button onclick="showTab('rank')" class=nav-btn id=nav-rank><span class=ni>🏆</span><span class=nl>TOP</span></button><button onclick="showTab('leaderboard')" class=nav-btn id=nav-leaderboard><span class=ni>👑</span><span class=nl>PALMARÈS</span></button><button onclick="showTab('search')" class=nav-btn id=nav-search><span class=ni>🔍</span><span class=nl>SEARCH</span></button><button onclick="showTab('notif')" class=nav-btn id=nav-notif><span class=ni>🔔</span><span class=nl>NOTIFS</span> <div id=notifDot></div></button><button onclick="showTab('profile')" class=nav-btn id=nav-profile><span class=ni>👤</span><span class=nl>PROFIL</span></button></nav><button id=fabUpload onclick=openUpload()>＋</button><div class="screen" id=feedScreen><div id=feedTopBar><button onclick="switchFeedTab('following',this)" class=feed-tab>Abonnements</button><button class="feed-tab active" onclick="switchFeedTab('foryou',this)">Pour toi</button></div><div id=storiesWrap><div id=storiesBar></div></div><div id=videoFeed></div><div style="z-index:50;padding:0 12px 8px;display:none;position:fixed;bottom:70px;left:0;right:0" id=suggestBar><div style="backdrop-filter:blur(12px);background:#0f0f1ef2;border:1px solid #ffffff1a;border-radius:16px;padding:10px 12px"><div style=justify-content:space-between;align-items:center;margin-bottom:8px;display:flex><span style="color:#ffffff80;letter-spacing:.05em;font-family:Space Mono,monospace;font-size:10px" class=suggest-label>PERSONNES À SUIVRE</span><button onclick="document.getElementById('suggestBar').style.display='none'" style="color:#ffffff4d;cursor:pointer;background:0 0;border:none;padding:0;font-size:16px">×</button></div><div id=suggestList style=gap:12px;padding-bottom:4px;display:flex;overflow-x:auto></div></div></div></div><div class=screen id=searchScreen><div class=search-header><div class=search-bar><span>🔍</span><input placeholder="Rechercher vidéos, hashtags…" id=searchInput oninput=onSearch(this.value)></div></div><div id=searchResults><div class=search-section-title>TENDANCES</div><div id=trendingTags></div><div class=search-section-title style=margin-top:20px>⚡ CHALLENGES DU MOMENT</div><div id=challengesList style=flex-direction:column;gap:8px;margin-bottom:4px;display:flex></div><div class=search-section-title style=margin-top:16px>RÉCENTES</div><div class=search-video-grid id=recentGrid></div></div></div><div class="screen active" id=battleScreen><div id=battleFeed></div></div><button id=fabBattle onclick=openBattleUpload()>⚔️</button><div id=battleUploadModal><div class=battle-upload-header><button style="color:#fff;cursor:pointer;background:0 0;border:none;font-size:22px" onclick=closeBattleUpload()>←</button><span style=font-family:var(--font-mono);color:#fff;flex:1;font-size:15px;font-weight:700>⚔️ Créer un Battle</span></div><div class=battle-upload-steps><div style=color:var(--muted);font-size:12px;font-family:var(--font-mono);letter-spacing:.08em;margin-bottom:4px>TITRE DU BATTLE</div><input placeholder="Ex: Qui a le meilleur flow ? 🎤" class=upload-input id=battleTitle style=margin-bottom:8px><div style=color:var(--muted);font-size:12px;font-family:var(--font-mono);letter-spacing:.08em;margin-bottom:8px>CATÉGORIE</div><div id=battleCatGrid style=flex-wrap:wrap;gap:8px;margin-bottom:16px;display:flex></div><div style=gap:10px;margin-bottom:8px;display:flex><div onclick="pickBattleVideo('left')" style="background:var(--surface);border:1.5px dashed var(--border);text-align:center;cursor:pointer;border-radius:14px;flex:1;padding:16px;transition:border-color .2s" id=battleLeftPick><div id=battleLeftThumb style=margin-bottom:8px;font-size:32px>📹</div><div style=font-family:var(--font-mono);color:var(--muted);font-size:11px>VIDÉO GAUCHE</div><div id=battleLeftName style=color:var(--accent);margin-top:4px;font-size:10px;display:none></div></div><div style=font-family:var(--font-mono);color:var(--accent2);align-items:center;font-size:18px;font-weight:700;display:flex>VS</div><div onclick="pickBattleVideo('right')" style="background:var(--surface);border:1.5px dashed var(--border);text-align:center;cursor:pointer;border-radius:14px;flex:1;padding:16px;transition:border-color .2s" id=battleRightPick><div id=battleRightThumb style=margin-bottom:8px;font-size:32px>📹</div><div style=font-family:var(--font-mono);color:var(--muted);font-size:11px>VIDÉO DROITE</div><div id=battleRightName style=color:var(--accent);margin-top:4px;font-size:10px;display:none></div></div></div><div style=color:var(--muted);text-align:center;margin-bottom:12px;font-size:11px>Sélectionne 2 vidéos déjà uploadées sur VoltClip</div><div id=battleUploadErr style=color:var(--accent2);text-align:center;margin-bottom:8px;font-size:12px></div><button class=upload-submit onclick=submitBattle()>⚔️ Lancer le Battle !</button><input accept=video/* id=battleFileInput onchange=handleBattleFile(this) style=display:none type=file></div></div><div id=battlePickerModal style=z-index:960;background:#000000d9;flex-direction:column;display:none;position:fixed;inset:0><div style="background:var(--surface);border-radius:20px 20px 0 0;flex-direction:column;max-height:80vh;display:flex;position:absolute;bottom:0;left:0;right:0"><div style="border-bottom:1px solid var(--border);justify-content:space-between;align-items:center;padding:14px 16px;display:flex"><span style=font-family:var(--font-mono);font-size:14px;font-weight:700>Choisir une vidéo</span><button style="color:var(--muted);cursor:pointer;background:0 0;border:none;font-size:20px" onclick=closeBattlePicker()>✕</button></div><div style="grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:60vh;padding:2px;display:grid;overflow-y:auto" id=battlePickerGrid></div></div></div><div class=screen id=rankScreen><div class=rank-header><div class=rank-title>🏆 TOP CLIPS RAP FR</div><div class=period-tabs><button class="period-tab active" onclick="loadRank('week',this)">SEMAINE</button><button onclick="loadRank('month',this)" class=period-tab>MOIS</button><button onclick="loadRank('all',this)" class=period-tab>TOUT</button></div></div><div id=rankList><div class=loader-dots><span></span><span></span><span></span></div></div></div><div class=screen id=notifScreen><div class=notif-header>🔔 NOTIFICATIONS</div><div id=notifList></div></div><div class=screen id=profileScreen><div class=profile-top><div class=profile-avatar id=profileAvatarWrap onclick=changeAvatar()><span id=profileAvatarInitial>👤</span><div class=profile-avatar-edit>✏️</div></div><div class=profile-username id=profileUsername>—</div><div style="color:gold;margin-top:-4px;font-family:Space Mono,monospace;font-size:12px;display:none" id=profileStreakBadge></div><div class=profile-bio id=profileBio>Aucune bio</div><div class=profile-stats><div class=pstat><span class=pstat-val id=pVideos>0</span><span class=pstat-lbl>VIDÉOS</span></div><div class=pstat><span class=pstat-val id=pFollowers>0</span><span class=pstat-lbl>ABONNÉS</span></div><div class=pstat><span class=pstat-val id=pFollowing>0</span><span class=pstat-lbl>ABONNEMENTS</span></div><div class=pstat><span class=pstat-val id=pTotalLikes>0</span><span class=pstat-lbl>❤️ LIKES</span></div></div><div class=profile-actions><button class="profile-btn primary" onclick=editProfile()>✏️ Modifier</button><button class=profile-btn onclick=shareProfile()>🔗 Partager</button><button class=profile-btn onclick=signOut()>Déconnexion</button></div><div style=text-align:center;margin-top:12px><button style="color:#fff;cursor:pointer;letter-spacing:.04em;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:20px;width:100%;padding:10px 22px;font-family:Space Mono,monospace;font-size:11px;font-weight:700" onclick=showVoltPass()>⚡ VoltPass — Sans pub</button></div><div id=adminPanelBtn style=text-align:center;margin-top:10px;display:none><button style="color:#fff;cursor:pointer;letter-spacing:.04em;background:linear-gradient(135deg,#f44,#fc5c7d);border:none;border-radius:20px;width:100%;padding:10px 22px;font-family:Space Mono,monospace;font-size:11px;font-weight:700" onclick=openAdminPanel()>🛡 Panneau Administrateur</button></div><div style=text-align:center;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:16px;display:flex><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=mentions-legales.html>Mentions légales</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=politique-confidentialite.html>Confidentialité</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=cgu.html>CGU</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href=cookies.html>Cookies</a><a style="color:#ffffff59;font-family:Space Mono,monospace;font-size:10px;text-decoration:none" href="/cdn-cgi/l/email-protection#7c14190e0a191f1d0c130e1d10194d4b3c1b111d1510521f1311">✉️ Contact</a></div></div><div style="background:var(--bg);z-index:10;border-bottom:1px solid #ffffff12;display:flex;position:sticky;top:0"><button class="profile-tab-btn active" onclick="switchProfileTab('videos',this)" style="color:#fff;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #7c5cfc;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" id=ptab-videos>🎬 VIDÉOS</button><button onclick="switchProfileTab('likes',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-likes>❤️ LIKES</button><button onclick="switchProfileTab('bookmarks',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-bookmarks>🔖 FAVORIS</button><button onclick="switchProfileTab('stats',this)" style="color:#fff6;cursor:pointer;background:0 0;border:none;border-bottom:2px solid #0000;flex:1;padding:12px;font-family:Space Mono,monospace;font-size:11px" class=profile-tab-btn id=ptab-stats>📊 STATS</button></div><div class=profile-videos-grid id=profileGrid></div><div id=profileStatsPanel style=flex-direction:column;gap:14px;padding:16px;display:none></div><div id=profileNotLoggedIn style=display:none><div class=empty-state><span class=ei>👤</span><p>Connecte-toi pour voir ton profil</p><button style="width:auto;margin-top:12px;padding:10px 28px" class=auth-btn onclick=openAuth()>Se connecter</button></div></div></div><div id=leaderboardScreen class=screen style="display:none"><div class=leaderboard-header><div class=leaderboard-title>🏆 PALMARÈS RAP FR</div><div class=leaderboard-sub>Les votants les plus actifs de la communauté</div></div><div id=leaderboardList><div class="loader-dots"><span></span><span></span><span></span></div></div></div><div id=adminPanel><div class=admin-header><button class=admin-back onclick=closeAdminPanel()>←</button><span class=admin-title>🛡 Administration</span><span class=admin-badge>ADMIN</span></div><div class=admin-tabs><button class="admin-tab active" onclick="switchAdminTab('stats',this)">📊 Stats</button><button onclick="switchAdminTab('users',this)" class=admin-tab>👥 Users</button><button onclick="switchAdminTab('videos',this)" class=admin-tab>🎬 Vidéos</button><button onclick="switchAdminTab('reports',this)" class=admin-tab>🚨 Signalements</button></div><div class=admin-body id=adminBody><div class=admin-empty>Chargement...</div></div></div><div id=dmPage><div class=dm-header><button class=dm-back onclick=closeDmPage()>←</button><span class=dm-title>💬 Messages</span><button class=dm-new onclick=openNewDm()>+ Nouveau</button></div><div class=dm-list id=dmList><div class=empty-state><span class=ei>💬</span><p>Aucun message pour l'instant.<br>Envoie un DM à quelqu'un !</div></div></div><div id=dmConvPage><div class=dm-header><button class=dm-back onclick=closeDmConv()>←</button><div class=dm-avatar id=convAvatar style=width:34px;height:34px;font-size:14px></div><span class=dm-title id=convUsername>@user</span></div><div class=conv-messages id=convMessages></div><div class=conv-input-row><input onkeydown="if(event.key==='Enter')sendDm()" class=conv-input id=convInput placeholder=Message…><button class=conv-send onclick=sendDm()>➤</button></div></div><div id=newDmModal style=z-index:870;background:#000c;align-items:flex-end;display:none;position:fixed;inset:0><div style="background:var(--surface);border-radius:20px 20px 0 0;flex-direction:column;gap:12px;width:100%;max-height:70vh;padding:20px;display:flex"><div style=font-family:var(--font-mono);font-size:15px;font-weight:700>Nouveau message</div><input placeholder="🔍 Rechercher un utilisateur…" class=conv-input id=dmSearchInput oninput=searchDmUser(this.value) style=border-radius:12px><div id=dmUserResults style=flex-direction:column;flex:1;gap:4px;display:flex;overflow-y:auto></div><button style="color:var(--muted);font-family:var(--font-mono);cursor:pointer;background:0 0;border:none;padding:8px;font-size:13px" onclick=closeNewDm()>Annuler</button></div></div><div id=publicProfilePage><div class=pub-header><button class=pub-back onclick=closePublicProfile()>←</button><button onclick="openReportModal('user', currentPublicUserId)" style="color:var(--muted);cursor:pointer;background:0 0;border:none;margin-left:auto;font-size:20px">⋯</button></div><div class=pub-top><div class=pub-avatar id=pubAvatar></div><div class=pub-username id=pubUsername>@user</div><div class=pub-bio id=pubBio></div><div class=pub-stats><div class=pstat><span class=pstat-val id=pubVideos>0</span><span class=pstat-lbl>VIDÉOS</span></div><div class=pstat><span class=pstat-val id=pubFollowers>0</span><span class=pstat-lbl>ABONNÉS</span></div><div class=pstat><span class=pstat-val id=pubFollowing>0</span><span class=pstat-lbl>ABONNEMENTS</span></div></div><div class=pub-actions><button class="pub-follow-btn follow" id=pubFollowBtn onclick=togglePublicFollow()>S'abonner</button><button onclick="startDmWithUser(currentPublicUserId, currentPublicUsername)" class=pub-dm-btn>💬 Message</button></div><button onclick="adminBanUser(currentPublicUserId,'cet utilisateur')" style="color:#f44;width:90%;font-family:var(--font-mono);cursor:pointer;background:#ff44441a;border:1.5px solid #f44;border-radius:12px;margin-top:8px;margin-left:5%;padding:10px;font-size:12px;font-weight:700;display:none" id=adminBanBtn>🚫 BANNIR CET UTILISATEUR</button></div><div class=pub-grid id=pubGrid></div></div><div id=reportModal><div class=report-box><div class=report-title>🚩 Signaler</div><button onclick="submitReport('spam')" class=report-opt>🗑 Spam ou contenu indésirable</button><button onclick="submitReport('hate')" class=report-opt>😡 Discours haineux</button><button onclick="submitReport('violence')" class=report-opt>⚠️ Violence ou contenu dangereux</button><button onclick="submitReport('nude')" class=report-opt>🔞 Nudité ou contenu sexuel</button><button onclick="submitReport('false')" class=report-opt>❌ Fausse information</button><button class=report-cancel onclick=closeReportModal()>Annuler</button></div></div><div id=soundPage><div class=sound-page-header><button class=sound-page-back onclick=closeSoundPage()>←</button><div style=flex:1><div class=sound-page-name id=soundPageName>🎵 Son</div><div class=sound-page-count id=soundPageCount>0 vidéos</div></div><button class=sound-use-btn onclick=useSoundInUpload()>+ Utiliser ce son</button></div><div class=sound-page-grid id=soundPageGrid></div></div><div id=ageGateModal style=z-index:2000;background:#0a0a0f;flex-direction:column;justify-content:center;align-items:center;gap:0;padding:20px;position:fixed;inset:0><div style=flex-direction:column;align-items:center;gap:20px;width:100%;max-width:360px;display:flex><div style=font-size:48px>⚡</div><div style="text-align:center;color:#fff;font-family:Space Mono,monospace;font-size:22px;font-weight:700">VoltClip</div><div style=color:#ffffff8c;text-align:center;font-size:13px;line-height:1.6>Conformément à la loi française,<br>tu dois avoir <strong style=color:#fff>15 ans minimum</strong><br>pour accéder à VoltClip.</div><div style=background:#13131a;border-radius:16px;flex-direction:column;gap:14px;width:100%;padding:20px;display:flex><div style="color:#ffffff80;text-align:center;font-family:Space Mono,monospace;font-size:12px">QUELLE EST TA DATE DE NAISSANCE ?</div><div style=gap:8px;display:flex><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1;padding:12px 8px;font-size:15px" id=ageDaySelect><option value>Jour</select><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1.4;padding:12px 8px;font-size:15px" id=ageMonthSelect><option value>Mois<option value=1>Janvier<option value=2>Février<option value=3>Mars<option value=4>Avril<option value=5>Mai<option value=6>Juin<option value=7>Juillet<option value=8>Août<option value=9>Septembre<option value=10>Octobre<option value=11>Novembre<option value=12>Décembre</select><select style="color:#fff;text-align:center;background:#1c1c27;border:1.5px solid #ffffff1a;border-radius:12px;outline:none;flex:1.2;padding:12px 8px;font-size:15px" id=ageYearSelect><option value>Année</select></div><div id=ageGateErr style=color:#fc5c7d;text-align:center;font-size:12px;display:none></div><button style="color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:12px;width:100%;padding:14px;font-family:Space Mono,monospace;font-size:14px;font-weight:700" onclick=submitAgeGate()>Confirmer mon âge ⚡</button></div><div style=color:#ffffff40;text-align:center;font-size:10px;line-height:1.5>Loi n°2023-566 — Protection des mineurs<br>Tes données ne sont pas transmises à des tiers.</div></div></div><div id=onboardingModal style=z-index:1000;background:#000000d9;justify-content:center;align-items:center;padding:20px;display:none;position:fixed;inset:0><div style="background:#13131a;border-radius:20px;flex-direction:column;gap:16px;width:100%;max-width:360px;padding:28px 20px;display:flex"><div style="text-align:center;font-family:Space Mono,monospace;font-size:20px;font-weight:700">⚡ Bienvenue sur VoltClip</div><div style=color:#fff9;text-align:center;font-size:13px>Choisis tes centres d'intérêt pour un feed personnalisé</div><div id=interestGrid style=flex-wrap:wrap;justify-content:center;gap:8px;display:flex></div><button style="color:#fff;cursor:pointer;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;border-radius:12px;width:100%;padding:13px;font-family:Space Mono,monospace;font-size:14px;font-weight:700" onclick=saveInterests()>Continuer ⚡</button></div></div><div id=storyViewer><div id=storyProgressBar><div id=storyProgressFill></div></div><div id=storyHeader><span class=story-uname id=storyUserSpan style=color:#fff;font-size:13px;font-weight:700></span><span style=flex:1></span><button id=storyClose onclick=closeStory()>✕</button></div><video autoplay id=storyVideo loop muted playsinline></video></div><div id=authModal><div class=auth-box><button class=auth-close onclick=closeAuth()>✕</button><div class=auth-title id=authTitle>Connexion</div><input class=auth-input id=authEmail placeholder=Email type=email><input class=auth-input id=authUsername placeholder=Pseudo style=display:none><input placeholder="Mot de passe" class=auth-input id=authPassword type=password><div class=auth-err id=authErr></div><button class=auth-btn onclick=submitAuth()>Continuer</button><div class=auth-switch id=authSwitch onclick=toggleAuthMode()>Pas de compte ? <span>S'inscrire</span></div></div></div><div id=uploadModal><div id=uploadStep1><video autoplay id=uploadBgPreview loop muted playsinline style=display:none></video><div id=uploadStep1Overlay><div class=upload-pick-icon>🎬</div><div class=upload-pick-title>Balance ton clip Rap FR ⚡</div><div class=upload-pick-sub>Freestyles, punchlines, clips, sons...<br>La scène rap FR t'attend ⚡</div><div class=upload-pick-btns><button class="upload-pick-btn gallery" onclick="document.getElementById('fileInput').click()"><span>📁</span><p>GALERIE</button><button class="upload-pick-btn camera" onclick=openCamera()><span>📷</span><p>CAMÉRA</button></div><button style="color:#fff6;cursor:pointer;background:0 0;border:none;margin-top:16px;font-family:Space Mono,monospace;font-size:12px" onclick=closeUpload()>Annuler</button></div><input accept=video/* id=fileInput onchange=handleFileSelect(this) style=display:none type=file><input accept=video/* capture id=camInput onchange=handleFileSelect(this) style=display:none type=file></div><div id=uploadStep2><div id=uploadStep2Header><button id=uploadStep2Back onclick=uploadGoBack()>←</button><span class=upload-step2-title>Détails de la vidéo</span></div><div id=uploadStep2Body><div id=uploadStep2PreviewWrap><video autoplay id=uploadPreviewVideo loop muted playsinline></video><canvas id=uploadFxCanvas style=pointer-events:none;opacity:.72;width:100%;height:100%;position:absolute;inset:0></canvas><div class=upload-step2-badge id=uploadTypeBadge>🎬 VIDÉO</div></div><div id=uploadStep2Form><div class=upload-type-row><button class="upload-type-btn active" onclick="setUploadType('video')" id=typeVideo>🎬 Vidéo (60s)</button><button onclick="setUploadType('story')" class=upload-type-btn id=typeStory>⚡ Story (10s)</button></div><div id=uploadVideoFields style=flex-direction:column;gap:10px;display:flex><input placeholder="✏️ Titre *" class=upload-input id=uploadTitle><input placeholder="📝 Description (optionnel)" class=upload-input id=uploadDesc><input placeholder="#hashtag1 #hashtag2" class=upload-input id=uploadTags><input placeholder="🎵 Nom du son / musique (optionnel)" class=upload-input id=uploadSound></div><div class=intro-fx-section><div class=intro-fx-label>✨ INTRO FX <span>TENDANCE 2026</span></div><div class=intro-fx-scroll id=introFxScroll></div></div><div class=upload-err id=uploadErr></div><button class=upload-submit id=uploadSubmit onclick=submitUpload()>Publier ⚡</button><button class=upload-cancel onclick=closeUpload()>Annuler</button><div class=upload-progress id=uploadProgress style=display:none></div></div></div></div></div><div id=commentsModal><div id=commentsBg onclick=closeComments()></div><div class=comments-box><div class=comments-header><div class=comments-header-top><span class=comments-title>💬 Commentaires (<span id=commentsCount>0</span>)</span><button class=comments-close onclick=closeComments()>✕</button></div><div class=comments-sort><button class="comments-sort-btn active" onclick="sortComments('top',this)">🔥 Top</button><button onclick="sortComments('recent',this)" class=comments-sort-btn>🕐 Récents</button></div></div><div id=commentsList></div><div class=comment-input-row><div class=comment-reply-banner id=replyBanner><span id=replyBannerText>↩ Répondre à @...</span><button style="color:var(--muted);cursor:pointer;background:0 0;border:none;font-size:14px" onclick=cancelReply()>✕</button></div><div class=comment-input-inner style=position:relative><div id=mentionDropdown></div><input onkeydown="if(event.key==='Enter')sendComment()" placeholder="Ajouter un commentaire… (@user pour mentionner)" id=commentInput oninput=onCommentInput(this.value)><button class=comment-send onclick=sendComment()>➤</button></div></div></div></div><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>// ══════════════════════════════════════════
 // CONFIG — remplace par tes clés Supabase
 // ══════════════════════════════════════════
 const SUPABASE_URL=`https://czdfoqgcjbsoupekpxpg.supabase.co`,SUPABASE_ANON=`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6ZGZvcWdjamJzb3VwZWtweHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzQ3MzgsImV4cCI6MjA4OTAxMDczOH0.ANivcmm64cYQCZZiFrCpduigWytloZSzwJ1vi1BbOy0`,CLOUDINARY_CLOUD=`dtdkrbdoo`,CLOUDINARY_PRESET=`ml_default`,{createClient}=supabase,sb=createClient(`https://czdfoqgcjbsoupekpxpg.supabase.co`,`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6ZGZvcWdjamJzb3VwZWtweHBnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MzQ3MzgsImV4cCI6MjA4OTAxMDczOH0.ANivcmm64cYQCZZiFrCpduigWytloZSzwJ1vi1BbOy0`);
@@ -1101,4 +1101,984 @@ e.preventDefault(),pwaInstallPrompt=e,setTimeout(()=>{pwaInstallPrompt&&showPwaT
       </div>
       <button onclick="installPwa()" style="background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;padding:8px 14px;border-radius:14px;cursor:pointer;white-space:nowrap">Installer</button>
       <button onclick="document.getElementById('pwaToast').remove()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:18px;cursor:pointer;padding:0 4px">×</button>
-    </div>`,el.style.cssText=`position:fixed;bottom:72px;left:12px;right:12px;z-index:1500;background:rgba(28,28,39,0.98);backdrop-filter:blur(20px);border:1px solid rgba(124,92,252,.3);border-radius:18px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slideUp .3s ease`,document.body.appendChild(el)}async function installPwa(){if(!pwaInstallPrompt)return;pwaInstallPrompt.prompt();let{outcome}=await pwaInstallPrompt.userChoice;outcome===`accepted`&&(toast(`⚡ VoltClip installé !`),document.getElementById(`pwaToast`)?.remove()),pwaInstallPrompt=null}window.addEventL
+    </div>`,el.style.cssText=`position:fixed;bottom:72px;left:12px;right:12px;z-index:1500;background:rgba(28,28,39,0.98);backdrop-filter:blur(20px);border:1px solid rgba(124,92,252,.3);border-radius:18px;padding:14px 16px;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slideUp .3s ease`,document.body.appendChild(el)}async function installPwa(){if(!pwaInstallPrompt)return;pwaInstallPrompt.prompt();let{outcome}=await pwaInstallPrompt;outcome===`accepted`&&(pwaInstallPrompt=null,document.getElementById(`pwaToast`)?.remove(),toast(`⚡ VoltClip installé !`))}
+// ══════════════════════════════════════════
+// INIT PRINCIPAL
+// ══════════════════════════════════════════
+async function init(){
+  const{data:{session}}=await sb.auth.getSession();
+  if(session){currentUser=session.user;await loadProfile();}
+  else{document.getElementById(`profileNotLoggedIn`).style.display=`block`;}
+  sb.auth.onAuthStateChange((_,s)=>{
+    if(s){currentUser=s.user;loadProfile();}
+    else{currentUser=null;document.getElementById(`profileNotLoggedIn`).style.display=`block`;document.getElementById(`profileGrid`).innerHTML=``;}
+  });
+  showTab(`battle`);
+  await loadBattleFeed();
+  loadStories();
+  loadTrendingTags();
+  loadRank(`week`,document.querySelector(`.period-tab.active`));
+  loadNotifs();
+  checkAgeGate();
+  renderBattleCatGrid();
+  renderIntroFxCards();
+}
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+let authMode=`login`;
+function openAuth(){document.getElementById(`authModal`).classList.add(`open`);}
+function closeAuth(){document.getElementById(`authModal`).classList.remove(`open`);}
+function toggleAuthMode(){
+  authMode=authMode===`login`?`register`:`login`;
+  document.getElementById(`authTitle`).textContent=authMode===`login`?`Connexion`:`Inscription`;
+  document.getElementById(`authUsername`).style.display=authMode===`register`?`block`:`none`;
+  document.getElementById(`authSwitch`).innerHTML=authMode===`login`?`Pas de compte ? <span>S'inscrire</span>`:`Déjà un compte ? <span>Se connecter</span>`;
+  document.getElementById(`authErr`).textContent=``;
+}
+async function submitAuth(){
+  const email=document.getElementById(`authEmail`).value.trim();
+  const password=document.getElementById(`authPassword`).value;
+  const username=document.getElementById(`authUsername`).value.trim();
+  const errEl=document.getElementById(`authErr`);
+  errEl.textContent=``;
+  if(!email||!password){errEl.textContent=`Email et mot de passe requis`;return;}
+  if(authMode===`register`){
+    if(!username){errEl.textContent=`Pseudo requis`;return;}
+    const{error}=await sb.auth.signUp({email,password,options:{data:{username}}});
+    if(error){errEl.textContent=error.message;return;}
+    toast(`✅ Compte créé ! Vérifie ton email.`);closeAuth();
+  }else{
+    const{error}=await sb.auth.signInWithPassword({email,password});
+    if(error){errEl.textContent=`Email ou mot de passe incorrect`;return;}
+    closeAuth();toast(`⚡ Connecté !`);
+  }
+}
+async function signOut(){await sb.auth.signOut();currentUser=null;toast(`Déconnecté`);}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showTab(tab){
+  currentTab=tab;
+  document.querySelectorAll(`.screen`).forEach(s=>s.classList.remove(`active`));
+  document.querySelectorAll(`.nav-btn`).forEach(b=>b.classList.remove(`active`));
+  const screens={battle:`battleScreen`,rank:`rankScreen`,search:`searchScreen`,notif:`notifScreen`,profile:`profileScreen`,leaderboard:`leaderboardScreen`,feed:`feedScreen`};
+  const s=document.getElementById(screens[tab]);
+  if(s)s.classList.add(`active`);
+  const nb=document.getElementById(`nav-${tab}`);
+  if(nb)nb.classList.add(`active`);
+  if(tab===`profile`)renderProfile();
+  if(tab===`search`)loadRecentVideos();
+  if(tab===`leaderboard`)loadLeaderboard();
+}
+function switchFeedTab(type,btn){
+  document.querySelectorAll(`.feed-tab`).forEach(b=>b.classList.remove(`active`));
+  btn.classList.add(`active`);
+  loadFeed(type);
+}
+
+// ══════════════════════════════════════════
+// PROFIL
+// ══════════════════════════════════════════
+async function loadProfile(){
+  if(!currentUser)return;
+  const{data:p}=await sb.from(`profiles`).select(`*`).eq(`id`,currentUser.id).single();
+  if(!p)return;
+  document.getElementById(`profileUsername`).textContent=`@${p.username||`—`}`;
+  document.getElementById(`profileBio`).innerHTML=renderBio(p.bio);
+  if(p.avatar_url){
+    const wrap=document.getElementById(`profileAvatarWrap`);
+    wrap.innerHTML=`<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"><div class="profile-avatar-edit">✏️</div>`;
+  }
+  const{count:vCount}=await sb.from(`videos`).select(`*`,{count:`exact`,head:true}).eq(`user_id`,currentUser.id).eq(`status`,`active`);
+  const{count:flwrs}=await sb.from(`follows`).select(`*`,{count:`exact`,head:true}).eq(`following_id`,currentUser.id);
+  const{count:flwing}=await sb.from(`follows`).select(`*`,{count:`exact`,head:true}).eq(`follower_id`,currentUser.id);
+  document.getElementById(`pVideos`).textContent=fmtNum(vCount||0);
+  document.getElementById(`pFollowers`).textContent=fmtNum(flwrs||0);
+  document.getElementById(`pFollowing`).textContent=fmtNum(flwing||0);
+  if(p.is_admin)document.getElementById(`adminPanelBtn`).style.display=`block`;
+  document.getElementById(`profileNotLoggedIn`).style.display=`none`;
+  loadProfileGrid();
+}
+async function renderProfile(){
+  if(!currentUser){document.getElementById(`profileNotLoggedIn`).style.display=`block`;return;}
+}
+let profileTab=`videos`;
+function switchProfileTab(tab,btn){
+  profileTab=tab;
+  document.querySelectorAll(`.profile-tab-btn`).forEach(b=>{b.style.borderBottomColor=`#0000`;b.style.color=`rgba(255,255,255,0.4)`;});
+  btn.style.borderBottomColor=`#7c5cfc`;btn.style.color=`#fff`;
+  document.getElementById(`profileGrid`).style.display=tab===`stats`?`none`:`grid`;
+  document.getElementById(`profileStatsPanel`).style.display=tab===`stats`?`flex`:`none`;
+  if(tab===`videos`)loadProfileGrid();
+  else if(tab===`likes`)loadLikedVideos();
+  else if(tab===`bookmarks`)loadBookmarks();
+  else if(tab===`stats`)loadProfileStats();
+}
+async function loadProfileGrid(){
+  if(!currentUser)return;
+  const grid=document.getElementById(`profileGrid`);
+  const{data}=await sb.from(`videos`).select(`id,thumbnail_url,views_count,is_pinned`).eq(`user_id`,currentUser.id).eq(`status`,`active`).order(`is_pinned`,{ascending:false}).order(`created_at`,{ascending:false}).limit(30);
+  grid.innerHTML=(data||[]).map(v=>`
+    <div class="profile-thumb" data-video-id="${v.id}" onclick="playFromProfile('${v.id}')">
+      ${v.thumbnail_url?`<img src="${v.thumbnail_url}" loading="lazy" alt="">`:`<div style="background:var(--surface2);width:100%;height:100%"></div>`}
+      ${v.is_pinned?`<div class="video-pin-badge">📌</div>`:`}`}
+      <button class="profile-thumb-del" onclick="event.stopPropagation();deleteVideo('${v.id}')">🗑</button>
+    </div>`).join(``)||`<div class="empty-state" style="grid-column:1/-1"><span class="ei">🎬</span><p>Aucune vidéo publiée</p></div>`;
+}
+async function loadLikedVideos(){
+  if(!currentUser)return;
+  const grid=document.getElementById(`profileGrid`);
+  const{data}=await sb.from(`likes`).select(`video_id,videos(id,thumbnail_url,views_count)`).eq(`user_id`,currentUser.id).limit(30);
+  grid.innerHTML=(data||[]).filter(l=>l.videos).map(l=>`
+    <div class="profile-thumb" onclick="playFromSearch('${l.videos.id}')">
+      ${l.videos.thumbnail_url?`<img src="${l.videos.thumbnail_url}" loading="lazy" alt="">`:`<div style="background:var(--surface2);width:100%;height:100%"></div>`}
+    </div>`).join(``)||`<div class="empty-state" style="grid-column:1/-1"><span class="ei">❤️</span><p>Aucun like</p></div>`;
+}
+async function loadBookmarks(){
+  if(!currentUser)return;
+  const grid=document.getElementById(`profileGrid`);
+  const{data}=await sb.from(`bookmarks`).select(`video_id,videos(id,thumbnail_url,views_count)`).eq(`user_id`,currentUser.id).limit(30);
+  grid.innerHTML=(data||[]).filter(b=>b.videos).map(b=>`
+    <div class="profile-thumb" onclick="playFromSearch('${b.videos.id}')">
+      ${b.videos.thumbnail_url?`<img src="${b.videos.thumbnail_url}" loading="lazy" alt="">`:`<div style="background:var(--surface2);width:100%;height:100%"></div>`}
+    </div>`).join(``)||`<div class="empty-state" style="grid-column:1/-1"><span class="ei">🔖</span><p>Aucun favori</p></div>`;
+}
+async function loadProfileStats(){
+  const panel=document.getElementById(`profileStatsPanel`);
+  if(!currentUser){panel.innerHTML=``;return;}
+  const{data:videos}=await sb.from(`videos`).select(`id,views_count,likes_count,comments_count,title`).eq(`user_id`,currentUser.id).eq(`status`,`active`).order(`views_count`,{ascending:false}).limit(5);
+  const totalViews=(videos||[]).reduce((a,v)=>a+(v.views_count||0),0);
+  const totalLikes=(videos||[]).reduce((a,v)=>a+(v.likes_count||0),0);
+  document.getElementById(`pTotalLikes`).textContent=fmtNum(totalLikes);
+  panel.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:var(--surface);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${fmtNum(totalViews)}</div>
+        <div style="font-family:var(--font-mono);color:var(--muted);font-size:10px;margin-top:4px">VUES TOTALES</div>
+      </div>
+      <div style="background:var(--surface);border-radius:14px;padding:14px;text-align:center">
+        <div style="font-family:var(--font-mono);font-size:24px;font-weight:700;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${fmtNum(totalLikes)}</div>
+        <div style="font-family:var(--font-mono);color:var(--muted);font-size:10px;margin-top:4px">LIKES TOTAUX</div>
+      </div>
+    </div>
+    <div style="font-family:var(--font-mono);color:var(--muted);font-size:11px;letter-spacing:.08em;margin-top:4px">TOP CLIPS</div>
+    ${(videos||[]).map(v=>`
+      <div style="display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:12px;padding:10px 12px">
+        <div style="flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(v.title||`—`)}</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--muted)">👁 ${fmtNum(v.views_count)} · ❤️ ${fmtNum(v.likes_count)}</div>
+      </div>`).join(``)}`;
+}
+async function editProfile(){
+  if(!currentUser)return;
+  const{data:p}=await sb.from(`profiles`).select(`username,bio`).eq(`id`,currentUser.id).single();
+  const uname=prompt(`Pseudo :`,p?.username||``);
+  if(uname===null)return;
+  const bio=prompt(`Bio :`,p?.bio||``);
+  if(bio===null)return;
+  await sb.from(`profiles`).upsert({id:currentUser.id,username:uname.trim(),bio:bio.trim()});
+  toast(`✅ Profil mis à jour`);loadProfile();
+}
+async function changeAvatar(){
+  if(!currentUser)return;
+  const input=document.createElement(`input`);input.type=`file`;input.accept=`image/*`;
+  input.onchange=async()=>{
+    const file=input.files[0];if(!file)return;
+    const fd=new FormData();fd.append(`file`,file);fd.append(`upload_preset`,CLOUDINARY_PRESET);
+    toast(`⏳ Upload avatar...`);
+    const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,{method:`POST`,body:fd});
+    const d=await r.json();
+    if(d.secure_url){await sb.from(`profiles`).update({avatar_url:d.secure_url}).eq(`id`,currentUser.id);toast(`✅ Avatar mis à jour`);loadProfile();}
+  };
+  input.click();
+}
+function shareProfile(){
+  if(navigator.share)navigator.share({title:`VoltClip`,text:`Suis-moi sur VoltClip !`,url:window.location.href});
+  else{navigator.clipboard.writeText(window.location.href);toast(`🔗 Lien copié !`);}
+}
+async function deleteVideo(id){
+  if(!confirm(`Supprimer cette vidéo ?`))return;
+  await sb.from(`videos`).update({status:`deleted`}).eq(`id`,id).eq(`user_id`,currentUser.id);
+  toast(`🗑 Supprimée`);loadProfileGrid();
+}
+
+// ══════════════════════════════════════════
+// FEED VIDÉOS
+// ══════════════════════════════════════════
+let feedVideos=[],feedIndex=0,feedType=`foryou`;
+async function loadFeed(type=`foryou`){
+  feedType=type;feedVideos=[];feedIndex=0;
+  const feed=document.getElementById(`videoFeed`);
+  feed.innerHTML=`<div class="loader-dots" style="padding:40px"><span></span><span></span><span></span></div>`;
+  let query=sb.from(`videos`).select(`id,title,description,tags,video_url,thumbnail_url,views_count,likes_count,comments_count,sound_name,is_pinned,user_id,profiles(username,avatar_url)`).eq(`status`,`active`).order(`created_at`,{ascending:false}).limit(20);
+  if(type===`following`&&currentUser){
+    const{data:follows}=await sb.from(`follows`).select(`following_id`).eq(`follower_id`,currentUser.id);
+    const ids=(follows||[]).map(f=>f.following_id);
+    if(!ids.length){feed.innerHTML=`<div class="empty-state"><span class="ei">👥</span><p>Abonne-toi à des créateurs pour voir leur contenu ici</p></div>`;return;}
+    query=query.in(`user_id`,ids);
+  }
+  const{data}=await query;
+  feedVideos=data||[];
+  renderFeed();
+}
+function renderFeed(){
+  const feed=document.getElementById(`videoFeed`);
+  feed.innerHTML=``;
+  feedVideos.forEach((v,i)=>{feed.appendChild(createVideoItem(v,i,`feed`));});
+  if(!feedVideos.length)feed.innerHTML=`<div class="empty-state"><span class="ei">🎬</span><p>Aucune vidéo pour l'instant</p></div>`;
+  setupFeedIntersection();
+}
+function createVideoItem(v,index,source){
+  const div=document.createElement(`div`);
+  div.className=`video-item`;div.dataset.videoId=v.id;div.dataset.source=source;
+  const tags=(v.tags||``).split(` `).filter(Boolean).map(t=>`<span class="video-tag" onclick="searchByTag('${t.replace(`#`,``)}')"> ${t}</span>`).join(``);
+  const initials=(v.profiles?.username||`?`)[0].toUpperCase();
+  div.innerHTML=`
+    <video src="${v.video_url}" loop muted playsinline preload="metadata" style="object-fit:cover;width:100%;height:100%;position:absolute;inset:0"></video>
+    <div class="video-grad"></div>
+    <div class="video-pause-icon">⏸</div>
+    ${v.is_pinned?`<div class="video-pin-badge">📌 ÉPINGLÉ</div>`:`}`}
+    ${v.sound_name?`<div class="video-sound" onclick="openSoundPage('${escHtml(v.sound_name)}')"><span class="video-sound-icon">🎵</span><span class="video-sound-name">${escHtml(v.sound_name)}</span></div>`:`}`}
+    <div class="video-intro-canvas" id="canvas-${v.id}"></div>
+    <div class="video-info">
+      <div class="video-user" onclick="openPublicProfile('${v.user_id}')">
+        <div class="video-avatar-wrap">
+          ${v.profiles?.avatar_url?`<img class="video-avatar" src="${v.profiles.avatar_url}" alt="">`:`<div class="video-avatar">${initials}</div>`}
+          <button class="video-follow-btn" onclick="event.stopPropagation();toggleFollowFromVideo('${v.user_id}',this)" data-uid="${v.user_id}">+</button>
+        </div>
+        @${escHtml(v.profiles?.username||`?`)}
+      </div>
+      <div class="video-title">${escHtml(v.title||``)}</div>
+      <div class="video-tags">${tags}</div>
+    </div>
+    <div class="video-actions">
+      <button class="vbtn" id="like-btn-${v.id}" onclick="toggleLike('${v.id}',this)"><span class="vi">❤️</span><span class="vc" id="like-count-${v.id}">${fmtNum(v.likes_count)}</span></button>
+      <button class="vbtn" onclick="openComments('${v.id}')"><span class="vi">💬</span><span class="vc">${fmtNum(v.comments_count)}</span></button>
+      <button class="vbtn" id="bm-btn-${v.id}" onclick="toggleBookmark('${v.id}',this)"><span class="vi">🔖</span></button>
+      <button class="vbtn" onclick="shareVideo('${v.id}','${escHtml(v.title||``)}')"><span class="vi">🔗</span></button>
+      <button class="vbtn" onclick="openReportModal('video','${v.id}')"><span class="vi">⚠️</span></button>
+    </div>
+    <div class="video-progress"><div class="video-progress-fill" id="prog-${v.id}"></div></div>`;
+  div.addEventListener(`click`,()=>toggleVideoPlay(div.querySelector(`video`),div.querySelector(`.video-pause-icon`)));
+  return div;
+}
+function setupFeedIntersection(){
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      const video=e.target.querySelector(`video`);
+      if(!video)return;
+      if(e.isIntersecting){
+        video.play().catch(()=>{});activeVideoEl=video;
+        const id=e.target.dataset.videoId;
+        if(id)sb.from(`videos`).rpc||sb.rpc(`increment_views`,{vid:id}).catch(()=>{});
+        video.addEventListener(`timeupdate`,()=>{
+          const prog=document.getElementById(`prog-${id}`);
+          if(prog&&video.duration)prog.style.width=`${(video.currentTime/video.duration)*100}%`;
+        });
+      }else{video.pause();video.currentTime=0;}
+    });
+  },{threshold:0.6});
+  document.querySelectorAll(`.video-item`).forEach(item=>observer.observe(item));
+}
+function toggleVideoPlay(video,icon){
+  if(video.paused){video.play();icon.classList.remove(`show`);}
+  else{video.pause();icon.classList.add(`show`);}
+}
+async function toggleLike(videoId,btn){
+  if(!currentUser){openAuth();return;}
+  haptic(10);playUISound(`like`);
+  const isLiked=btn.classList.contains(`liked`);
+  btn.classList.toggle(`liked`);
+  const countEl=document.getElementById(`like-count-${videoId}`);
+  const curr=parseInt(countEl.textContent)||0;
+  countEl.textContent=isLiked?fmtNum(curr-1):fmtNum(curr+1);
+  if(isLiked)await sb.from(`likes`).delete().eq(`user_id`,currentUser.id).eq(`video_id`,videoId);
+  else{await sb.from(`likes`).upsert({user_id:currentUser.id,video_id:videoId});await sb.from(`videos`).rpc||null;}
+}
+async function toggleBookmark(videoId,btn){
+  if(!currentUser){openAuth();return;}
+  haptic(10);playUISound(`bookmark`);
+  const isBookmarked=btn.classList.contains(`bookmarked`);
+  btn.classList.toggle(`bookmarked`);
+  if(isBookmarked)await sb.from(`bookmarks`).delete().eq(`user_id`,currentUser.id).eq(`video_id`,videoId);
+  else await sb.from(`bookmarks`).upsert({user_id:currentUser.id,video_id:videoId});
+  toast(isBookmarked?`🔖 Retiré des favoris`:`🔖 Ajouté aux favoris`);
+}
+function shareVideo(id,title){
+  const url=`${location.origin}${location.pathname}?v=${id}`;
+  if(navigator.share)navigator.share({title:`VoltClip — ${title}`,url});
+  else{navigator.clipboard.writeText(url);toast(`🔗 Lien copié !`);}
+}
+async function toggleFollowFromVideo(uid,btn){
+  if(!currentUser){openAuth();return;}
+  if(uid===currentUser.id)return;
+  playUISound(`follow`);
+  const following=btn.classList.contains(`following`);
+  btn.classList.toggle(`following`);
+  btn.textContent=following?`+`:`✓`;
+  if(following)await sb.from(`follows`).delete().eq(`follower_id`,currentUser.id).eq(`following_id`,uid);
+  else await sb.from(`follows`).upsert({follower_id:currentUser.id,following_id:uid});
+}
+function playFromProfile(id){
+  const v=feedVideos.find(x=>x.id===id);
+  if(v)showTab(`feed`);else playFromSearch(id);
+}
+async function playFromSearch(id){
+  const{data}=await sb.from(`videos`).select(`id,title,description,tags,video_url,thumbnail_url,views_count,likes_count,comments_count,sound_name,is_pinned,user_id,profiles(username,avatar_url)`).eq(`id`,id).single();
+  if(!data)return;
+  feedVideos=[data];feedIndex=0;
+  showTab(`feed`);
+  setTimeout(renderFeed,100);
+}
+
+// ══════════════════════════════════════════
+// STORIES
+// ══════════════════════════════════════════
+async function loadStories(){
+  const bar=document.getElementById(`storiesBar`);
+  const{data}=await sb.from(`videos`).select(`id,video_url,thumbnail_url,user_id,profiles(username,avatar_url)`).eq(`status`,`active`).eq(`type`,`story`).order(`created_at`,{ascending:false}).limit(15);
+  if(!data?.length){document.getElementById(`storiesWrap`).style.display=`none`;return;}
+  bar.innerHTML=data.map(s=>`
+    <div class="story-avatar-wrap" onclick="playStory('${s.video_url}','${escHtml(s.profiles?.username||`?`)}')">
+      <div class="story-ring">
+        ${s.profiles?.avatar_url?`<img src="${s.profiles.avatar_url}" alt="">`:`<div class="story-initial">${(s.profiles?.username||`?`)[0].toUpperCase()}</div>`}
+      </div>
+      <span class="story-uname">@${escHtml(s.profiles?.username||`?`)}</span>
+    </div>`).join(``);
+}
+function playStory(url,username){
+  document.getElementById(`storyVideo`).src=url;
+  document.getElementById(`storyUserSpan`).textContent=`@${username}`;
+  document.getElementById(`storyViewer`).classList.add(`open`);
+  document.getElementById(`storyVideo`).play();
+}
+function closeStory(){
+  document.getElementById(`storyViewer`).classList.remove(`open`);
+  document.getElementById(`storyVideo`).pause();
+  document.getElementById(`storyVideo`).src=``;
+}
+
+// ══════════════════════════════════════════
+// UPLOAD
+// ══════════════════════════════════════════
+let selectedIntroFx=null;
+const INTRO_FX=[
+  {id:`none`,name:`Aucun`,emoji:`🚫`},
+  {id:`glitch`,name:`Glitch`,emoji:`⚡`},
+  {id:`fire`,name:`Fire`,emoji:`🔥`},
+  {id:`flash`,name:`Flash`,emoji:`✨`},
+  {id:`matrix`,name:`Matrix`,emoji:`💚`},
+  {id:`gold`,name:`Gold`,emoji:`🥇`}
+];
+function renderIntroFxCards(){
+  const scroll=document.getElementById(`introFxScroll`);
+  if(!scroll)return;
+  scroll.innerHTML=INTRO_FX.map(fx=>`
+    <div class="intro-fx-card${fx.id===`none`?` selected`:``}" onclick="selectIntroFx('${fx.id}',this)">
+      <div class="intro-fx-thumb">${fx.id===`none`?`<div class="intro-fx-none-thumb">🚫</div>`:`<span style="font-size:24px">${fx.emoji}</span>`}</div>
+      <div class="intro-fx-name">${fx.name}</div>
+    </div>`).join(``);
+}
+function selectIntroFx(id,el){
+  selectedIntroFx=id===`none`?null:id;
+  document.querySelectorAll(`.intro-fx-card`).forEach(c=>c.classList.remove(`selected`));
+  el.classList.add(`selected`);
+}
+function openUpload(){
+  if(!currentUser){openAuth();return;}
+  document.getElementById(`uploadModal`).classList.add(`open`);
+  document.getElementById(`uploadStep1`).style.display=`flex`;
+  document.getElementById(`uploadStep2`).style.display=`none`;
+}
+function closeUpload(){
+  document.getElementById(`uploadModal`).classList.remove(`open`);
+  uploadFile=null;
+  document.getElementById(`uploadPreviewVideo`).src=``;
+  document.getElementById(`uploadTitle`).value=``;
+  document.getElementById(`uploadDesc`).value=``;
+  document.getElementById(`uploadTags`).value=``;
+  document.getElementById(`uploadSound`).value=``;
+  document.getElementById(`uploadErr`).textContent=``;
+  document.getElementById(`uploadProgress`).style.display=`none`;
+}
+function handleFileSelect(input){
+  const file=input.files[0];if(!file)return;
+  uploadFile=file;
+  const url=URL.createObjectURL(file);
+  document.getElementById(`uploadPreviewVideo`).src=url;
+  document.getElementById(`uploadBgPreview`).src=url;
+  document.getElementById(`uploadBgPreview`).style.display=`block`;
+  document.getElementById(`uploadStep1`).style.display=`none`;
+  document.getElementById(`uploadStep2`).style.display=`flex`;
+}
+function uploadGoBack(){
+  document.getElementById(`uploadStep1`).style.display=`flex`;
+  document.getElementById(`uploadStep2`).style.display=`none`;
+  uploadFile=null;
+}
+function openCamera(){document.getElementById(`camInput`).click();}
+function setUploadType(type){
+  uploadType=type;
+  document.getElementById(`typeVideo`).classList.toggle(`active`,type===`video`);
+  document.getElementById(`typeStory`).classList.toggle(`active`,type===`story`);
+  document.getElementById(`uploadTypeBadge`).textContent=type===`story`?`⚡ STORY`:`🎬 VIDÉO`;
+  document.getElementById(`uploadVideoFields`).style.display=type===`story`?`none`:`flex`;
+}
+async function submitUpload(){
+  if(!uploadFile||!currentUser)return;
+  const title=document.getElementById(`uploadTitle`).value.trim();
+  if(uploadType===`video`&&!title){document.getElementById(`uploadErr`).textContent=`Titre requis`;return;}
+  const btn=document.getElementById(`uploadSubmit`);
+  btn.disabled=true;btn.textContent=`⏳ Upload...`;
+  document.getElementById(`uploadProgress`).style.display=`block`;
+  document.getElementById(`uploadProgress`).textContent=`Envoi en cours...`;
+  try{
+    const fd=new FormData();fd.append(`file`,uploadFile);fd.append(`upload_preset`,CLOUDINARY_PRESET);fd.append(`resource_type`,`video`);
+    const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`,{method:`POST`,body:fd});
+    const d=await r.json();
+    if(!d.secure_url)throw new Error(`Upload échoué`);
+    const tags=document.getElementById(`uploadTags`).value.trim();
+    const desc=document.getElementById(`uploadDesc`).value.trim();
+    const sound=document.getElementById(`uploadSound`).value.trim();
+    await sb.from(`videos`).insert({user_id:currentUser.id,title,description:desc,tags,video_url:d.secure_url,thumbnail_url:d.secure_url.replace(`/upload/`,`/upload/so_0,w_400,h_700,c_fill/f_jpg/`),type:uploadType,status:`active`,sound_name:sound||null,intro_fx:selectedIntroFx});
+    toast(`⚡ Clip publié !`);closeUpload();loadFeed(feedType);loadStories();loadProfileGrid();
+  }catch(e){document.getElementById(`uploadErr`).textContent=e.message;}
+  btn.disabled=false;btn.textContent=`Publier ⚡`;
+}
+
+// ══════════════════════════════════════════
+// COMMENTAIRES
+// ══════════════════════════════════════════
+let replyToCommentId=null;
+async function openComments(videoId){
+  commentsVideoId=videoId;replyToCommentId=null;
+  document.getElementById(`commentsModal`).classList.add(`open`);
+  document.getElementById(`commentInput`).value=``;
+  playUISound(`comment`);
+  await loadComments(videoId);
+}
+function closeComments(){document.getElementById(`commentsModal`).classList.remove(`open`);}
+async function loadComments(videoId,sort=`top`){
+  const list=document.getElementById(`commentsList`);
+  list.innerHTML=`<div class="loader-dots"><span></span><span></span><span></span></div>`;
+  let query=sb.from(`comments`).select(`id,content,created_at,user_id,is_pinned,likes_count,profiles(username,avatar_url)`).eq(`video_id`,videoId).is(`parent_id`,null);
+  query=sort===`top`?query.order(`is_pinned`,{ascending:false}).order(`likes_count`,{ascending:false}):query.order(`created_at`,{ascending:false});
+  const{data:comments}=await query.limit(50);
+  document.getElementById(`commentsCount`).textContent=comments?.length||0;
+  list.innerHTML=(comments||[]).map(c=>renderComment(c)).join(``)||`<div class="empty-state"><span class="ei">💬</span><p>Pas encore de commentaires</p></div>`;
+}
+function renderComment(c){
+  const init=(c.profiles?.username||`?`)[0].toUpperCase();
+  return`<div class="comment-item${c.is_pinned?` comment-pinned`:`}`}" id="comment-${c.id}">
+    <div class="comment-avatar">${c.profiles?.avatar_url?`<img src="${c.profiles.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`${init}`}</div>
+    <div class="comment-body">
+      ${c.is_pinned?`<div class="comment-pin-badge">📌 ÉPINGLÉ</div>`:``}
+      <div class="comment-user">@${escHtml(c.profiles?.username||`?`)}</div>
+      <div class="comment-text">${escHtml(c.content)}</div>
+      <div class="comment-actions">
+        <span class="comment-time">${timeAgo(c.created_at)}</span>
+        <button class="comment-like-btn" onclick="likeComment('${c.id}',this)">❤️ ${fmtNum(c.likes_count)}</button>
+        <button class="comment-reply-btn" onclick="replyTo('${c.id}','${escHtml(c.profiles?.username||``)}')">Répondre</button>
+      </div>
+    </div>
+  </div>`;
+}
+async function sendComment(){
+  if(!currentUser){openAuth();return;}
+  const input=document.getElementById(`commentInput`);
+  const content=input.value.trim();if(!content)return;
+  await sb.from(`comments`).insert({video_id:commentsVideoId,user_id:currentUser.id,content,parent_id:replyToCommentId||null});
+  await sb.from(`videos`).rpc||null;
+  input.value=``;cancelReply();
+  playUISound(`comment`);
+  await loadComments(commentsVideoId);
+}
+function replyTo(id,username){replyToCommentId=id;document.getElementById(`replyBanner`).classList.add(`show`);document.getElementById(`replyBannerText`).textContent=`↩ Répondre à @${username}`;document.getElementById(`commentInput`).focus();}
+function cancelReply(){replyToCommentId=null;document.getElementById(`replyBanner`).classList.remove(`show`);}
+async function likeComment(id,btn){
+  if(!currentUser){openAuth();return;}
+  btn.classList.toggle(`liked`);
+}
+function sortComments(sort,btn){
+  document.querySelectorAll(`.comments-sort-btn`).forEach(b=>b.classList.remove(`active`));
+  btn.classList.add(`active`);
+  if(commentsVideoId)loadComments(commentsVideoId,sort);
+}
+async function onCommentInput(val){
+  const match=val.match(/@(\w*)$/);
+  const dd=document.getElementById(`mentionDropdown`);
+  if(!match){dd.classList.remove(`show`);dd.innerHTML=``;return;}
+  const q=match[1];
+  if(q.length<1){dd.classList.remove(`show`);return;}
+  const{data}=await sb.from(`profiles`).select(`id,username`).ilike(`username`,`${q}%`).limit(5);
+  if(!data?.length){dd.classList.remove(`show`);return;}
+  dd.classList.add(`show`);
+  dd.innerHTML=data.map(u=>`<div class="mention-item" onclick="insertMention('@${u.username}')">@${escHtml(u.username)}</div>`).join(``);
+}
+function insertMention(mention){
+  const input=document.getElementById(`commentInput`);
+  input.value=input.value.replace(/@\w*$/,mention+` `);
+  document.getElementById(`mentionDropdown`).classList.remove(`show`);
+  input.focus();
+}
+
+// ══════════════════════════════════════════
+// RECHERCHE
+// ══════════════════════════════════════════
+async function onSearch(q){
+  const res=document.getElementById(`searchResults`);
+  if(!q){res.innerHTML=`<div class="search-section-title">TENDANCES</div><div id="trendingTags"></div>`;loadTrendingTags();loadRecentVideos();return;}
+  res.innerHTML=`<div class="loader-dots"><span></span><span></span><span></span></div>`;
+  const[{data:videos},{data:users}]=await Promise.all([
+    sb.from(`videos`).select(`id,title,thumbnail_url,views_count,profiles(username)`).eq(`status`,`active`).ilike(`title`,`%${q}%`).limit(12),
+    sb.from(`profiles`).select(`id,username,avatar_url,followers_count`).ilike(`username`,`%${q}%`).limit(5)
+  ]);
+  res.innerHTML=``;
+  if(users?.length){
+    res.innerHTML+=`<div class="search-section-title">UTILISATEURS</div>`;
+    res.innerHTML+=users.map(u=>`
+      <div class="search-user-item" onclick="openPublicProfile('${u.id}')">
+        <div class="search-user-avatar">${u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.username[0].toUpperCase()}</div>
+        <div class="search-user-info">
+          <div class="search-user-name">@${escHtml(u.username)}</div>
+          <div class="search-user-stats">${fmtNum(u.followers_count)} abonnés</div>
+        </div>
+      </div>`).join(``);
+  }
+  if(videos?.length){
+    res.innerHTML+=`<div class="search-section-title" style="margin-top:16px">VIDÉOS</div><div class="search-video-grid">`;
+    res.innerHTML+=videos.map(v=>`
+      <div class="search-thumb" onclick="playFromSearch('${v.id}')">
+        <img src="${v.thumbnail_url||``}" loading="lazy" alt="">
+        <span class="search-thumb-views">👁 ${fmtNum(v.views_count)}</span>
+      </div>`).join(``);
+    res.innerHTML+=`</div>`;
+  }
+  if(!users?.length&&!videos?.length)res.innerHTML=`<div class="empty-state"><span class="ei">🔍</span><p>Aucun résultat pour "${escHtml(q)}"</p></div>`;
+}
+async function loadTrendingTags(){
+  const el=document.getElementById(`trendingTags`);if(!el)return;
+  const{data}=await sb.from(`videos`).select(`tags`).eq(`status`,`active`).limit(100);
+  const counts={};
+  (data||[]).forEach(v=>(v.tags||``).split(` `).filter(Boolean).forEach(t=>{counts[t]=(counts[t]||0)+1;}));
+  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  el.innerHTML=sorted.map(([t,c])=>`<span class="hashtag-chip" onclick="onSearch('${t.replace(`#`,``)}');document.getElementById('searchInput').value='${t}'">${t} <span style="color:var(--muted);font-size:10px">${c}</span></span>`).join(``);
+  loadChallenges();
+}
+async function loadChallenges(){
+  const el=document.getElementById(`challengesList`);if(!el)return;
+  const challenges=[{tag:`#FreestyleFR`,label:`🎤 Freestyle FR`,desc:`Balance ton meilleur freestyle`},{tag:`#PunchlineDu`,label:`💥 Punchline du jour`,desc:`La punchline qui tue`},{tag:`#BattleRap`,label:`⚔️ Battle Rap`,desc:`Qui a le meilleur flow ?`}];
+  el.innerHTML=challenges.map(c=>`
+    <div onclick="onSearch('${c.tag}');document.getElementById('searchInput').value='${c.tag}'" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">
+      <div style="flex:1"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700">${c.label}</div><div style="color:var(--muted);font-size:11px;margin-top:2px">${c.desc}</div></div>
+      <span style="color:var(--accent);font-size:11px;font-family:var(--font-mono)">${c.tag}</span>
+    </div>`).join(``);
+}
+async function loadRecentVideos(){
+  const grid=document.getElementById(`recentGrid`);if(!grid)return;
+  const{data}=await sb.from(`videos`).select(`id,thumbnail_url,views_count`).eq(`status`,`active`).order(`created_at`,{ascending:false}).limit(9);
+  grid.innerHTML=(data||[]).map(v=>`
+    <div class="search-thumb" onclick="playFromSearch('${v.id}')">
+      <img src="${v.thumbnail_url||``}" loading="lazy" alt="">
+      <span class="search-thumb-views">👁 ${fmtNum(v.views_count)}</span>
+    </div>`).join(``);
+}
+function searchByTag(tag){
+  showTab(`search`);
+  const q=`#${tag}`;
+  document.getElementById(`searchInput`).value=q;
+  onSearch(q);
+}
+
+// ══════════════════════════════════════════
+// TOP CLIPS / RANK
+// ══════════════════════════════════════════
+async function loadRank(period,btn){
+  if(btn){document.querySelectorAll(`.period-tab`).forEach(b=>b.classList.remove(`active`));btn.classList.add(`active`);}
+  const list=document.getElementById(`rankList`);
+  list.innerHTML=`<div class="loader-dots"><span></span><span></span><span></span></div>`;
+  const now=new Date();
+  let from=null;
+  if(period===`week`)from=new Date(now-7*86400000).toISOString();
+  else if(period===`month`)from=new Date(now-30*86400000).toISOString();
+  let query=sb.from(`videos`).select(`id,title,thumbnail_url,views_count,likes_count,profiles(username)`).eq(`status`,`active`).order(`likes_count`,{ascending:false}).limit(20);
+  if(from)query=query.gte(`created_at`,from);
+  const{data}=await query;
+  const medals=[`🥇`,`🥈`,`🥉`];
+  list.innerHTML=(data||[]).map((v,i)=>`
+    <div class="rank-item" onclick="playFromSearch('${v.id}')">
+      <div class="rank-num${i===0?` gold`:i===1?` silver`:i===2?` bronze`:``}">${medals[i]||i+1}</div>
+      <img class="rank-thumb" src="${v.thumbnail_url||``}" alt="">
+      <div class="rank-info">
+        <div class="rank-video-title">${escHtml(v.title||`—`)}</div>
+        <div class="rank-username">@${escHtml(v.profiles?.username||`?`)}</div>
+        <div class="rank-score">❤️ ${fmtNum(v.likes_count)} · 👁 ${fmtNum(v.views_count)}</div>
+      </div>
+    </div>`).join(``)||`<div class="empty-state"><span class="ei">🏆</span><p>Aucune vidéo pour cette période</p></div>`;
+}
+
+// ══════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════
+async function loadNotifs(){
+  if(!currentUser)return;
+  const{data}=await sb.from(`notifications`).select(`*`).eq(`user_id`,currentUser.id).order(`created_at`,{ascending:false}).limit(30);
+  const list=document.getElementById(`notifList`);
+  const unread=(data||[]).filter(n=>!n.is_read);
+  document.getElementById(`notifDot`).style.display=unread.length?`block`:`none`;
+  list.innerHTML=(data||[]).map(n=>`
+    <div class="notif-item${n.is_read?``:` unread`}">
+      <div class="notif-avatar">${n.type===`like`?`❤️`:n.type===`comment`?`💬`:n.type===`follow`?`👤`:`🔔`}</div>
+      <div class="notif-text">${escHtml(n.content||`Nouvelle notification`)}</div>
+      <div class="notif-time">${timeAgo(n.created_at)}</div>
+    </div>`).join(``)||`<div class="notif-empty">🔔 Aucune notification</div>`;
+  if(unread.length)await sb.from(`notifications`).update({is_read:true}).eq(`user_id`,currentUser.id).eq(`is_read`,false);
+}
+
+// ══════════════════════════════════════════
+// PROFIL PUBLIC
+// ══════════════════════════════════════════
+let currentPublicUserId=null,currentPublicUsername=null;
+async function openPublicProfile(uid){
+  if(currentUser&&uid===currentUser.id){showTab(`profile`);return;}
+  currentPublicUserId=uid;
+  const{data:p}=await sb.from(`profiles`).select(`*`).eq(`id`,uid).single();
+  if(!p)return;
+  currentPublicUsername=p.username;
+  document.getElementById(`pubUsername`).textContent=`@${escHtml(p.username||`?`)}`;
+  document.getElementById(`pubBio`).innerHTML=renderBio(p.bio);
+  const avatarEl=document.getElementById(`pubAvatar`);
+  avatarEl.innerHTML=p.avatar_url?`<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:(p.username||`?`)[0].toUpperCase();
+  const{count:vCount}=await sb.from(`videos`).select(`*`,{count:`exact`,head:true}).eq(`user_id`,uid).eq(`status`,`active`);
+  const{count:flwrs}=await sb.from(`follows`).select(`*`,{count:`exact`,head:true}).eq(`following_id`,uid);
+  const{count:flwing}=await sb.from(`follows`).select(`*`,{count:`exact`,head:true}).eq(`follower_id`,uid);
+  document.getElementById(`pubVideos`).textContent=fmtNum(vCount||0);
+  document.getElementById(`pubFollowers`).textContent=fmtNum(flwrs||0);
+  document.getElementById(`pubFollowing`).textContent=fmtNum(flwing||0);
+  if(currentUser){
+    const{data:f}=await sb.from(`follows`).select(`id`).eq(`follower_id`,currentUser.id).eq(`following_id`,uid).single();
+    const btn=document.getElementById(`pubFollowBtn`);
+    btn.className=`pub-follow-btn ${f?`following`:`follow`}`;
+    btn.textContent=f?`Abonné ✓`:`S'abonner`;
+  }
+  const{data:videos}=await sb.from(`videos`).select(`id,thumbnail_url,views_count`).eq(`user_id`,uid).eq(`status`,`active`).order(`created_at`,{ascending:false}).limit(30);
+  const grid=document.getElementById(`pubGrid`);
+  grid.innerHTML=(videos||[]).map(v=>`
+    <div class="profile-thumb" onclick="closePublicProfile();playFromSearch('${v.id}')">
+      ${v.thumbnail_url?`<img src="${v.thumbnail_url}" loading="lazy" alt="">`:`<div style="background:var(--surface2);width:100%;height:100%"></div>`}
+    </div>`).join(``)||`<div class="empty-state" style="grid-column:1/-1"><span class="ei">🎬</span><p>Aucune vidéo</p></div>`;
+  if(currentUser){
+    const{data:isAdmin}=await sb.from(`profiles`).select(`is_admin`).eq(`id`,currentUser.id).single();
+    document.getElementById(`adminBanBtn`).style.display=isAdmin?.is_admin?`block`:`none`;
+  }
+  document.getElementById(`publicProfilePage`).classList.add(`open`);
+}
+function closePublicProfile(){document.getElementById(`publicProfilePage`).classList.remove(`open`);}
+async function togglePublicFollow(){
+  if(!currentUser){openAuth();return;}
+  if(!currentPublicUserId)return;
+  playUISound(`follow`);
+  const btn=document.getElementById(`pubFollowBtn`);
+  const isFollowing=btn.classList.contains(`following`);
+  btn.className=`pub-follow-btn ${isFollowing?`follow`:`following`}`;
+  btn.textContent=isFollowing?`S'abonner`:`Abonné ✓`;
+  if(isFollowing)await sb.from(`follows`).delete().eq(`follower_id`,currentUser.id).eq(`following_id`,currentPublicUserId);
+  else await sb.from(`follows`).upsert({follower_id:currentUser.id,following_id:currentPublicUserId});
+}
+
+// ══════════════════════════════════════════
+// MESSAGES DIRECTS
+// ══════════════════════════════════════════
+let currentDmUserId=null;
+async function openDmPage(){
+  if(!currentUser){openAuth();return;}
+  document.getElementById(`dmPage`).classList.add(`open`);
+  const{data}=await sb.from(`direct_messages`).select(`*,profiles!receiver_id(username,avatar_url)`).eq(`sender_id`,currentUser.id).order(`created_at`,{ascending:false}).limit(30);
+  const list=document.getElementById(`dmList`);
+  list.innerHTML=(data||[]).map(m=>`
+    <div class="dm-item" onclick="openConv('${m.receiver_id}','${escHtml(m.profiles?.username||`?`)}')">
+      <div class="dm-avatar">${m.profiles?.avatar_url?`<img src="${m.profiles.avatar_url}" alt="">`:( m.profiles?.username||`?`)[0].toUpperCase()}</div>
+      <div class="dm-info">
+        <div class="dm-username">@${escHtml(m.profiles?.username||`?`)}</div>
+        <div class="dm-preview">${escHtml(m.content||``)}</div>
+      </div>
+      <div class="dm-time">${timeAgo(m.created_at)}</div>
+    </div>`).join(``)||`<div class="empty-state"><span class="ei">💬</span><p>Aucun message</p></div>`;
+}
+function closeDmPage(){document.getElementById(`dmPage`).classList.remove(`open`);}
+async function openConv(uid,username){
+  currentDmUserId=uid;
+  document.getElementById(`convUsername`).textContent=`@${username}`;
+  document.getElementById(`dmConvPage`).classList.add(`open`);
+  await loadConvMessages();
+}
+function closeDmConv(){document.getElementById(`dmConvPage`).classList.remove(`open`);currentDmUserId=null;}
+async function loadConvMessages(){
+  if(!currentUser||!currentDmUserId)return;
+  const{data}=await sb.from(`direct_messages`).select(`*`).or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${currentDmUserId}),and(sender_id.eq.${currentDmUserId},receiver_id.eq.${currentUser.id})`).order(`created_at`,{ascending:true}).limit(50);
+  const msgs=document.getElementById(`convMessages`);
+  msgs.innerHTML=(data||[]).map(m=>`
+    <div class="msg-wrap ${m.sender_id===currentUser.id?`mine`:`theirs`}">
+      <div class="msg-bubble">${escHtml(m.content)}</div>
+      <div class="msg-time">${timeAgo(m.created_at)}</div>
+    </div>`).join(``);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+async function sendDm(){
+  const input=document.getElementById(`convInput`);
+  const content=input.value.trim();
+  if(!content||!currentUser||!currentDmUserId)return;
+  input.value=``;
+  await sb.from(`direct_messages`).insert({sender_id:currentUser.id,receiver_id:currentDmUserId,content});
+  await loadConvMessages();
+}
+function openNewDm(){document.getElementById(`newDmModal`).style.display=`flex`;}
+function closeNewDm(){document.getElementById(`newDmModal`).style.display=`none`;document.getElementById(`dmSearchInput`).value=``;document.getElementById(`dmUserResults`).innerHTML=``;}
+async function searchDmUser(q){
+  const res=document.getElementById(`dmUserResults`);
+  if(!q){res.innerHTML=``;return;}
+  const{data}=await sb.from(`profiles`).select(`id,username,avatar_url`).ilike(`username`,`%${q}%`).limit(8);
+  res.innerHTML=(data||[]).map(u=>`
+    <div class="dm-item" onclick="closeNewDm();closeDmPage();openConv('${u.id}','${escHtml(u.username)}')">
+      <div class="dm-avatar">${u.avatar_url?`<img src="${u.avatar_url}" alt="">`:u.username[0].toUpperCase()}</div>
+      <div class="dm-info"><div class="dm-username">@${escHtml(u.username)}</div></div>
+    </div>`).join(``)||`<div style="color:var(--muted);padding:20px;text-align:center;font-size:13px">Aucun résultat</div>`;
+}
+function startDmWithUser(uid,username){closePublicProfile();setTimeout(()=>{openConv(uid,username);document.getElementById(`dmPage`).classList.add(`open`);},200);}
+
+// ══════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════
+let _isAdmin=false;
+async function openAdminPanel(){
+  if(!currentUser)return;
+  const{data:p}=await sb.from(`profiles`).select(`is_admin`).eq(`id`,currentUser.id).single();
+  if(!p?.is_admin){toast(`🚫 Accès refusé`);return;}
+  _isAdmin=true;
+  document.getElementById(`adminPanel`).classList.add(`open`);
+  renderAdminStats();
+}
+function closeAdminPanel(){document.getElementById(`adminPanel`).classList.remove(`open`);}
+function switchAdminTab(tab,btn){
+  document.querySelectorAll(`.admin-tab`).forEach(b=>b.classList.remove(`active`));
+  btn.classList.add(`active`);
+  if(tab===`stats`)renderAdminStats();
+  else if(tab===`users`)renderAdminUsers();
+  else if(tab===`videos`)renderAdminVideos();
+  else if(tab===`reports`)renderAdminReports();
+}
+async function renderAdminStats(){
+  const body=document.getElementById(`adminBody`);
+  const[{count:uCount},{count:vCount},{count:rCount}]=await Promise.all([
+    sb.from(`profiles`).select(`*`,{count:`exact`,head:true}),
+    sb.from(`videos`).select(`*`,{count:`exact`,head:true}).eq(`status`,`active`),
+    sb.from(`reports`).select(`*`,{count:`exact`,head:true})
+  ]);
+  body.innerHTML=`
+    <div class="admin-stats-grid">
+      <div class="admin-stat"><div class="admin-stat-val">${fmtNum(uCount)}</div><div class="admin-stat-lbl">UTILISATEURS</div></div>
+      <div class="admin-stat"><div class="admin-stat-val">${fmtNum(vCount)}</div><div class="admin-stat-lbl">VIDÉOS ACTIVES</div></div>
+      <div class="admin-stat"><div class="admin-stat-val">${fmtNum(rCount)}</div><div class="admin-stat-lbl">SIGNALEMENTS</div></div>
+    </div>`;
+}
+async function renderAdminUsers(search=``){
+  const body=document.getElementById(`adminBody`);
+  let query=sb.from(`profiles`).select(`id,username,avatar_url,is_banned,created_at`).order(`created_at`,{ascending:false}).limit(50);
+  if(search)query=query.ilike(`username`,`%${search}%`);
+  const{data:users}=await query;
+  body.innerHTML=`
+    <div class="admin-search-bar"><span>🔍</span><input type="text" placeholder="Rechercher un utilisateur..." oninput="renderAdminUsers(this.value)" value="${search}"></div>
+    <div class="admin-section-title">${users?.length??0} utilisateurs</div>
+    ${(users||[]).map(u=>`
+      <div class="admin-user-item">
+        <div class="admin-user-avatar">${u.avatar_url?`<img src="${u.avatar_url}" alt="">`:( u.username||`?`)[0].toUpperCase()}</div>
+        <div class="admin-user-info">
+          <div class="admin-user-name">@${escHtml(u.username||`?`)}</div>
+          <div class="admin-user-meta">${u.is_banned?`🚫 Banni`:`✅ Actif`} · ${timeAgo(u.created_at)}</div>
+        </div>
+        <div class="admin-user-actions">
+          ${u.is_banned
+            ?`<button class="admin-btn-unban" onclick="adminUnbanUser('${u.id}')">Débannir</button>`
+            :`<button class="admin-btn-ban" onclick="adminBanUser('${u.id}','${escHtml(u.username||``)}')">Bannir</button>`}
+        </div>
+      </div>`).join(``)}
+    ${users?.length?``:` <div class="admin-empty">Aucun utilisateur trouvé</div>`}`;
+}
+
+// ══════════════════════════════════════════
+// LEADERBOARD (suite init déjà déclaré plus haut)
+// ══════════════════════════════════════════
+// la fonction loadLeaderboard() est déclarée plus haut dans le fichier
+
+// ══════════════════════════════════════════
+// BATTLE FEED
+// ══════════════════════════════════════════
+async function loadBattleFeed(){
+  const feed=document.getElementById(`battleFeed`);
+  if(battleLoading||battleAllLoaded)return;
+  battleLoading=true;
+  const{data:battles}=await sb.from(`battle_videos`).select(`id,title,category,left_video_id,right_video_id,left_votes,right_votes,left_video:left_video_id(video_url,thumbnail_url,user_id,profiles(username)),right_video:right_video_id(video_url,thumbnail_url,user_id,profiles(username))`).eq(`status`,`active`).order(`created_at`,{ascending:false}).range(battlePage*5,(battlePage+1)*5-1);
+  if(!battles?.length){battleAllLoaded=true;if(!battlePage)feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">⚔️</span><p>Aucun battle pour l'instant<br>Sois le premier à en créer un !</p></div>`;battleLoading=false;return;}
+  battles.forEach(b=>{
+    const el=createBattleItem(b);
+    feed.appendChild(el);
+  });
+  battlePage++;battleLoading=false;
+  setupBattleIntersection();
+}
+function createBattleItem(b){
+  const div=document.createElement(`div`);div.className=`battle-item`;div.dataset.battleId=b.id;
+  const total=(b.left_votes||0)+(b.right_votes||0)||1;
+  const leftPct=Math.round((b.left_votes||0)/total*100);
+  const rightPct=100-leftPct;
+  const catLabel=BATTLE_CATEGORIES.find(c=>c.id===b.category)?.label||b.category||`⚔️`;
+  div.innerHTML=`
+    <div class="battle-header">
+      <span class="battle-title">${escHtml(b.title||`Battle`)}</span>
+      <span class="battle-category-chip">${catLabel}</span>
+    </div>
+    <div class="battle-videos">
+      <div class="battle-side" id="left-${b.id}">
+        <video src="${b.left_video?.video_url||``}" loop muted playsinline preload="metadata" style="object-fit:cover;width:100%;height:100%;position:absolute;inset:0"></video>
+        <div class="battle-side-grad-left"></div>
+      </div>
+      <div class="battle-divider"></div>
+      <div class="battle-side" id="right-${b.id}">
+        <video src="${b.right_video?.video_url||``}" loop muted playsinline preload="metadata" style="object-fit:cover;width:100%;height:100%;position:absolute;inset:0"></video>
+        <div class="battle-side-grad-right"></div>
+      </div>
+      <div class="battle-user">
+        <span class="battle-username">@${escHtml(b.left_video?.profiles?.username||`?`)}</span>
+        <span class="battle-username">@${escHtml(b.right_video?.profiles?.username||`?`)}</span>
+      </div>
+      <div class="winner-overlay" id="winner-${b.id}"><div class="winner-badge" id="winner-badge-${b.id}"></div></div>
+    </div>
+    <div class="battle-vote-bar">
+      <button class="battle-vote-btn left" id="vote-left-${b.id}" onclick="castBattleVote('${b.id}','left',this)">
+        <div class="battle-vote-fill-left" style="width:${leftPct}%"></div>
+        <span class="battle-vote-icon">👈</span>
+        <span class="battle-vote-pct" id="lpct-${b.id}">${leftPct}%</span>
+      </button>
+      <button class="battle-vote-btn right" id="vote-right-${b.id}" onclick="castBattleVote('${b.id}','right',this)">
+        <div class="battle-vote-fill-right" style="width:${rightPct}%"></div>
+        <span class="battle-vote-icon">👉</span>
+        <span class="battle-vote-pct" id="rpct-${b.id}">${rightPct}%</span>
+      </button>
+    </div>`;
+  return div;
+}
+function setupBattleIntersection(){
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      const videos=e.target.querySelectorAll(`video`);
+      if(e.isIntersecting)videos.forEach(v=>v.play().catch(()=>{}));
+      else videos.forEach(v=>{v.pause();v.currentTime=0;});
+    });
+    const feed=document.getElementById(`battleFeed`);
+    const items=feed.querySelectorAll(`.battle-item`);
+    const last=items[items.length-1];
+    if(last){
+      const rect=last.getBoundingClientRect();
+      if(rect.top<window.innerHeight*2)loadBattleFeed();
+    }
+  },{threshold:0.5});
+  document.querySelectorAll(`.battle-item`).forEach(item=>observer.observe(item));
+}
+async function castBattleVote(battleId,side,btn){
+  if(!currentUser){openAuth();return;}
+  haptic([10,5,10]);
+  const key=`voted_battle_${battleId}`;
+  if(localStorage.getItem(key)){toast(`✅ Tu as déjà voté pour ce battle`);return;}
+  localStorage.setItem(key,side);
+  await sb.from(`battle_votes`).upsert({battle_id:battleId,user_id:currentUser.id,side});
+  const col=side===`left`?`left_votes`:`right_votes`;
+  const{data:b}=await sb.from(`battle_videos`).select(`left_votes,right_votes`).eq(`id`,battleId).single();
+  const newVal=((b?.[col])||0)+1;
+  await sb.from(`battle_videos`).update({[col]:newVal}).eq(`id`,battleId);
+  const total=(b?.left_votes||0)+(b?.right_votes||0)+1;
+  const lv=side===`left`?newVal:(b?.left_votes||0);
+  const rv=side===`right`?newVal:(b?.right_votes||0);
+  const lp=Math.round(lv/total*100);const rp=100-lp;
+  document.getElementById(`lpct-${battleId}`).textContent=`${lp}%`;
+  document.getElementById(`rpct-${battleId}`).textContent=`${rp}%`;
+  document.querySelector(`#vote-left-${battleId} .battle-vote-fill-left`).style.width=`${lp}%`;
+  document.querySelector(`#vote-right-${battleId} .battle-vote-fill-right`).style.width=`${rp}%`;
+  const badge=document.getElementById(`winner-badge-${battleId}`);
+  if(badge&&Math.abs(lp-rp)>20){
+    badge.textContent=lp>rp?`👈 GAGNE !`:`👉 GAGNE !`;
+    badge.classList.add(`show`);
+    launchConfetti();
+    setTimeout(()=>badge.classList.remove(`show`),3000);
+  }
+  toast(`⚔️ Vote enregistré !`);
+}
+function launchConfetti(){
+  const colors=[`#7c5cfc`,`#fc5c7d`,`#ffd700`,`#2ecc71`,`#fff`];
+  for(let i=0;i<30;i++){
+    const el=document.createElement(`div`);el.className=`confetti-piece`;
+    el.style.left=`${Math.random()*100}vw`;
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDelay=`${Math.random()*1.5}s`;
+    el.style.width=el.style.height=`${6+Math.random()*8}px`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3500);
+  }
+}
+
+// ══════════════════════════════════════════
+// BATTLE UPLOAD
+// ══════════════════════════════════════════
+function renderBattleCatGrid(){
+  const grid=document.getElementById(`battleCatGrid`);if(!grid)return;
+  grid.innerHTML=BATTLE_CATEGORIES.map(c=>`
+    <button class="upload-type-btn${c.id===selectedBattleCat?` active`:``}" onclick="selectBattleCat('${c.id}',this)">${c.label}</button>`).join(``);
+}
+function selectBattleCat(id,el){
+  selectedBattleCat=id;
+  document.querySelectorAll(`#battleCatGrid .upload-type-btn`).forEach(b=>b.classList.remove(`active`));
+  el.classList.add(`active`);
+}
+function openBattleUpload(){
+  if(!currentUser){openAuth();return;}
+  document.getElementById(`battleUploadModal`).classList.add(`open`);
+}
+function closeBattleUpload(){document.getElementById(`battleUploadModal`).classList.remove(`open`);}
+function pickBattleVideo(side){
+  battlePickSide=side;
+  loadBattlePickerVideos();
+  document.getElementById(`battlePickerModal`).style.display=`flex`;
+}
+function closeBattlePicker(){document.getElementById(`battlePickerModal`).style.display=`none`;}
+async function loadBattlePickerVideos(){
+  if(!currentUser)return;
+  const grid=document.getElementById(`battlePickerGrid`);
+  grid.innerHTML=`<div class="loader-dots" style="grid-column:1/-1;padding:30px"><span></span><span></span><span></span></div>`;
+  const{data}=await sb.from(`videos`).select(`id,thumbnail_url,title,video_url`).eq(`status`,`active`).order(`created_at`,{ascending:false}).limit(30);
+  grid.innerHTML=(data||[]).map(v=>`
+    <div class="search-thumb" onclick="selectBattleVideo('${v.id}','${escHtml(v.title||``)}','${v.video_url}','${v.thumbnail_url||``}')">
+      <img src="${v.thumbnail_url||``}" loading="lazy" alt="">
+    </div>`).join(``)||`<div style="color:var(--muted);padding:20px;text-align:center;font-size:13px;grid-column:1/-1">Aucune vidéo disponible</div>`;
+}
+function selectBattleVideo(id,title,url,thumb){
+  if(battlePickSide===`left`){battleLeftVideoId=id;battleLeftVideoUrl=url;battleLeftThumbUrl=thumb;document.getElementById(`battleLeftName`).textContent=title||id;document.getElementById(`battleLeftName`).style.display=`block`;document.getElementById(`battleLeftThumb`).textContent=`🎬`;}
+  else{battleRightVideoId=id;battleRightVideoUrl=url;battleRightThumbUrl=thumb;document.getElementById(`battleRightName`).textContent=title||id;document.getElementById(`battleRightName`).style.display=`block`;document.getElementById(`battleRightThumb`).textContent=`🎬`;}
+  closeBattlePicker();
+}
+function handleBattleFile(){}
+async function submitBattle(){
+  const title=document.getElementById(`battleTitle`).value.trim();
+  const errEl=document.getElementById(`battleUploadErr`);
+  errEl.textContent=``;
+  if(!title){errEl.textContent=`Titre requis`;return;}
+  if(!battleLeftVideoId||!battleRightVideoId){errEl.textContent=`Sélectionne 2 vidéos`;return;}
+  if(!currentUser){openAuth();return;}
+  const{error}=await sb.from(`battle_videos`).insert({title,category:selectedBattleCat,left_video_id:battleLeftVideoId,right_video_id:battleRightVideoId,created_by:currentUser.id,status:`active`,left_votes:0,right_votes:0});
+  if(error){errEl.textContent=`Erreur: ${error.message}`;return;}
+  toast(`⚔️ Battle lancé !`);closeBattleUpload();
+  battlePage=0;battleAllLoaded=false;
+  document.getElementById(`battleFeed`).innerHTML=``;
+  loadBattleFeed();
+}
+</script></html>
