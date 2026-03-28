@@ -890,6 +890,8 @@ async function init() {
     if (session?.user) {
       const { data: prof } = await sb.from('profiles').select('is_banned').eq('id', session.user.id).single()
       if (prof?.is_banned) { await sb.auth.signOut(); alert('🚫 Ton compte a été suspendu.'); return }
+      setupRealtimeNotifs(session.user.id)
+      requestPushPermission()
     }
     checkAdmin()
   })
@@ -902,13 +904,65 @@ async function init() {
   checkOnboarding()
   checkAdmin()
 
-  // Realtime notifs
-  sb.channel('notifications')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications',
-      filter: currentUser ? `user_id=eq.${currentUser.id}` : undefined
-    }, () => { document.getElementById('notifDot').style.display = 'block' })
+  if (currentUser) {
+    setupRealtimeNotifs(currentUser.id)
+  }
+}
+
+// ══════════════════════════════════════════
+// NOTIFICATIONS PUSH + REALTIME
+// ══════════════════════════════════════════
+let _realtimeNotifChannel = null
+
+function setupRealtimeNotifs(userId) {
+  if (_realtimeNotifChannel) { sb.removeChannel(_realtimeNotifChannel) }
+  _realtimeNotifChannel = sb.channel('notif_' + userId)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'notifications',
+      filter: `user_id=eq.${userId}`
+    }, (payload) => {
+      const notif = payload.new
+      // Point rouge sur l'onglet
+      document.getElementById('notifDot').style.display = 'block'
+      // Toast in-app discret
+      showNotifToast(notif.content || '🔔 Nouvelle notification')
+      // Push native si permission accordée
+      if (Notification.permission === 'granted') {
+        new Notification('VoltClip ⚡', {
+          body: notif.content,
+          icon: '/icon-192.png',
+          badge: '/icon-192.png',
+          tag: notif.id || 'voltclip-notif',
+          renotify: true
+        })
+      }
+      if (currentTab === 'notif') loadNotifs()
+    })
     .subscribe()
 }
+
+function showNotifToast(msg) {
+  const t = document.createElement('div')
+  t.style.cssText = `position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;
+    transform:translateX(-50%);z-index:9998;background:var(--surface);
+    border:1px solid rgba(124,92,252,.4);color:var(--text);
+    font-size:13px;padding:10px 16px;border-radius:14px;
+    box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:85vw;text-align:center;
+    animation:fakeFeedIn .3s ease;pointer-events:none`
+  t.textContent = msg
+  document.body.appendChild(t)
+  setTimeout(() => { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 400) }, 3500)
+}
+
+async function requestPushPermission() {
+  if (!('Notification' in window)) return
+  if (Notification.permission === 'default') {
+    // Demande discrète, seulement après 1ère interaction
+    const granted = await Notification.requestPermission()
+    if (granted === 'granted') toast('🔔 Notifications activées !')
+  }
+}
+
 
 // ══════════════════════════════════════════
 // TABS
@@ -952,87 +1006,109 @@ async function loadFeed(append = false) {
   const feed = document.getElementById('videoFeed')
   if (!append) feed.innerHTML = '<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>'
 
-  let query = sb.from('videos').select('*, profiles(username, avatar_url), video_watch_times(watch_seconds)').eq('status', 'active').limit(20).range(feedPage * 20, feedPage * 20 + 19)
-
-  if (currentFeedTab === 'following' && currentUser) {
+  // ── Following feed ──
+  if (currentFeedTab === 'following') {
+    if (!currentUser) {
+      feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Connecte-toi pour voir les abonnements</p></div>'
+      feedLoading = false; return
+    }
     const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id', currentUser.id)
     const ids = follows?.map(f => f.following_id) || []
     if (!ids.length) {
       feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Abonne-toi à des créateurs<br>pour voir leur contenu ici !</p></div>'
-      feedLoading = false
-      return
+      feedLoading = false; return
     }
-    query = query.in('user_id', ids)
-  }
-
-  const { data: videos, error } = await query
-
-  if (!append && (error || !videos?.length)) {
-    feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Aucune vidéo pour l\'instant.<br>Sois le premier à publier !</p></div>'
+    const { data: videos } = await sb.from('videos')
+      .select('*, profiles(username, avatar_url)')
+      .eq('status', 'active').in('user_id', ids)
+      .order('created_at', { ascending: false })
+      .range(feedPage * 20, feedPage * 20 + 19)
+    if (!videos?.length) { feedAllLoaded = true; feedLoading = false; return }
+    await _renderFeedVideos(videos, feed, append)
     feedLoading = false
     return
   }
 
-  if (videos?.length < 20) feedAllLoaded = true
+  // ── Pour toi : fetch 60 vidéos, score côté client, affiche les 20 meilleures ──
+  const fetchCount = 60
+  const offset = feedPage * 20
+  const { data: videos, error } = await sb.from('videos')
+    .select('*, profiles(username, avatar_url), video_watch_times(watch_seconds, skipped_fast)')
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .range(offset, offset + fetchCount - 1)
 
-  // ══ Score algorithm v3 : cold start + exploration/exploitation + batch phases + re-surfacing ══
-  if (videos && currentFeedTab === 'foryou') {
-    const now = Date.now()
-    const userInterests = new Set(JSON.parse(localStorage.getItem('voltclip_interests') || '[]').map(s => s.toLowerCase()))
-    const seenVideos = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
-    const isNewUser = !localStorage.getItem('voltclip_interests') || userInterests.size < 3
-    const seenTags = new Set()
+  if (!append && (error || !videos?.length)) {
+    feed.innerHTML = '<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Aucune vidéo pour l\'instant.<br>Sois le premier à publier !</p></div>'
+    feedLoading = false; return
+  }
+  if ((videos?.length || 0) < fetchCount) feedAllLoaded = true
 
-    videos.forEach(v => {
-      const ageHours = (now - new Date(v.created_at)) / 3600000
-      const freshness = Math.max(0, 1 - ageHours / 72)
-      const watchTimes = v.video_watch_times || []
-      const totalViews = watchTimes.length || 1
-      const avgWatch = watchTimes.length ? watchTimes.reduce((s, w) => s + (w.watch_seconds||0), 0) / watchTimes.length : 0
-      const rewatchCount = watchTimes.filter(w => (w.watch_seconds||0) > (v.duration||15) * 0.9).length
-      const rewatchRate = rewatchCount / totalViews
-      const fastSkips = watchTimes.filter(w => w.skipped_fast).length
-      const fastSkipPenalty = (fastSkips / totalViews) * 30
-      const completionRate = (v.duration && avgWatch) ? Math.min(1, avgWatch / v.duration) : 0
-      const videoTags = ((v.description||'').match(/#\w+/g)||[]).map(t => t.slice(1).toLowerCase())
-      const interestMatch = userInterests.size && videoTags.some(t => userInterests.has(t))
-      const interestBoost = interestMatch ? 40 : 0
-      const explorationBoost = (!interestMatch && Math.random() < 0.3) ? 20 : 0
-      const tagOverlapPenalty = videoTags.some(t => seenTags.has(t)) ? 15 : 0
-      videoTags.forEach(t => seenTags.add(t))
-      const isTestPhase = (v.views_count || 0) < 50
-      const testBoost = isTestPhase ? 25 : 0
-      const growthBoost = (!isTestPhase && (v.views_count||0) < 500 && completionRate > 0.6) ? 35 : 0
-      const resurfaceBoost = (ageHours > 72 && completionRate > 0.75 && rewatchRate > 0.3) ? 30 : 0
-      const killPenalty = (fastSkips / totalViews > 0.6) ? 40 : 0
-      const coldStartBoost = isNewUser ? (v.likes_count||0) * 2 : 0
-      const seenPenalty = seenVideos.has(v.id) ? 50 : 0
-      v._score = (v.likes_count||0)*3 + (v.comments_count||0)*5 + (v.views_count||0)*0.1
-              + avgWatch*8 + completionRate*50 + rewatchRate*60 + freshness*50
-              + interestBoost + explorationBoost + testBoost + growthBoost
-              + resurfaceBoost + coldStartBoost
-              - fastSkipPenalty - tagOverlapPenalty - killPenalty - seenPenalty
-    })
-    videos.sort((a, b) => b._score - a._score)
-    // Banger aléatoire : 1 vidéo populaire injectée toutes les ~8 vidéos
-    const bangers = videos.filter(v => (v.likes_count||0) > 20 || (v.views_count||0) > 200)
-    if (bangers.length && videos.length > 4) {
-      const banger = bangers[Math.floor(Math.random() * bangers.length)]
-      const insertAt = 4 + Math.floor(Math.random() * 4)
-      const ci = videos.indexOf(banger)
-      if (ci > insertAt) { videos.splice(ci, 1); videos.splice(insertAt, 0, banger) }
-    }
-    for (let i = videos.length-1; i > 0; i--) {
-      if (Math.random() > 0.85) { const j = Math.floor(Math.random()*(i+1)); [videos[i],videos[j]]=[videos[j],videos[i]] }
-    }
+  // ══ Score algorithm v4 : scoring sur 60 vidéos ══
+  const now = Date.now()
+  const userInterests = new Set(JSON.parse(localStorage.getItem('voltclip_interests') || '[]').map(s => s.toLowerCase()))
+  const seenVideos = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
+  const isNewUser = userInterests.size < 3
+  const seenTags = new Set()
+
+  ;(videos || []).forEach(v => {
+    const ageHours = (now - new Date(v.created_at)) / 3600000
+    const freshness = Math.max(0, 1 - ageHours / 72)
+    const watchTimes = v.video_watch_times || []
+    const totalViews = Math.max(watchTimes.length, 1)
+    const avgWatch = watchTimes.length ? watchTimes.reduce((s, w) => s + (w.watch_seconds||0), 0) / watchTimes.length : 0
+    const rewatchRate = watchTimes.filter(w => (w.watch_seconds||0) > (v.duration||15) * 0.9).length / totalViews
+    const fastSkips = watchTimes.filter(w => w.skipped_fast).length
+    const completionRate = (v.duration && avgWatch) ? Math.min(1, avgWatch / v.duration) : 0
+    const videoTags = ((v.description||'').match(/#\w+/g)||[]).map(t => t.slice(1).toLowerCase())
+    const interestMatch = userInterests.size && videoTags.some(t => userInterests.has(t))
+    const tagOverlapPenalty = videoTags.some(t => seenTags.has(t)) ? 15 : 0
+    videoTags.forEach(t => seenTags.add(t))
+    const isTestPhase = (v.views_count || 0) < 50
+    const growthBoost = (!isTestPhase && (v.views_count||0) < 500 && completionRate > 0.6) ? 35 : 0
+    const resurfaceBoost = (ageHours > 72 && completionRate > 0.75 && rewatchRate > 0.3) ? 30 : 0
+    const killPenalty = (fastSkips / totalViews > 0.6) ? 40 : 0
+    const seenPenalty = seenVideos.has(v.id) ? 60 : 0
+
+    v._score = (v.likes_count||0)*3 + (v.comments_count||0)*5 + (v.views_count||0)*0.1
+      + avgWatch*8 + completionRate*50 + rewatchRate*60 + freshness*50
+      + (interestMatch ? 40 : (!interestMatch && Math.random() < 0.3) ? 20 : 0)
+      + (isTestPhase ? 25 : 0) + growthBoost + resurfaceBoost
+      + (isNewUser ? (v.likes_count||0)*2 : 0)
+      - (fastSkips / totalViews) * 30 - tagOverlapPenalty - killPenalty - seenPenalty
+  })
+
+  const scored = [...(videos || [])].sort((a, b) => b._score - a._score)
+
+  // Injecter 1 banger toutes les ~8 vidéos
+  const bangers = scored.filter(v => (v.likes_count||0) > 20 || (v.views_count||0) > 200)
+  if (bangers.length && scored.length > 4) {
+    const banger = bangers[Math.floor(Math.random() * bangers.length)]
+    const insertAt = 4 + Math.floor(Math.random() * 4)
+    const ci = scored.indexOf(banger)
+    if (ci > insertAt) { scored.splice(ci, 1); scored.splice(insertAt, 0, banger) }
   }
 
-  // Liked + bookmarked + following
+  // Légère randomisation pour éviter le feed trop déterministe
+  for (let i = scored.length-1; i > 0; i--) {
+    if (Math.random() > 0.85) { const j = Math.floor(Math.random()*(i+1)); [scored[i],scored[j]]=[scored[j],scored[i]] }
+  }
+
+  // Prendre les 20 meilleurs
+  const topVideos = scored.slice(0, 20)
+  await _renderFeedVideos(topVideos, feed, append)
+  feedLoading = false
+  if (!append && currentFeedTab === 'foryou') loadSuggestFollow()
+}
+
+// ── Render helper : charge likes/bookmarks/follows en 1 batch et crée les items ──
+async function _renderFeedVideos(videos, feed, append) {
+  // 1 seule requête groupée au lieu de 3
   let likedIds = new Set(), bookmarkedIds = new Set(), followingIds = new Set()
   if (currentUser) {
     const [likesRes, bmRes, folRes] = await Promise.all([
-      sb.from('likes').select('video_id').eq('user_id', currentUser.id),
-      sb.from('bookmarks').select('video_id').eq('user_id', currentUser.id),
+      sb.from('likes').select('video_id').eq('user_id', currentUser.id).in('video_id', videos.map(v=>v.id)),
+      sb.from('bookmarks').select('video_id').eq('user_id', currentUser.id).in('video_id', videos.map(v=>v.id)),
       sb.from('follows').select('following_id').eq('follower_id', currentUser.id)
     ])
     likedIds = new Set(likesRes.data?.map(l => l.video_id))
@@ -1041,105 +1117,88 @@ async function loadFeed(append = false) {
   }
 
   if (!append) feed.innerHTML = ''
-  videos?.forEach((v, i) => {
+  videos.forEach((v, i) => {
     const el = createVideoItem(v, feedPage*20+i, likedIds.has(v.id), bookmarkedIds.has(v.id), followingIds)
     feed.appendChild(el)
   })
 
-  // Intersection observer
-  const watchTimers = {}
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      const vid = e.target.querySelector('video')
-      const vidId = e.target.dataset.videoId
-      if (e.isIntersecting) {
-        if (activeVideoEl && activeVideoEl !== vid) { activeVideoEl.pause(); activeVideoEl.currentTime = 0 }
-        activeVideoEl = vid
-        if (currentTab === 'feed') vid.play().catch(()=>{})
-        if (vidId) {
-          sb.rpc('increment_views', { vid_id: vidId })
-          checkViralMilestone(vidId)
-          // Track vue pour algo (évite répétition)
-          const seen = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
-          seen.add(vidId)
-          if (seen.size > 200) { const arr = [...seen]; arr.splice(0,50); seen.clear(); arr.forEach(i=>seen.add(i)) }
-          localStorage.setItem('voltclip_seen', JSON.stringify([...seen]))
-          // Session counter + "just one more"
-          const sc = parseInt(localStorage.getItem('voltclip_session_count') || '0') + 1
-          localStorage.setItem('voltclip_session_count', sc)
-          if (sc === 5) toast('🔥 T\'as vu 5 vidéos — encore une ?')
-          if (sc === 15) toast('⚡ 15 vidéos ! Tu es accro 😂')
-        }
-        if (vidId) watchTimers[vidId] = { start: Date.now(), sent: false }
-        // Intro FX playback
-        const introFxId = e.target.dataset.introFx
-        if (introFxId && vidId) playIntroFxOnVideo(vidId, introFxId, e.target)
-        // Live reactions
-        startLiveReactions(vidId)
-        // Vibration légère au changement de vidéo
-        if (navigator.vibrate) navigator.vibrate(8)
-        // Preload 2 prochaines vidéos
-        const next = e.target.nextElementSibling
-        const next2 = next?.nextElementSibling
-        if (next) { const nv = next.querySelector('video'); if(nv) nv.preload = 'auto' }
-        if (next2) { const nv2 = next2.querySelector('video'); if(nv2) nv2.preload = 'auto' }
-      } else {
-        vid?.pause()
-        stopLiveReactions()
-        if (vidId && watchTimers[vidId] && !watchTimers[vidId].sent) {
-          const watchSec = Math.round((Date.now()-watchTimers[vidId].start)/1000)
-          const skippedFast = watchSec < 2
-          if (watchSec >= 1 && currentUser) {
-            sb.from('video_watch_times').insert({ user_id: currentUser.id, video_id: vidId, watch_seconds: watchSec, skipped_fast: skippedFast }).then(()=>{})
-            watchTimers[vidId].sent = true
+  // Intersection observer (reuse ou créer)
+  if (!feed._observer) {
+    const watchTimers = {}
+    feed._observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        const vid = e.target.querySelector('video')
+        const vidId = e.target.dataset.videoId
+        if (e.isIntersecting) {
+          if (activeVideoEl && activeVideoEl !== vid) { activeVideoEl.pause(); activeVideoEl.currentTime = 0 }
+          activeVideoEl = vid
+          if (currentTab === 'feed') vid?.play().catch(()=>{})
+          if (vidId) {
+            sb.rpc('increment_views', { vid_id: vidId })
+            checkViralMilestone(vidId)
+            const seen = new Set(JSON.parse(localStorage.getItem('voltclip_seen') || '[]'))
+            seen.add(vidId)
+            if (seen.size > 200) { const arr = [...seen]; arr.splice(0,50); seen.clear(); arr.forEach(i=>seen.add(i)) }
+            localStorage.setItem('voltclip_seen', JSON.stringify([...seen]))
+            const sc = parseInt(localStorage.getItem('voltclip_session_count') || '0') + 1
+            localStorage.setItem('voltclip_session_count', sc)
+            if (sc === 5) toast('🔥 T\'as vu 5 vidéos — encore une ?')
+            if (sc === 15) toast('⚡ 15 vidéos ! Tu es accro 😂')
+          }
+          if (vidId) watchTimers[vidId] = { start: Date.now(), sent: false }
+          const introFxId = e.target.dataset.introFx
+          if (introFxId && vidId) playIntroFxOnVideo(vidId, introFxId, e.target)
+          startLiveReactions(vidId)
+          if (navigator.vibrate) navigator.vibrate(8)
+          const next = e.target.nextElementSibling
+          const next2 = next?.nextElementSibling
+          if (next) { const nv = next.querySelector('video'); if(nv) nv.preload = 'auto' }
+          if (next2) { const nv2 = next2.querySelector('video'); if(nv2) nv2.preload = 'auto' }
+        } else {
+          vid?.pause()
+          stopLiveReactions()
+          if (vidId && watchTimers[vidId] && !watchTimers[vidId].sent) {
+            const watchSec = Math.round((Date.now()-watchTimers[vidId].start)/1000)
+            if (watchSec >= 1 && currentUser) {
+              sb.from('video_watch_times').insert({ user_id: currentUser.id, video_id: vidId, watch_seconds: watchSec, skipped_fast: watchSec < 2 }).then(()=>{})
+              watchTimers[vidId].sent = true
+            }
+          }
+          const items = feed.querySelectorAll('.video-item')
+          const idx = Array.from(items).indexOf(e.target)
+          if (idx >= items.length - 3 && !feedAllLoaded && !feedLoading) {
+            feedPage++
+            loadFeed(true)
           }
         }
-        // Infinite scroll — load more when near end
-        const items = feed.querySelectorAll('.video-item')
-        const idx = Array.from(items).indexOf(e.target)
-        if (idx >= items.length - 3 && !feedAllLoaded) {
-          feedPage++
-          feedLoading = false
-          loadFeed(true)
-        }
-      }
-    })
-  }, { threshold: 0.6 })
-
-  feed.querySelectorAll('.video-item').forEach(el => { if (!el._observed) { observer.observe(el); el._observed = true } })
-
-  // ── Virtualisation DOM : libérer les vidéos trop loin du scroll ──
-  // Garde max 5 éléments avec src actif pour ne pas saturer la mémoire
-  function virtualizeVideos() {
-    const items = Array.from(feed.querySelectorAll('.video-item'))
-    const feedRect = feed.getBoundingClientRect()
-    items.forEach((item, idx) => {
-      const vid = item.querySelector('video')
-      if (!vid) return
-      const rect = item.getBoundingClientRect()
-      const dist = Math.abs(rect.top - feedRect.top)
-      // Décharger les vidéos à plus de 3 items du viewport
-      if (dist > window.innerHeight * 3) {
-        if (vid.src && !vid.dataset.srcBak) {
-          vid.dataset.srcBak = vid.src
-          vid.pause()
-          vid.removeAttribute('src')
-          vid.load()
-        }
-      } else {
-        if (vid.dataset.srcBak && !vid.src) {
-          vid.src = vid.dataset.srcBak
-          delete vid.dataset.srcBak
-        }
-      }
-    })
+      })
+    }, { threshold: 0.6 })
   }
-  feed.addEventListener('scroll', () => requestAnimationFrame(virtualizeVideos), { passive: true })
-  feedLoading = false
 
-  // Charger suggestions après le feed (seulement si pas en mode abonnements)
-  if (!append && currentFeedTab === 'foryou') loadSuggestFollow()
+  feed.querySelectorAll('.video-item').forEach(el => {
+    if (!el._observed) { feed._observer.observe(el); el._observed = true }
+  })
+
+  // Virtualisation DOM
+  if (!feed._virtListener) {
+    feed._virtListener = true
+    feed.addEventListener('scroll', () => requestAnimationFrame(() => {
+      const items = Array.from(feed.querySelectorAll('.video-item'))
+      const feedRect = feed.getBoundingClientRect()
+      items.forEach(item => {
+        const vid = item.querySelector('video')
+        if (!vid) return
+        const dist = Math.abs(item.getBoundingClientRect().top - feedRect.top)
+        if (dist > window.innerHeight * 3) {
+          if (vid.src && !vid.dataset.srcBak) { vid.dataset.srcBak = vid.src; vid.pause(); vid.removeAttribute('src'); vid.load() }
+        } else {
+          if (vid.dataset.srcBak && !vid.src) { vid.src = vid.dataset.srcBak; delete vid.dataset.srcBak }
+        }
+      })
+    }), { passive: true })
+  }
 }
+
 
 // ── Suggestions d'abonnements ──
 async function loadSuggestFollow() {
@@ -1387,6 +1446,15 @@ async function toggleFollow(userId, isFollowing) {
   if (newFollowing) { playUISound('follow'); haptic([15, 5, 15]) }
   if (newFollowing) {
     await sb.from('follows').insert({ follower_id: currentUser.id, following_id: userId })
+    // Notifier la personne suivie
+    const { data: prof } = await sb.from('profiles').select('username').eq('id', currentUser.id).single()
+    await sb.from('notifications').insert({
+      user_id: userId,
+      type: 'follow',
+      content: `👤 @${prof?.username || 'quelqu\'un'} a commencé à te suivre !`,
+      related_id: currentUser.id,
+      is_read: false
+    })
   } else {
     await sb.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId)
   }
@@ -1457,6 +1525,18 @@ async function toggleLike(videoId, isLiked) {
     await sb.rpc('increment_likes', { video_id: videoId }).catch(() =>
       sb.from('videos').update({ likes_count: newCount }).eq('id', videoId)
     )
+    // Notifier le créateur (pas soi-même)
+    const { data: vid } = await sb.from('videos').select('user_id, title').eq('id', videoId).single()
+    if (vid && vid.user_id !== currentUser.id) {
+      const { data: prof } = await sb.from('profiles').select('username').eq('id', currentUser.id).single()
+      await sb.from('notifications').insert({
+        user_id: vid.user_id,
+        type: 'like',
+        content: `❤️ @${prof?.username || 'quelqu\'un'} a aimé ta vidéo "${(vid.title||'').slice(0,30)}"`,
+        related_id: videoId,
+        is_read: false
+      })
+    }
   } else {
     await sb.from('likes').delete().eq('user_id', currentUser.id).eq('video_id', videoId)
     await sb.rpc('decrement_likes', { video_id: videoId }).catch(() =>
@@ -3080,6 +3160,35 @@ async function sendComment() {
   loadComments(commentsVideoId)
   const cnt = document.getElementById('cc-'+commentsVideoId)
   if (cnt) cnt.textContent = parseInt(cnt.textContent||0) + 1
+
+  // Notifier le créateur de la vidéo
+  if (!isShadowbanned) {
+    const { data: vid } = await sb.from('videos').select('user_id, title').eq('id', commentsVideoId).single()
+    if (vid && vid.user_id !== currentUser.id) {
+      const { data: prof } = await sb.from('profiles').select('username').eq('id', currentUser.id).single()
+      await sb.from('notifications').insert({
+        user_id: vid.user_id,
+        type: 'comment',
+        content: `💬 @${prof?.username || 'quelqu\'un'} a commenté : "${text.slice(0, 50)}"`,
+        related_id: commentsVideoId,
+        is_read: false
+      })
+    }
+    // Notifier la personne mentionnée (@user) si reply
+    if (replyToCommentId) {
+      const { data: parentComment } = await sb.from('comments').select('user_id, profiles(username)').eq('id', replyToCommentId).single()
+      if (parentComment && parentComment.user_id !== currentUser.id) {
+        const { data: prof } = await sb.from('profiles').select('username').eq('id', currentUser.id).single()
+        await sb.from('notifications').insert({
+          user_id: parentComment.user_id,
+          type: 'reply',
+          content: `↩️ @${prof?.username || 'quelqu\'un'} a répondu à ton commentaire : "${text.slice(0, 50)}"`,
+          related_id: commentsVideoId,
+          is_read: false
+        })
+      }
+    }
+  }
 }
 // ══════════════════════════════════════════
 // MENTIONS @USER
