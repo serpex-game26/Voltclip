@@ -1824,8 +1824,7 @@ for(;_uploadLog.length&&now-_uploadLog[0]>36e5;)_uploadLog.shift();return _uploa
 let previewVid=document.getElementById(`uploadPreviewVideo`);if(previewVid&&previewVid.duration&&previewVid.duration>uploadMaxDuration){document.getElementById(`uploadErr`).textContent=`⚠️ Vidéo trop longue (max ${Math.round(uploadMaxDuration/60)} min)`;return}
 // Rate limit
 if(!checkUploadRateLimit()){document.getElementById(`uploadErr`).textContent=`⚠️ Max 5 uploads par heure. Réessaie plus tard.`;return}let prog=document.getElementById(`uploadProgress`);prog.style.display=`block`,prog.textContent=`⏳ Vérification…`,document.getElementById(`uploadSubmit`).style.display=`none`,document.getElementById(`uploadErr`).textContent=``;
-// Vérification durée réelle de la vidéo
-try{let tmpCheck=document.createElement(`video`);tmpCheck.preload=`metadata`;await new Promise(resolve=>{let u=URL.createObjectURL(uploadFile);tmpCheck.onloadedmetadata=()=>{URL.revokeObjectURL(u);if(tmpCheck.duration&&isFinite(tmpCheck.duration)&&tmpCheck.duration>uploadMaxDuration){throw Object.assign(new Error(`Vidéo trop longue (${Math.round(tmpCheck.duration)}s). Limite : ${uploadMaxDuration}s.`),{isDurationErr:true})}resolve()};tmpCheck.onerror=()=>{URL.revokeObjectURL(u);resolve()};tmpCheck.src=u})}catch(e){if(e.isDurationErr){prog.style.display=`none`;document.getElementById(`uploadErr`).textContent=`❌ `+e.message;document.getElementById(`uploadSubmit`).style.display=`block`;return}}
+
 let{data:{session}}=await sb.auth.getSession();if(!session){document.getElementById(`uploadErr`).textContent=`Non connecté`;return}prog.textContent=`⏳ Upload en cours…`;try{
 // Compression si fichier lourd
 let fileToUpload=await compressVideo(uploadFile,prog),savedMB=((uploadFile.size-fileToUpload.size)/1024/1024).toFixed(1);
