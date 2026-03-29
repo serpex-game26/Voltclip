@@ -896,6 +896,8 @@ function createBattleItem(b, myVotes) {
   const hasVoted = votedLeft || votedRight
   const userLeft = b.video_left?.profiles?.username || 'user'
   const userRight = b.video_right?.profiles?.username || 'user'
+  const userLeftId = b.video_left?.user_id || ''
+  const userRightId = b.video_right?.user_id || ''
 
   const div = document.createElement('div')
   div.className = 'battle-item'
@@ -914,7 +916,7 @@ function createBattleItem(b, myVotes) {
         <video src="${b.video_right?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_right?.thumbnail_url || ''}" id="bvid-right-${b.id}"></video>
         <div class="battle-side-grad-right"></div>
         <div class="battle-voted-badge" id="badge-right-${b.id}">🔴</div>
-        <span class="battle-username" style="position:absolute;bottom:8px;right:10px;pointer-events:none">@${escHtml(userRight)} 🔴</span>
+        <span class="battle-username" style="position:absolute;bottom:8px;right:10px;pointer-events:auto;cursor:pointer" onclick="event.stopPropagation();openPublicProfile('${userRightId}')">@${escHtml(userRight)} 🔴</span>
       </div>
       <div class="battle-divider"></div>
       <!-- Vidéo BAS (left) -->
@@ -922,7 +924,7 @@ function createBattleItem(b, myVotes) {
         <video src="${b.video_left?.video_url || ''}" loop muted playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}"></video>
         <div class="battle-side-grad-left"></div>
         <div class="battle-voted-badge" id="badge-left-${b.id}">🔵</div>
-        <span class="battle-username" style="position:absolute;bottom:8px;left:10px;pointer-events:none">🔵 @${escHtml(userLeft)}</span>
+        <span class="battle-username" style="position:absolute;bottom:8px;left:10px;pointer-events:auto;cursor:pointer" onclick="event.stopPropagation();openPublicProfile('${userLeftId}')">🔵 @${escHtml(userLeft)}</span>
       </div>
 
       <!-- Bouton GAUCHE : centré dans la vidéo du BAS -->
@@ -1480,7 +1482,7 @@ if(!data?.length){list.innerHTML=`<div class="empty-state"><span class="ei">🏆
         <img class="rank-thumb" src="${v.thumbnail_url||``}" alt="">
         <div class="rank-info">
           <div class="rank-video-title">${escHtml(v.title)}</div>
-          <div class="rank-username">@${v.username}</div>
+          <div class="rank-username" style="cursor:pointer" onclick="event.stopPropagation();openPublicProfile('${v.user_id}')">@${v.username}</div>
           <div class="rank-score">❤️ ${fmtNum(v.likes_count)} · 👁 ${fmtNum(v.views_count)} · 💬 ${fmtNum(v.comments_count)}</div>
         </div>
       </div>
@@ -2180,7 +2182,7 @@ async function sendChallenge() {
 
   // Récupérer le profil de l'expéditeur
   const { data: myProfile } = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
-  const myUsername = myProfile?.username || 'quelqu'un';
+  const myUsername = myProfile?.username || "quelqu'un";
 
   // Créer une entrée dans battle_challenges (ou utiliser notifications)
   // On stocke le challenge comme une notification spéciale avec toutes les infos dans `content` en JSON
