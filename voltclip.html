@@ -1829,7 +1829,7 @@ const _uploadLog=[];function checkUploadRateLimit(){let now=Date.now();
 // Garde seulement les uploads des 60 dernières minutes
 for(;_uploadLog.length&&now-_uploadLog[0]>36e5;)_uploadLog.shift();return _uploadLog.length>=5?!1:!0}function handlePublishClick(e){e.preventDefault();// Blur tous les inputs pour fermer le clavier mobile
 document.querySelectorAll('#uploadStep2Form .upload-input').forEach(el=>el.blur());document.activeElement&&document.activeElement.blur();// Laisser le temps au clavier de se fermer avant d'exécuter
-setTimeout(()=>submitUpload(),150)}async function submitUpload(){if(!uploadFile){document.getElementById(`uploadErr`).textContent=`Sélectionne une vidéo`;return}let title=document.getElementById(`uploadTitle`).value.trim();if(uploadType===`video`&&!title){document.getElementById(`uploadErr`).textContent=`Titre obligatoire`;return}
+setTimeout(()=>submitUpload(),150)}async function submitUpload(){alert('1-submitUpload OK');if(!uploadFile){alert('STOP: pas de fichier');document.getElementById(`uploadErr`).textContent=`Sélectionne une vidéo`;return}alert('2-fichier OK: '+uploadFile.name);let title=document.getElementById(`uploadTitle`).value.trim();alert('3-titre: "'+title+'"');if(uploadType===`video`&&!title){document.getElementById(`uploadErr`).textContent=`Titre obligatoire`;return}alert('4-tout OK on upload');
 // Rate limit
 if(!checkUploadRateLimit()){document.getElementById(`uploadErr`).textContent=`⚠️ Max 5 uploads par heure. Réessaie plus tard.`;return}if(!currentUser){document.getElementById(`uploadErr`).textContent=`Non connecté`;return}
 // Rafraîchir la session si nécessaire
