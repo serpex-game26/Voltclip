@@ -1711,23 +1711,29 @@ async function openWebcamRecorder(){
   
   let modal = document.createElement('div');
   modal.id = 'webcamModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;overflow:hidden';
   modal.innerHTML = `
-    <div style="font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:#fff">🎥 Enregistrer une vidéo</div>
-    <video id="webcamPreview" autoplay muted playsinline style="width:100%;height:100%;border-radius:0;background:#111;object-fit:cover;position:absolute;inset:0"></video>
-    <div style="display:flex;gap:12px;align-items:center">
-      <button id="webcamRecBtn" style="background:linear-gradient(135deg,#fc5c7d,#7c5cfc);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:14px 28px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:8px">
-        <span id="webcamRecDot" style="width:12px;height:12px;border-radius:50%;background:#fff;display:inline-block"></span>
-        <span id="webcamRecLabel">⏺ Démarrer</span>
-      </button>
-      <button id="webcamStopBtn" style="display:none;background:#ff4444;border:none;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:14px 28px;border-radius:20px;cursor:pointer">⏹ Arrêter</button>
+    <div style="position:relative;flex:1;min-height:0;background:#111">
+      <video id="webcamPreview" autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>
+      <div style="position:absolute;top:12px;left:0;right:0;text-align:center;pointer-events:none">
+        <span style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:#fff;background:rgba(0,0,0,0.5);border-radius:20px;padding:4px 14px">🎥 Enregistrer</span>
+      </div>
+      <div id="webcamTimer" style="font-family:'Space Mono',monospace;color:#fc5c7d;font-size:22px;font-weight:700;display:none;position:absolute;bottom:12px;left:0;right:0;text-align:center">00:00</div>
     </div>
-    <div id="webcamTimer" style="font-family:'Space Mono',monospace;color:#fc5c7d;font-size:18px;font-weight:700;display:none">00:00</div>
-    <div style="display:flex;gap:10px">
-      <button id="webcamSwitchCam" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:8px 14px;border-radius:12px;cursor:pointer">🔄 Changer cam</button>
-      <button onclick="closeWebcamRecorder()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:8px 14px;border-radius:12px;cursor:pointer">✕ Annuler</button>
+    <div style="background:#0a0a0f;padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button id="webcamRecBtn" style="background:linear-gradient(135deg,#fc5c7d,#7c5cfc);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:12px 24px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:8px">
+          <span id="webcamRecDot" style="width:10px;height:10px;border-radius:50%;background:#fff;display:inline-block"></span>
+          <span id="webcamRecLabel">⏺ Démarrer</span>
+        </button>
+        <button id="webcamStopBtn" style="display:none;background:#ff4444;border:none;color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:12px 24px;border-radius:20px;cursor:pointer">⏹ Arrêter</button>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button id="webcamSwitchCam" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:8px 14px;border-radius:12px;cursor:pointer">🔄 Changer cam</button>
+        <button onclick="closeWebcamRecorder()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Space Mono',monospace;font-size:11px;padding:8px 14px;border-radius:12px;cursor:pointer">✕ Annuler</button>
+      </div>
+      <div style="color:rgba(255,255,255,0.35);font-size:10px;font-family:'Space Mono',monospace;text-align:center">Max \${uploadMaxDuration}s · Clique Arrêter pour utiliser la vidéo</div>
     </div>
-    <div style="color:rgba(255,255,255,0.4);font-size:11px;font-family:'Space Mono',monospace;text-align:center">Max ${uploadMaxDuration}s · Cliquez "Arrêter" pour utiliser la vidéo</div>
   `;
   document.body.appendChild(modal);
   
