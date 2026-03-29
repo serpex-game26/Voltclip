@@ -1823,9 +1823,8 @@ const _uploadLog=[];function checkUploadRateLimit(){let now=Date.now();
 // Garde seulement les uploads des 60 dernières minutes
 for(;_uploadLog.length&&now-_uploadLog[0]>36e5;)_uploadLog.shift();return _uploadLog.length>=5?!1:(_uploadLog.push(now),!0)}async function submitUpload(){if(!uploadFile){document.getElementById(`uploadErr`).textContent=`Sélectionne une vidéo`;return}let title=document.getElementById(`uploadTitle`).value.trim();if(uploadType===`video`&&!title){document.getElementById(`uploadErr`).textContent=`Titre obligatoire`;return}
 // Rate limit
-if(!checkUploadRateLimit()){document.getElementById(`uploadErr`).textContent=`⚠️ Max 5 uploads par heure. Réessaie plus tard.`;return}let prog=document.getElementById(`uploadProgress`);prog.style.display=`block`,prog.textContent=`⏳ Vérification…`,document.getElementById(`uploadSubmit`).style.display=`none`,document.getElementById(`uploadErr`).textContent=``;
-
-let session;try{let sessionPromise=sb.auth.getSession();let timeoutPromise=new Promise((_,rej)=>setTimeout(()=>rej(new Error(`Session timeout`)),8000));let result=await Promise.race([sessionPromise,timeoutPromise]);session=result.data?.session}catch(sessErr){document.getElementById(`uploadErr`).textContent=`❌ Erreur de connexion — réessaie`;document.getElementById(`uploadSubmit`).style.display=`block`;prog.style.display=`none`;return}if(!session){document.getElementById(`uploadErr`).textContent=`Non connecté`;document.getElementById(`uploadSubmit`).style.display=`block`;prog.style.display=`none`;return}prog.textContent=`⏳ Upload en cours…`;try{
+if(!checkUploadRateLimit()){document.getElementById(`uploadErr`).textContent=`⚠️ Max 5 uploads par heure. Réessaie plus tard.`;return}if(!currentUser){document.getElementById(`uploadErr`).textContent=`Non connecté`;return}let prog=document.getElementById(`uploadProgress`);prog.style.display=`block`,prog.textContent=`☁️ Upload en cours…`,document.getElementById(`uploadSubmit`).style.display=`none`,document.getElementById(`uploadErr`).textContent=``;
+try{
 // Compression si fichier lourd
 let fileToUpload=await compressVideo(uploadFile,prog),savedMB=((uploadFile.size-fileToUpload.size)/1024/1024).toFixed(1);
 // Upload vers Cloudinary (preset unsigned requis)
