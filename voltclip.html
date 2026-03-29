@@ -1462,9 +1462,18 @@ let{data:videos}=await sb.from(`videos`).select(`id, title, views_count, likes_c
 let{data:likesSum}=await sb.from(`videos`).select(`likes_count`).eq(`user_id`,currentUser.id).eq(`status`,`active`),totalLikes=(likesSum||[]).reduce((s,v)=>s+(v.likes_count||0),0);document.getElementById(`pTotalLikes`).textContent=fmtNum(totalLikes),profile.avatar_url?document.getElementById(`profileAvatarWrap`).innerHTML=`<img src="${profile.avatar_url}" alt=""><div class="profile-avatar-edit">✏️</div>`:document.getElementById(`profileAvatarInitial`).textContent=profile.username[0].toUpperCase(),await updateStreak(profile),loadProfileGrid()}async function updateStreak(profile){let badge=document.getElementById(`profileStreakBadge`),today=(/* @__PURE__ */ new Date()).toDateString(),lastLogin=localStorage.getItem(`voltclip_last_login`),streak=parseInt(localStorage.getItem(`voltclip_streak`)||`0`),newStreak=streak;lastLogin!==today&&(newStreak=lastLogin===(/* @__PURE__ */ new Date(Date.now()-864e5)).toDateString()?streak+1:1,localStorage.setItem(`voltclip_last_login`,today),localStorage.setItem(`voltclip_streak`,newStreak),newStreak>1&&toast(`🔥 ${newStreak} jours de suite ! Continue !`)),newStreak>=2&&(badge.style.display=`block`,badge.textContent=`${newStreak>=30?`👑`:newStreak>=7?`🏆`:`🔥`} ${newStreak} jour${newStreak>1?`s`:``} de suite`)}function shareProfile(){let url=window.location.origin+window.location.pathname+`?u=`+currentUser?.id;navigator.share?navigator.share({title:`Mon profil VoltClip`,url}):(navigator.clipboard.writeText(url),toast(`Lien profil copié ! 🔗`))}async function deleteVideo(videoId,e){
   e.stopPropagation();
   if(!confirm(`Supprimer cette vidéo ?`)) return;
-  // Supprimer le thumbnail immédiatement du DOM
+  // Retirer du DOM immédiatement
   const thumb = document.querySelector(`[data-vid="${videoId}"]`);
   if(thumb) thumb.remove();
+  // 1. Supprimer les votes liés aux battles de cette vidéo
+  const {data: battles} = await sb.from(`battles`).select(`id`).or(`video_left_id.eq.${videoId},video_right_id.eq.${videoId}`);
+  if(battles?.length){
+    const battleIds = battles.map(b=>b.id);
+    await sb.from(`battle_votes`).delete().in(`battle_id`, battleIds);
+    // 2. Supprimer les battles qui utilisent cette vidéo
+    await sb.from(`battles`).delete().or(`video_left_id.eq.${videoId},video_right_id.eq.${videoId}`);
+  }
+  // 3. Supprimer la vidéo
   const {error} = await sb.from(`videos`).delete().eq(`id`,videoId);
   if(error){ toast(`Erreur : ${error.message}`); refreshProfile(); return; }
   toast(`Vidéo supprimée ✅`);
