@@ -860,7 +860,13 @@ async function loadBattles(append = false) {
     entries.forEach(e => {
       const vids = e.target.querySelectorAll('video')
       if (e.isIntersecting) {
-        vids.forEach(v => { v.muted = true; v.play().catch(()=>{}) })
+        // Son séquentiel: vidéo du HAUT (right) joue avec son en premier
+        const bid = e.target.dataset.battleId
+        const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
+        const vidLeft = bid ? document.getElementById('bvid-left-'+bid) : null
+        vids.forEach(v => { v.muted = true; })
+        if (vidRight) { vidRight.muted = false; e.target._soundSide = 'right'; }
+        vids.forEach(v => v.play().catch(()=>{}))
         // Infinite scroll
         const items = feed.querySelectorAll('.battle-item')
         const idx = Array.from(items).indexOf(e.target)
@@ -870,7 +876,8 @@ async function loadBattles(append = false) {
           loadBattles(true)
         }
       } else {
-        vids.forEach(v => v.pause())
+        // Couper tous les sons quand on quitte
+        vids.forEach(v => { v.pause(); v.muted = true; })
       }
     })
   }, { threshold: 0.6 })
@@ -902,16 +909,16 @@ function createBattleItem(b, myVotes) {
     </div>
     <div class="battle-videos">
       <!-- Vidéo HAUT (right) -->
-      <div class="battle-side" id="bs-right-${b.id}" onclick="voteBattle('${b.id}','right',this)">
-        <video src="${b.video_right?.video_url || ''}" loop muted playsinline preload="auto" poster="${b.video_right?.thumbnail_url || ''}"></video>
+      <div class="battle-side" id="bs-right-${b.id}" onclick="switchBattleSound('${b.id}','right');voteBattle('${b.id}','right',this)">
+        <video src="${b.video_right?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_right?.thumbnail_url || ''}" id="bvid-right-${b.id}"></video>
         <div class="battle-side-grad-right"></div>
         <div class="battle-voted-badge" id="badge-right-${b.id}">🔴</div>
         <span class="battle-username" style="position:absolute;bottom:8px;right:10px;pointer-events:none">@${escHtml(userRight)} 🔴</span>
       </div>
       <div class="battle-divider"></div>
       <!-- Vidéo BAS (left) -->
-      <div class="battle-side" id="bs-left-${b.id}" onclick="voteBattle('${b.id}','left',this)">
-        <video src="${b.video_left?.video_url || ''}" loop muted playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}"></video>
+      <div class="battle-side" id="bs-left-${b.id}" onclick="switchBattleSound('${b.id}','left');voteBattle('${b.id}','left',this)">
+        <video src="${b.video_left?.video_url || ''}" loop muted playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}"></video>
         <div class="battle-side-grad-left"></div>
         <div class="battle-voted-badge" id="badge-left-${b.id}">🔵</div>
         <span class="battle-username" style="position:absolute;bottom:8px;left:10px;pointer-events:none">🔵 @${escHtml(userLeft)}</span>
@@ -1034,6 +1041,53 @@ function showWinnerAnimation(battleId, side, username) {
     overlay.style.opacity = '0'
     setTimeout(() => overlay.remove(), 600)
   }, 3500)
+}
+
+// ── Logique son séquentiel pour les battles ──
+// Quand un battle est visible: vidéo HAUT joue avec son
+// Tap sur une vidéo = switcher le son sur cette vidéo
+function switchBattleSound(battleId, toSide) {
+  const vidRight = document.getElementById('bvid-right-' + battleId)
+  const vidLeft = document.getElementById('bvid-left-' + battleId)
+  const item = document.querySelector('[data-battle-id="' + battleId + '"]')
+  if (!item) return
+  
+  if (toSide === 'right') {
+    if (vidRight) vidRight.muted = false
+    if (vidLeft) vidLeft.muted = true
+    item._soundSide = 'right'
+  } else {
+    if (vidLeft) vidLeft.muted = false
+    if (vidRight) vidRight.muted = true
+    item._soundSide = 'left'
+  }
+  updateBattleSoundBadge(battleId, toSide)
+}
+
+function updateBattleSoundBadge(battleId, side) {
+  const item = document.querySelector('[data-battle-id="' + battleId + '"]')
+  if (!item) return
+  // Retirer les anciens badges
+  item.querySelectorAll('.battle-sound-badge').forEach(b => b.remove())
+  // Ajouter le badge sur la vidéo active
+  const targetSide = document.getElementById('bs-' + side + '-' + battleId)
+  if (targetSide) {
+    const badge = document.createElement('div')
+    badge.className = 'battle-sound-badge'
+    badge.innerHTML = '🔊 Son actif'
+    badge.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(124,92,252,.85);color:#fff;font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;pointer-events:none;z-index:25;white-space:nowrap'
+    targetSide.appendChild(badge)
+  }
+  // Indicateur "tap pour écouter" sur l'autre
+  const otherSide = side === 'right' ? 'left' : 'right'
+  const otherEl = document.getElementById('bs-' + otherSide + '-' + battleId)
+  if (otherEl) {
+    const badge2 = document.createElement('div')
+    badge2.className = 'battle-sound-badge'
+    badge2.innerHTML = '👆 Tape pour écouter'
+    badge2.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:rgba(255,255,255,.7);font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;pointer-events:none;z-index:25;white-space:nowrap'
+    otherEl.appendChild(badge2)
+  }
 }
 
 function shareBattle(battleId) {
@@ -1405,7 +1459,21 @@ let{data:v}=await sb.from(`videos`).select(`*, profiles(username)`).eq(`id`,vide
 // ══════════════════════════════════════════
 // CLASSEMENT
 // ══════════════════════════════════════════
-async function loadRank(period,tabEl){tabEl&&(document.querySelectorAll(`.period-tab`).forEach(t=>t.classList.remove(`active`)),tabEl.classList.add(`active`));let list=document.getElementById(`rankList`);list.innerHTML=`<div class="loader-dots"><span></span><span></span><span></span></div>`;let{data}=await sb.rpc(`get_top_videos`,{period});if(!data?.length){list.innerHTML=`<div class="empty-state"><span class="ei">🏆</span><p>Pas encore de classement</p></div>`;return}list.innerHTML=data.map((v,i)=>{let numClass=i===0?`gold`:i===1?`silver`:i===2?`bronze`:``;return`
+async function loadRank(period,tabEl){tabEl&&(document.querySelectorAll(`.period-tab`).forEach(t=>t.classList.remove(`active`)),tabEl.classList.add(`active`));let list=document.getElementById(`rankList`);list.innerHTML=`<div class="loader-dots"><span></span><span></span><span></span></div>`;
+// Essaie la RPC, sinon fallback direct sur la table (évite les vidéos supprimées)
+let data;
+try{let rpc=await sb.rpc(`get_top_videos`,{period});data=rpc.data;}catch{}
+if(!data?.length){
+  // Fallback direct: filtre uniquement les vidéos status=active
+  let dateFilter=new Date();
+  if(period==='week')dateFilter.setDate(dateFilter.getDate()-7);
+  else if(period==='month')dateFilter.setDate(dateFilter.getDate()-30);
+  let q=sb.from('videos').select('id,title,thumbnail_url,views_count,likes_count,comments_count,user_id,profiles(username)').eq('status','active').order('likes_count',{ascending:false}).limit(20);
+  if(period!=='all')q=q.gte('created_at',dateFilter.toISOString());
+  let{data:vids}=await q;
+  data=(vids||[]).map(v=>({...v,username:v.profiles?.username||'user'}));
+}
+if(!data?.length){list.innerHTML=`<div class="empty-state"><span class="ei">🏆</span><p>Pas encore de classement</p></div>`;return}list.innerHTML=data.map((v,i)=>{let numClass=i===0?`gold`:i===1?`silver`:i===2?`bronze`:``;return`
       <div class="rank-item" onclick="playFromSearch('${v.id}')">
         <span class="rank-num ${numClass}">${i<3?[`🥇`,`🥈`,`🥉`][i]:i+1}</span>
         <img class="rank-thumb" src="${v.thumbnail_url||``}" alt="">
@@ -1489,11 +1557,16 @@ let{data:likesSum}=await sb.from(`videos`).select(`likes_count`).eq(`user_id`,cu
   // Supprimer le thumbnail immédiatement du DOM
   const thumb = document.querySelector(`[data-vid="${videoId}"]`);
   if(thumb) thumb.remove();
+  // Marquer les battles qui utilisent cette vidéo comme inactifs
+  await sb.from('battles').update({status:'inactive'})
+    .or(`video_left_id.eq.${videoId},video_right_id.eq.${videoId}`);
   const {error} = await sb.from(`videos`).delete().eq(`id`,videoId);
   if(error){ toast(`Erreur : ${error.message}`); refreshProfile(); return; }
   toast(`Vidéo supprimée ✅`);
   refreshProfile();
   loadFeed();
+  // Recharger les battles pour retirer les battles obsolètes
+  if(currentTab === 'battle'){ battlePage=0; battleAllLoaded=false; loadBattles(); }
 }async function editProfile(){let bio=prompt(`Ta bio (max 100 caractères) :`);bio!==null&&(await sb.from(`profiles`).update({bio:bio.slice(0,100)}).eq(`id`,currentUser.id),toast(`Profil mis à jour ✓`),refreshProfile())}async function changeAvatar(){if(!currentUser){openAuth();return}let input=document.createElement(`input`);input.type=`file`,input.accept=`image/*`,input.onchange=async()=>{let file=input.files[0];if(!file)return;let path=`${currentUser.id}/avatar.jpg`,{error}=await sb.storage.from(`avatars`).upload(path,file,{upsert:!0});if(error){toast(`Erreur upload avatar`);return}let{data:{publicUrl}}=sb.storage.from(`avatars`).getPublicUrl(path);await sb.from(`profiles`).update({avatar_url:publicUrl}).eq(`id`,currentUser.id),toast(`Avatar mis à jour ✓`),refreshProfile()},input.click()}
 // ══════════════════════════════════════════
 // PROFIL PUBLIC
