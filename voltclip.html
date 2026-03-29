@@ -28,8 +28,8 @@
 /* ── RAP FR BRANDING ── */
 .battle-rap-tag{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:#ffd700;background:#ffd70020;border:1px solid #ffd70040;border-radius:20px;padding:2px 8px;margin-left:6px}
 /* ── SHARE DUEL BTN ── */
-.battle-share-duel{position:absolute;bottom:62px;left:50%;transform:translateX(-50%);z-index:25;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;border-radius:20px;font-family:var(--font-mono);font-size:11px;font-weight:700;padding:8px 18px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px rgba(255,215,0,.4);letter-spacing:.04em;display:flex;align-items:center;gap:6px}
-.battle-share-duel:active{transform:translateX(-50%)scale(.95)}
+.battle-share-duel{z-index:25;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border:none;border-radius:20px;font-family:var(--font-mono);font-size:10px;font-weight:700;padding:6px 12px;cursor:pointer;white-space:nowrap;letter-spacing:.04em;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.battle-share-duel:active{opacity:.8}
 
 /* ── NOUVEAU LAYOUT BATTLE : vidéos haut/bas, boutons vote latéraux ── */
 .battle-videos{flex-direction:column!important}
@@ -879,6 +879,7 @@ function createBattleItem(b, myVotes) {
     <div class="battle-header">
       <span class="battle-category-chip">${BATTLE_CATEGORIES.find(c=>c.id===b.category)?.label || '⚔️ Battle'}</span>
       <span class="battle-title">${escHtml(b.title || 'Qui gagne ?')}<span class="battle-rap-tag">RAP FR</span></span>
+      <button class="battle-share-duel" onclick="event.stopPropagation();shareBattle('${b.id}')">📤 Partager</button>
       <button class="battle-share-btn" onclick="shareBattle('${b.id}')">↗</button>
     </div>
     <div class="battle-videos">
@@ -912,7 +913,7 @@ function createBattleItem(b, myVotes) {
         <span class="battle-vote-btn-float-pct" id="pct-right-${b.id}">${hasVoted ? pctRight + '%' : '👍'}</span>
       </button>
     </div>
-    <button class="battle-share-duel" onclick="event.stopPropagation();shareBattle('${b.id}')">📤 Partager ce duel — Qui gagne ?</button>
+
   `
   return div
 }
