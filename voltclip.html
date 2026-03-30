@@ -1773,53 +1773,200 @@ file.arrayBuffer().then(buf=>{const safeBlob=new Blob([buf],{type:file.type||'vi
 // ── Compression vidéo côté client avant upload ──
 async function compressVideo(file,prog){return file;}
 // ── Rate limiting upload : max 5 uploads par heure ──
-const _uploadLog=[];function checkUploadRateLimit(){let now=Date.now();
-// Garde seulement les uploads des 60 dernières minutes
-for(;_uploadLog.length&&now-_uploadLog[0]>36e5;)_uploadLog.shift();return _uploadLog.length>=5?!1:!0}let _isSubmitting=false;function _scrollToPublishBtn(){try{const _btn=document.getElementById('uploadSubmit');if(_btn&&_btn.style.display!=='none'){_btn.scrollIntoView({behavior:'smooth',block:'nearest'});}}catch(_){}}function handlePublishClick(e){e.preventDefault();e.stopPropagation();if(_isSubmitting)return;submitUpload();}async function submitUpload(){if(_isSubmitting)return;if(!uploadFile){document.getElementById(`uploadErr`).textContent=`Sélectionne une vidéo`;return}let title=document.getElementById(`uploadTitle`).value.trim();if(uploadType===`video`&&!title){document.getElementById(`uploadErr`).textContent=`Titre obligatoire`;return}// Rate limit
-if(!checkUploadRateLimit()){document.getElementById(`uploadErr`).textContent=`⚠️ Max 5 uploads par heure. Réessaie plus tard.`;return}if(!currentUser){document.getElementById(`uploadErr`).textContent=`Non connecté`;return}
-// Rafraîchir la session si nécessaire
-// session check skipped — on utilise currentUser directement
-if(!currentUser){document.getElementById(`uploadErr`).textContent=`Session expirée — reconnecte-toi`;document.getElementById(`uploadSubmit`).style.display=`block`;return}
-_isSubmitting=true;let prog=document.getElementById(`uploadProgress`);prog.style.display=`block`,prog.textContent=`☁️ Upload en cours…`,document.getElementById(`uploadSubmit`).style.display=`none`,document.getElementById(`uploadErr`).textContent=``;
-try{
-// Compression si fichier lourd
-let fileToUpload=uploadFile;if(fileToUpload&&fileToUpload.size===0&&_uploadOriginalFile&&_uploadOriginalFile.size>0){fileToUpload=_uploadOriginalFile;}if(!fileToUpload||fileToUpload.size===0){throw new Error(`❌ Fichier vidéo inaccessible — resélectionne la vidéo`);}console.log("[VoltClip] Upload:",fileToUpload.name,fileToUpload.size,fileToUpload.type);
-const _sizeMB=(fileToUpload.size/1024/1024).toFixed(1);prog.textContent=`☁️ Envoi (${_sizeMB}MB)… patiente 30-60s`;
-let formData=new FormData;formData.append(`file`,fileToUpload),formData.append(`upload_preset`,CLOUDINARY_PRESET),formData.append(`folder`,`voltclip`);prog.textContent=`☁️ Upload en cours… 0%`;
-// XHR upload avec progress + retry 1x (fetch() est tué par Android en arrière-plan)
-const _xhrUpload=(attempt)=>new Promise((resolve,reject)=>{
-  const xhr=new XMLHttpRequest();
-  xhr.open(`POST`,`${CLOUDINARY_URL}/video/upload`,true);
-  xhr.timeout=180000;
-  xhr.upload.onprogress=e=>{if(e.lengthComputable){const pct=Math.round(e.loaded/e.total*100);prog.textContent=`☁️ Upload en cours… ${pct}%`;}};
-  xhr.ontimeout=()=>reject(new Error(`❌ Timeout — fichier trop lourd ou connexion trop lente`));
-  xhr.onerror=()=>reject(new Error(`❌ Erreur réseau — vérifie ta connexion`));
-  xhr.onload=()=>{
-    if(xhr.status>=200&&xhr.status<300){
-      try{resolve(JSON.parse(xhr.responseText));}
-      catch(e){reject(new Error(`❌ Cloudinary: réponse invalide (HTTP ${xhr.status})`));}
-    } else {
-      let _em='';try{const _r=JSON.parse(xhr.responseText);_em=_r?.error?.message||'';}catch(_){}
-      reject(new Error(`❌ Cloudinary HTTP ${xhr.status}${_em?' — '+_em:''}`));
-    }
-  };
-  xhr.send(formData);
-});
-let cdnData;
-try{cdnData=await _xhrUpload(1);}
-catch(err1){
-  // Retry automatique 1x après 2s
-  prog.textContent=`⚠️ Retry upload…`;
-  await new Promise(r=>setTimeout(r,2000));
-  try{cdnData=await _xhrUpload(2);}
-  catch(err2){throw new Error(err2.message);}
+const _uploadLog = [];
+
+function checkUploadRateLimit() {
+  const now = Date.now();
+  while (_uploadLog.length && now - _uploadLog[0] > 3600000) _uploadLog.shift();
+  return _uploadLog.length < 5;
 }
-if(cdnData.error){let msg=cdnData.error?.message||`Cloudinary error`;throw Error(`Cloudinary: ${msg}`);}if(!cdnData.secure_url){throw Error(`Cloudinary: réponse invalide`);}let rawUrl=cdnData.secure_url,rawDuration=cdnData.duration||0,trimSec=uploadMaxDuration,needsTrim=rawDuration>trimSec;let videoUrl=needsTrim?rawUrl.replace(`/upload/`,`/upload/du_${trimSec},so_0/`):rawUrl,thumbUrl=rawUrl.replace(`/upload/`,`/upload/so_0,c_thumb,w_400/`).replace(/\.[^.]+$/,`.jpg`),duration=needsTrim?trimSec:rawDuration;if(needsTrim)toast(`✂️ Vidéo coupée à ${Math.round(trimSec/60)} min`);prog.textContent=`💾 Enregistrement…`;let _authToken=null;try{let{data}=await sb.auth.getSession();_authToken=data?.session?.access_token||null;}catch(_){}let desc=document.getElementById(`uploadDesc`).value.trim(),tags=(document.getElementById(`uploadTags`).value.match(/#\w+/g)||[]).map(t=>t.slice(1).toLowerCase()),soundName=document.getElementById(`uploadSound`)?.value.trim()||null;if(uploadType===`video`){// Fire-and-forget: on envoie l'INSERT sans attendre la réponse
-let vid=null;fetch(`${SUPABASE_URL}/rest/v1/videos`,{method:`POST`,headers:{'Content-Type':`application/json`,'apikey':SUPABASE_ANON,'Authorization':`Bearer ${_authToken||SUPABASE_ANON}`,'Prefer':`return=minimal`},body:JSON.stringify({user_id:currentUser.id,title:title||`Sans titre`,description:desc+(tags.length?` `+tags.map(t=>`#`+t).join(` `):``),video_url:videoUrl,thumbnail_url:thumbUrl,duration:Math.round(duration),sound_name:soundName,status:`active`})}).catch(()=>{});// Attendre 2s que l'INSERT arrive en base puis continuer
-await new Promise(r=>setTimeout(r,2000));vid={id:`ok`,title:title};// Inserts hashtags en arrière-plan, sans bloquer
-try{for(let tag of tags){let{data:existing}=await sb.from(`hashtags`).select(`id`).eq(`name`,tag).single(),tagId;if(existing)tagId=existing.id,sb.from(`hashtags`).update({videos_count:existing.videos_count+1}).eq(`id`,tagId);else{let{data:newTag}=await sb.from(`hashtags`).insert({name:tag,videos_count:1}).select().single();tagId=newTag?.id}tagId&&vid&&sb.from(`video_hashtags`).insert({video_id:vid.id,hashtag_id:tagId})}}catch(tagErr){console.warn(`hashtag err`,tagErr)}}else{let{error}=await sb.from(`stories`).insert({user_id:currentUser.id,video_url:videoUrl,thumbnail_url:thumbUrl,status:`active`});if(error)throw error}_uploadLog.push(Date.now());toast(`Publié avec succès ⚡`),closeUpload(),loadFeed(),loadStories()}catch(err){console.error('Upload error:', err);_isSubmitting=false;let _errEl=document.getElementById(`uploadErr`);const _errMsg=err?.message||String(err)||'Erreur inconnue';_errEl.textContent=`❌ `+_errMsg;// Sur mobile, s'assurer que l'erreur est visible sans scrollIntoView qui peut fail
-try{_errEl.scrollIntoView({behavior:`smooth`,block:`nearest`});}catch(_){}toast(`❌ `+_errMsg.slice(0,80));document.getElementById(`uploadSubmit`).style.display=`block`;document.getElementById(`uploadProgress`).style.display=`none`;}finally{_isSubmitting=false;// Ne masquer le progress que si pas d'erreur visible
-if(!document.getElementById(`uploadErr`).textContent){document.getElementById(`uploadProgress`).style.display=`none`;}}}
+
+let _isSubmitting = false;
+
+function _scrollToPublishBtn() {
+  try {
+    const btn = document.getElementById('uploadSubmit');
+    if (btn && btn.style.display !== 'none') btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (_) {}
+}
+
+function handlePublishClick(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (_isSubmitting) return;
+  submitUpload();
+}
+
+async function submitUpload() {
+  if (_isSubmitting) return;
+
+  // Validations
+  if (!uploadFile) { document.getElementById('uploadErr').textContent = 'Sélectionne une vidéo'; return; }
+  const title = document.getElementById('uploadTitle').value.trim();
+  if (uploadType === 'video' && !title) { document.getElementById('uploadErr').textContent = 'Titre obligatoire'; return; }
+  if (!checkUploadRateLimit()) { document.getElementById('uploadErr').textContent = '⚠️ Max 5 uploads par heure.'; return; }
+  if (!currentUser) { document.getElementById('uploadErr').textContent = 'Non connecté'; return; }
+
+  _isSubmitting = true;
+  const prog = document.getElementById('uploadProgress');
+  const errEl = document.getElementById('uploadErr');
+  prog.style.display = 'block';
+  prog.textContent = '☁️ Upload en cours…';
+  document.getElementById('uploadSubmit').style.display = 'none';
+  errEl.textContent = '';
+
+  try {
+    // 1. Préparer le fichier
+    let fileToUpload = uploadFile;
+    if ((!fileToUpload || fileToUpload.size === 0) && _uploadOriginalFile && _uploadOriginalFile.size > 0) {
+      fileToUpload = _uploadOriginalFile;
+    }
+    if (!fileToUpload || fileToUpload.size === 0) throw new Error('Fichier inaccessible — resélectionne la vidéo');
+
+    const sizeMB = (fileToUpload.size / 1024 / 1024).toFixed(1);
+    prog.textContent = `☁️ Envoi (${sizeMB}MB)…`;
+
+    // 2. Upload Cloudinary via XHR
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+    formData.append('folder', 'voltclip');
+
+    const xhrUpload = () => new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${CLOUDINARY_URL}/video/upload`, true);
+      xhr.timeout = 180000;
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) prog.textContent = `☁️ Upload… ${Math.round(e.loaded / e.total * 100)}%`;
+      };
+      xhr.ontimeout = () => reject(new Error('Timeout — connexion trop lente'));
+      xhr.onerror = () => reject(new Error('Erreur réseau'));
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch (_) { reject(new Error('Cloudinary: réponse invalide')); }
+        } else {
+          let msg = '';
+          try { msg = JSON.parse(xhr.responseText)?.error?.message || ''; } catch (_) {}
+          reject(new Error(`Cloudinary erreur ${xhr.status}${msg ? ' — ' + msg : ''}`));
+        }
+      };
+      xhr.send(formData);
+    });
+
+    let cdnData;
+    try {
+      cdnData = await xhrUpload();
+    } catch (err1) {
+      prog.textContent = '⚠️ Retry…';
+      await new Promise(r => setTimeout(r, 2000));
+      cdnData = await xhrUpload();
+    }
+
+    if (!cdnData?.secure_url) throw new Error('Cloudinary: pas d\'URL retournee');
+
+    // 3. Préparer les URLs
+    const rawUrl = cdnData.secure_url;
+    const rawDuration = cdnData.duration || 0;
+    const needsTrim = rawDuration > uploadMaxDuration;
+    const videoUrl = needsTrim ? rawUrl.replace('/upload/', `/upload/du_${uploadMaxDuration},so_0/`) : rawUrl;
+    const thumbUrl = rawUrl.replace('/upload/', '/upload/so_0,c_thumb,w_400/').replace(/\.[^.]+$/, '.jpg');
+    const duration = needsTrim ? uploadMaxDuration : rawDuration;
+    if (needsTrim) toast(`✂️ Vidéo coupée à ${Math.round(uploadMaxDuration / 60)} min`);
+
+    prog.textContent = '💾 Enregistrement…';
+
+    // 4. Récupérer le token auth (lecture locale, pas de réseau)
+    let authToken = null;
+    try {
+      const { data } = await sb.auth.getSession();
+      authToken = data?.session?.access_token || null;
+    } catch (_) {}
+
+    const desc = document.getElementById('uploadDesc').value.trim();
+    const tags = (document.getElementById('uploadTags').value.match(/#\w+/g) || []).map(t => t.slice(1).toLowerCase());
+    const soundName = document.getElementById('uploadSound')?.value.trim() || null;
+
+    if (uploadType === 'video') {
+      // 5. INSERT Supabase — fire and forget, on n'attend pas la réponse
+      const payload = {
+        user_id: currentUser.id,
+        title: title || 'Sans titre',
+        description: desc + (tags.length ? ' ' + tags.map(t => '#' + t).join(' ') : ''),
+        video_url: videoUrl,
+        thumbnail_url: thumbUrl,
+        duration: Math.round(duration),
+        sound_name: soundName,
+        status: 'active'
+      };
+
+      fetch(`${SUPABASE_URL}/rest/v1/videos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON,
+          'Authorization': `Bearer ${authToken || SUPABASE_ANON}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+
+      // Attendre 1.5s que l'INSERT arrive en base
+      await new Promise(r => setTimeout(r, 1500));
+
+      // Hashtags en arrière-plan
+      if (tags.length) {
+        (async () => {
+          try {
+            const { data: lastVid } = await sb.from('videos').select('id').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(1).single();
+            if (!lastVid) return;
+            for (const tag of tags) {
+              const { data: existing } = await sb.from('hashtags').select('id, videos_count').eq('name', tag).single();
+              let tagId;
+              if (existing) {
+                tagId = existing.id;
+                sb.from('hashtags').update({ videos_count: existing.videos_count + 1 }).eq('id', tagId);
+              } else {
+                const { data: newTag } = await sb.from('hashtags').insert({ name: tag, videos_count: 1 }).select('id').single();
+                tagId = newTag?.id;
+              }
+              if (tagId) sb.from('video_hashtags').insert({ video_id: lastVid.id, hashtag_id: tagId });
+            }
+          } catch (_) {}
+        })();
+      }
+
+    } else {
+      // Story
+      const { error } = await sb.from('stories').insert({
+        user_id: currentUser.id,
+        video_url: videoUrl,
+        thumbnail_url: thumbUrl,
+        status: 'active'
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    _uploadLog.push(Date.now());
+    toast('Publié avec succès ⚡');
+    closeUpload();
+    loadFeed();
+    loadStories();
+
+  } catch (err) {
+    console.error('[VoltClip] Upload error:', err);
+    const msg = err?.message || String(err) || 'Erreur inconnue';
+    errEl.textContent = '❌ ' + msg;
+    try { errEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (_) {}
+    toast('❌ ' + msg.slice(0, 80));
+    document.getElementById('uploadSubmit').style.display = 'block';
+    prog.style.display = 'none';
+  } finally {
+    _isSubmitting = false;
+    if (!errEl.textContent) prog.style.display = 'none';
+  }
+}
+
 // ══════════════════════════════════════════
 // COMMENTS
 // ══════════════════════════════════════════
