@@ -1238,7 +1238,7 @@ async function submitBattle() {
   loadBattles()
 }
 
-async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null,sb.auth.onAuthStateChange(async(_,session)=>{if(currentUser=session?.user??null,refreshProfile(),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission()}checkAdmin()}),loadSearch(),loadRank(`week`),refreshProfile(),checkAgeGate(),checkAdmin(),currentUser&&setupRealtimeNotifs(currentUser.id);battlePage=0;battleAllLoaded=false;loadBattles()}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
+async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null;_currentAuthToken=session?.access_token||null,sb.auth.onAuthStateChange(async(_,session)=>{if(_currentAuthToken=session?.access_token||null,currentUser=session?.user??null,refreshProfile(),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission()}checkAdmin()}),loadSearch(),loadRank(`week`),refreshProfile(),checkAgeGate(),checkAdmin(),currentUser&&setupRealtimeNotifs(currentUser.id);battlePage=0;battleAllLoaded=false;loadBattles()}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
 }
 // ══════════════════════════════════════════
 // NOTIFICATIONS PUSH + REALTIME
@@ -1876,12 +1876,8 @@ async function submitUpload() {
 
     prog.textContent = '💾 Enregistrement…';
 
-    // 4. Récupérer le token auth (lecture locale, pas de réseau)
-    let authToken = null;
-    try {
-      const { data } = await sb.auth.getSession();
-      authToken = data?.session?.access_token || null;
-    } catch (_) {}
+    // 4. Token auth — stocké en mémoire, zéro réseau
+    const authToken = _currentAuthToken || null;
 
     const desc = document.getElementById('uploadDesc').value.trim();
     const tags = (document.getElementById('uploadTags').value.match(/#\w+/g) || []).map(t => t.slice(1).toLowerCase());
