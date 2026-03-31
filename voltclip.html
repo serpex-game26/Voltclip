@@ -1888,6 +1888,13 @@ async function submitUpload() {
       if (!insertedVideoId) {
         // Fallback: attendre et chercher en base
         await new Promise(r => setTimeout(r, 2000));
+        try {
+          const fallbackCat = document.getElementById('uploadCategory')?.value || null;
+          let fbQuery = sb.from('videos').select('id').eq('user_id', currentUser.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1);
+          if (fallbackCat) fbQuery = fbQuery.eq('category', fallbackCat);
+          const { data: fbVid } = await fbQuery.single();
+          if (fbVid) insertedVideoId = fbVid.id;
+        } catch(e) {}
       }
 
       // Matchmaking auto par catégorie
@@ -1895,7 +1902,7 @@ async function submitUpload() {
         try {
           const uploadCategory = document.getElementById('uploadCategory')?.value || null;
           const myVidId = insertedVideoId;
-          if (!myVidId) return;
+          if (!myVidId) { console.warn('matchmaking: pas d\'ID vidéo'); return; }
 
           const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
@@ -1909,7 +1916,8 @@ async function submitUpload() {
             .limit(1);
           if (uploadCategory) opponentQuery = opponentQuery.eq('category', uploadCategory);
 
-          const { data: opponent } = await opponentQuery.single();
+          const { data: opponent, error: oppErr } = await opponentQuery.single();
+          console.log('[matchmaking] catégorie:', uploadCategory, '| adversaire trouvé:', opponent?.id || null, oppErr?.message || '');
 
           if (opponent) {
             // Vérifier qu'il n'y a pas déjà un battle entre ces deux vidéos
