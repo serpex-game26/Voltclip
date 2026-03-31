@@ -1107,12 +1107,59 @@ function selectBattleVideo() {}
 function closeBattlePicker() {}
 async function submitBattle() {}
 
-async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null;_currentAuthToken=session?.access_token||null,sb.auth.onAuthStateChange(async(_,session)=>{if(_currentAuthToken=session?.access_token||null,currentUser=session?.user??null,refreshProfile(),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission()}checkAdmin()}),loadSearch(),loadRank(`week`),refreshProfile(),checkAgeGate(),checkAdmin(),currentUser&&setupRealtimeNotifs(currentUser.id);battlePage=0;battleAllLoaded=false;loadBattles()}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
+async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null;_currentAuthToken=session?.access_token||null,sb.auth.onAuthStateChange(async(_,session)=>{if(_currentAuthToken=session?.access_token||null,currentUser=session?.user??null,refreshProfile(),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission()}checkAdmin()}),loadSearch(),loadRank(`week`),refreshProfile(),checkAgeGate(),checkAdmin(),currentUser&&setupRealtimeNotifs(currentUser.id);battlePage=0;battleAllLoaded=false;loadBattles();setupRealtimeBattles();}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
 }
 // ══════════════════════════════════════════
 // NOTIFICATIONS PUSH + REALTIME
 // ══════════════════════════════════════════
-let _realtimeNotifChannel=null;function setupRealtimeNotifs(userId){_realtimeNotifChannel&&sb.removeChannel(_realtimeNotifChannel),_realtimeNotifChannel=sb.channel(`notif_`+userId).on(`postgres_changes`,{event:`INSERT`,schema:`public`,table:`notifications`,filter:`user_id=eq.${userId}`},payload=>{let notif=payload.new;document.getElementById(`notifDot`).style.display=`block`,showNotifToast(notif.content||`🔔 Nouvelle notification`),Notification.permission===`granted`&&new Notification(`VoltClip ⚡`,{body:notif.content,icon:`/icon-192.png`,badge:`/icon-192.png`,tag:notif.id||`voltclip-notif`,renotify:!0}),currentTab===`notif`&&loadNotifs()}).subscribe()}function showNotifToast(msg){let t=document.createElement(`div`);t.style.cssText=`position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;
+let _realtimeNotifChannel=null;
+let _realtimeBattleChannel=null;
+
+function setupRealtimeNotifs(userId){
+  _realtimeNotifChannel&&sb.removeChannel(_realtimeNotifChannel);
+  _realtimeNotifChannel=sb.channel(`notif_`+userId)
+    .on(`postgres_changes`,{event:`INSERT`,schema:`public`,table:`notifications`,filter:`user_id=eq.${userId}`},payload=>{
+      let notif=payload.new;
+      const msg = notif.content || notif.message || '🔔 Nouvelle notification';
+      document.getElementById(`notifDot`).style.display=`block`;
+      showNotifToast(msg);
+      Notification.permission===`granted`&&new Notification(`VoltClip ⚡`,{body:msg,icon:`/icon-192.png`,badge:`/icon-192.png`,tag:notif.id||`voltclip-notif`,renotify:!0});
+      currentTab===`notif`&&loadNotifs();
+    }).subscribe();
+}
+
+function setupRealtimeBattles(){
+  _realtimeBattleChannel&&sb.removeChannel(_realtimeBattleChannel);
+  _realtimeBattleChannel=sb.channel('battles_realtime')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'battles'},payload=>{
+      // Nouveau battle créé → on l'ajoute en tête si on est sur l'onglet battle
+      if(payload.new?.status==='active'){
+        if(currentTab==='battle'){
+          // Reload propre pour avoir toutes les données jointes
+          battlePage=0;
+          battleAllLoaded=false;
+          loadBattles();
+          toast('⚔️ Nouveau battle disponible !');
+        } else {
+          // Notif discrète si on n'est pas sur l'onglet
+          showNotifToast('⚔️ Nouveau battle disponible !');
+        }
+      }
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'battles'},payload=>{
+      // Vote mis à jour → refresh les compteurs en live
+      const b = payload.new;
+      if(!b) return;
+      const total = (b.votes_left||0)+(b.votes_right||0);
+      const pL = total ? Math.round(b.votes_left/total*100) : 50;
+      const pR = 100-pL;
+      const elL = document.getElementById('pct-left-'+b.id);
+      const elR = document.getElementById('pct-right-'+b.id);
+      if(elL) elL.textContent = pL+'%';
+      if(elR) elR.textContent = pR+'%';
+    })
+    .subscribe();
+}function showNotifToast(msg){let t=document.createElement(`div`);t.style.cssText=`position:fixed;top:max(14px,env(safe-area-inset-top));left:50%;
     transform:translateX(-50%);z-index:9998;background:var(--surface);
     border:1px solid rgba(124,92,252,.4);color:var(--text);
     font-size:13px;padding:10px 16px;border-radius:14px;
@@ -2670,12 +2717,26 @@ function openBattleFullscreen(battleId, side) {
   const sideEl = document.getElementById('bs-' + side + '-' + battleId);
   const usernameEl = sideEl ? sideEl.querySelector('.battle-username') : null;
 
-  if (!srcEl || !modal) return;
+  if (!modal) return;
+  
+  // Pause toutes les vidéos en cours
+  document.querySelectorAll('.battle-item video').forEach(v => v.pause());
 
   _bfsCurrentBattleId = battleId;
   _bfsCurrentSide = side;
 
-  vid.src = srcEl.src || srcEl.getAttribute('src') || '';
+  // Récupérer la src de la vidéo (currentSrc > src > attribut)
+  const videoSrc = srcEl
+    ? (srcEl.currentSrc || srcEl.src || srcEl.getAttribute('src') || '')
+    : '';
+
+  if (!videoSrc) {
+    toast('⏳ Vidéo en cours de chargement...');
+    return;
+  }
+
+  vid.src = videoSrc;
+  vid.currentTime = srcEl ? (srcEl.currentTime || 0) : 0;
   vid.muted = false;
   vid.play().catch(() => { vid.muted = true; vid.play(); });
 
@@ -2702,6 +2763,7 @@ function openBattleFullscreen(battleId, side) {
   }
 
   modal.style.display = 'flex';
+  modal.style.flexDirection = 'column';
   haptic && haptic([10]);
 }
 
