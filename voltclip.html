@@ -2957,21 +2957,18 @@ function openBattleFullscreen(battleId, side) {
   // Récupérer l'URL : currentSrc → src → getAttribute → data-src
   let videoSrc = '';
   if (srcEl) {
-    videoSrc = srcEl.currentSrc
-      || srcEl.src
-      || srcEl.getAttribute('src')
-      || srcEl.dataset.src
-      || '';
-    // Filtrer les URLs blob vides ou about:blank
-    if (videoSrc === 'about:blank' || videoSrc === window.location.href) videoSrc = '';
+    // Priorité à getAttribute('src') car srcEl.src résout en URL absolue et peut retourner location.href si l'attribut est vide
+    videoSrc = (srcEl.getAttribute('src') || srcEl.currentSrc || srcEl.dataset.src || '').trim();
+    if (videoSrc === 'about:blank' || videoSrc === window.location.href || videoSrc === location.origin + '/' || videoSrc === location.href) videoSrc = '';
   }
 
   if (!videoSrc) {
-    // Dernière tentative: chercher dans le DOM la vraie URL
+    // Fallback: chercher dans tous les <video> du side
     const allVids = document.querySelectorAll(`#bs-${side}-${battleId} video`);
     for (const v of allVids) {
-      if (v.currentSrc && v.currentSrc !== window.location.href) { videoSrc = v.currentSrc; break; }
-      if (v.getAttribute('src')) { videoSrc = v.getAttribute('src'); break; }
+      const s = v.getAttribute('src') || v.dataset.src || '';
+      if (s && s !== window.location.href && s !== 'about:blank' && s !== location.origin + '/') { videoSrc = s; break; }
+      if (v.currentSrc && v.currentSrc !== window.location.href && v.currentSrc !== location.origin + '/') { videoSrc = v.currentSrc; break; }
     }
   }
 
@@ -3056,4 +3053,8 @@ async function bfsVoteFromFullscreen() {
   <video id="bfsVideo" playsinline loop style="width:100%;height:100%;object-fit:contain;background:#000"></video>
   <div style="position:absolute;bottom:0;left:0;right:0;z-index:10;padding:14px 16px max(20px,env(safe-area-inset-bottom));background:linear-gradient(#0000,#000c);display:flex;align-items:center;gap:12px">
     <span id="bfsVoteLabel" style="font-family:'Space Mono',monospace;color:rgba(255,255,255,0.7);font-size:12px;flex:1"></span>
-    <button id="bfsVoteBtn" onclick="bfsVoteFromFullscreen()" style="font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#fff;backgroun
+    <button id="bfsVoteBtn" onclick="bfsVoteFromFullscreen()" style="background:linear-gradient(135deg,#fc5c7d,#7c5cfc);border:2px solid rgba(255,255,255,.3);color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:10px 20px;border-radius:24px;cursor:pointer">🗳️ Voter</button>
+  </div>
+</div>
+
+</html>
