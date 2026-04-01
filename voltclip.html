@@ -2473,8 +2473,8 @@ async function submitUpload() {
 
           const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
-          // Récupérer les IDs de vidéos déjà en battle actif
-          let alreadyInBattle = new Set();
+          // Récupérer tous les IDs de vidéos déjà en battle actif
+          const alreadyInBattle = new Set();
           try {
             const { data: activeBattles } = await sb.from('battles')
               .select('video_left_id, video_right_id')
@@ -2487,9 +2487,8 @@ async function submitUpload() {
             }
           } catch(e) { console.warn('matchmaking: fetch active battles err', e); }
 
-          // Chercher un adversaire — d'abord même catégorie, puis toutes catégories
-          const findOpponent = async (filterCat) => {
-            // Prendre un pool de candidats pour filtrer localement les déjà-en-battle
+          // Chercher un adversaire externe (autre user), jamais déjà en battle
+          const findExternalOpponent = async (filterCat) => {
             let q = sb.from('videos')
               .select('id, user_id')
               .eq('status', 'active')
@@ -2500,24 +2499,46 @@ async function submitUpload() {
             if (filterCat) q = q.eq('category', filterCat);
             const { data: candidates } = await q;
             if (!candidates?.length) return null;
-            // Exclure les vidéos déjà dans un battle actif
+            return candidates.find(v => v.user_id !== currentUser.id && !alreadyInBattle.has(v.id)) || null;
+          };
+
+          // Chercher une autre vidéo du même user (même catégorie), jamais déjà en battle
+          const findSelfOpponent = async (filterCat) => {
+            let q = sb.from('videos')
+              .select('id, user_id')
+              .eq('status', 'active')
+              .eq('user_id', currentUser.id)
+              .neq('id', myVidId)
+              .order('created_at', { ascending: false })
+              .limit(20);
+            if (filterCat) q = q.eq('category', filterCat);
+            const { data: candidates } = await q;
+            if (!candidates?.length) return null;
             return candidates.find(v => !alreadyInBattle.has(v.id)) || null;
           };
 
           let opponent = null;
           let matchedCat = uploadCategory;
 
-          // 1er essai : même catégorie
+          // 1er essai : adversaire externe, même catégorie
           if (uploadCategory) {
-            opponent = await findOpponent(uploadCategory);
-            console.log('[matchmaking] même catégorie:', uploadCategory, '| adversaire:', opponent?.id || null);
+            opponent = await findExternalOpponent(uploadCategory);
+            console.log('[matchmaking] externe même catégorie:', uploadCategory, '| adversaire:', opponent?.id || null);
           }
-
-          // 2e essai : toutes catégories si pas trouvé
+          // 2e essai : adversaire externe, toutes catégories
           if (!opponent) {
-            opponent = await findOpponent(null);
-            matchedCat = opponent ? (opponent.category || uploadCategory) : uploadCategory;
-            console.log('[matchmaking] fallback toutes catégories | adversaire:', opponent?.id || null);
+            opponent = await findExternalOpponent(null);
+            console.log('[matchmaking] externe toutes catégories | adversaire:', opponent?.id || null);
+          }
+          // 3e essai : propre vidéo du même user, même catégorie (self-battle autorisé si isolé)
+          if (!opponent && uploadCategory) {
+            opponent = await findSelfOpponent(uploadCategory);
+            console.log('[matchmaking] self-battle même catégorie | adversaire:', opponent?.id || null);
+          }
+          // 4e essai : propre vidéo, toutes catégories
+          if (!opponent) {
+            opponent = await findSelfOpponent(null);
+            console.log('[matchmaking] self-battle toutes catégories | adversaire:', opponent?.id || null);
           }
 
           if (opponent) {
@@ -2531,8 +2552,11 @@ async function submitUpload() {
               status: 'active',
               expires_at: expiresAt
             });
-            if (!battleErr) toast('⚔️ Battle lancé automatiquement !');
-            else console.warn('[matchmaking] insert battle err:', battleErr);
+            if (!battleErr) {
+              toast('⚔️ Battle lancé automatiquement !');
+              // Refresh le feed battle si l'user est dessus
+              if (currentTab === 'battle') { battlePage = 0; battleAllLoaded = false; loadBattles(); }
+            } else { console.warn('[matchmaking] insert battle err:', battleErr); }
           } else {
             console.log('[matchmaking] aucun adversaire disponible');
           }
@@ -2575,9 +2599,13 @@ async function submitUpload() {
     _uploadLog.push(Date.now());
     toast('Publié avec succès ⚡');
     closeUpload();
+    // Reset feed depuis le début pour voir sa vidéo
+    feedPage = 0; feedAllLoaded = false;
     loadFeed();
     loadStories();
     refreshProfile();
+    // Refresh battle feed (le matchmaking peut avoir créé un battle)
+    setTimeout(() => { battlePage = 0; battleAllLoaded = false; loadBattles(); }, 1500);
 
   } catch (err) {
     console.error('[VoltClip] Upload error:', err);
