@@ -1161,7 +1161,7 @@ async function loadBattles(append = false) {
   if (!append) feed.innerHTML = '<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>'
 
   const { data: battles, error } = await sb.from('battles')
-    .select('*, video_left:video_left_id(video_url,thumbnail_url,user_id,profiles(username)), video_right:video_right_id(video_url,thumbnail_url,user_id,profiles(username))')
+    .select('*, video_left:video_left_id(video_url,thumbnail_url,user_id,profiles!videos_user_id_fkey(username)), video_right:video_right_id(video_url,thumbnail_url,user_id,profiles!videos_user_id_fkey(username))')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .range(battlePage * 10, battlePage * 10 + 9)
@@ -1604,9 +1604,9 @@ function showTab(tab){document.querySelectorAll(`.screen`).forEach(s=>s.classLis
 // ══════════════════════════════════════════
 let currentFeedTab=`foryou`,feedPage=0,feedLoading=!1,feedAllLoaded=!1;function switchFeedTab(tab,btn){currentFeedTab=tab,document.querySelectorAll(`.feed-tab`).forEach(b=>b.classList.remove(`active`)),btn.classList.add(`active`),feedPage=0,feedAllLoaded=!1,loadFeed()}async function loadFeed(append=!1){if(feedLoading)return;feedLoading=!0;let feed=document.getElementById(`videoFeed`);
 // ── Following feed ──
-if(append||(feed.innerHTML=`<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>`),currentFeedTab===`following`){if(!currentUser){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Connecte-toi pour voir les abonnements</p></div>`,feedLoading=!1;return}let{data:follows}=await sb.from(`follows`).select(`following_id`).eq(`follower_id`,currentUser.id),ids=follows?.map(f=>f.following_id)||[];if(!ids.length){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Abonne-toi à des créateurs<br>pour voir leur contenu ici !</p></div>`,feedLoading=!1;return}let{data:videos,error:vidErr}=await sb.from(`videos`).select(`*, profiles(username, avatar_url)`).in(`status`,[`active`,`published`,`public`]).in(`user_id`,ids).order(`created_at`,{ascending:!1}).range(feedPage*20,feedPage*20+19);if(!videos?.length){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Les créateurs que tu suis<br>n\'ont pas encore posté de vidéos !</p></div>`,feedAllLoaded=!0,feedLoading=!1;return}await _renderFeedVideos(videos,feed,append),feedLoading=!1;return}
+if(append||(feed.innerHTML=`<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>`),currentFeedTab===`following`){if(!currentUser){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Connecte-toi pour voir les abonnements</p></div>`,feedLoading=!1;return}let{data:follows}=await sb.from(`follows`).select(`following_id`).eq(`follower_id`,currentUser.id),ids=follows?.map(f=>f.following_id)||[];if(!ids.length){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">👥</span><p>Abonne-toi à des créateurs<br>pour voir leur contenu ici !</p></div>`,feedLoading=!1;return}let{data:videos,error:vidErr}=await sb.from(`videos`).select(`*, profiles!videos_user_id_fkey(username, avatar_url)`).in(`status`,[`active`,`published`,`public`]).in(`user_id`,ids).order(`created_at`,{ascending:!1}).range(feedPage*20,feedPage*20+19);if(!videos?.length){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Les créateurs que tu suis<br>n\'ont pas encore posté de vidéos !</p></div>`,feedAllLoaded=!0,feedLoading=!1;return}await _renderFeedVideos(videos,feed,append),feedLoading=!1;return}
 // ── Pour toi : fetch 60 vidéos, score côté client, affiche les 20 meilleures ──
-let fetchCount=60,offset=feedPage*20,{data:videos,error}=await sb.from(`videos`).select(`*, profiles(username, avatar_url), video_watch_times(watch_seconds, skipped_fast)`).eq(`status`,`active`).order(`created_at`,{ascending:!1}).range(offset,offset+60-1);if(!append&&(error||!videos?.length)){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Aucune vidéo pour l\'instant.<br>Sois le premier à publier !</p></div>`,feedLoading=!1;return}(videos?.length||0)<60&&(feedAllLoaded=!0);
+let fetchCount=60,offset=feedPage*20,{data:videos,error}=await sb.from(`videos`).select(`*, profiles!videos_user_id_fkey(username, avatar_url), video_watch_times(watch_seconds, skipped_fast)`).eq(`status`,`active`).order(`created_at`,{ascending:!1}).range(offset,offset+60-1);if(!append&&(error||!videos?.length)){feed.innerHTML=`<div class="empty-state" style="height:100dvh"><span class="ei">🎬</span><p>Aucune vidéo pour l\'instant.<br>Sois le premier à publier !</p></div>`,feedLoading=!1;return}(videos?.length||0)<60&&(feedAllLoaded=!0);
 // ══ Score algorithm v4 : scoring sur 60 vidéos ══
 let now=Date.now(),userInterests=new Set(JSON.parse(localStorage.getItem(`voltclip_interests`)||`[]`).map(s=>s.toLowerCase())),seenVideos=new Set(JSON.parse(localStorage.getItem(`voltclip_seen`)||`[]`)),isNewUser=userInterests.size<3,seenTags=/* @__PURE__ */ new Set;(videos||[]).forEach(v=>{let ageHours=(now-new Date(v.created_at))/36e5,freshness=Math.max(0,1-ageHours/72),watchTimes=v.video_watch_times||[],totalViews=Math.max(watchTimes.length,1),avgWatch=watchTimes.length?watchTimes.reduce((s,w)=>s+(w.watch_seconds||0),0)/watchTimes.length:0,rewatchRate=watchTimes.filter(w=>(w.watch_seconds||0)>(v.duration||15)*.9).length/totalViews,fastSkips=watchTimes.filter(w=>w.skipped_fast).length,completionRate=v.duration&&avgWatch?Math.min(1,avgWatch/v.duration):0,videoTags=((v.description||``).match(/#\w+/g)||[]).map(t=>t.slice(1).toLowerCase()),interestMatch=userInterests.size&&videoTags.some(t=>userInterests.has(t)),tagOverlapPenalty=videoTags.some(t=>seenTags.has(t))?15:0;videoTags.forEach(t=>seenTags.add(t));let isTestPhase=(v.views_count||0)<50,growthBoost=!isTestPhase&&(v.views_count||0)<500&&completionRate>.6?35:0,resurfaceBoost=ageHours>72&&completionRate>.75&&rewatchRate>.3?30:0,killPenalty=fastSkips/totalViews>.6?40:0,seenPenalty=seenVideos.has(v.id)?60:0;v._score=(v.likes_count||0)*3+(v.comments_count||0)*5+(v.views_count||0)*.1+avgWatch*8+completionRate*50+rewatchRate*60+freshness*50+(interestMatch?40:!interestMatch&&Math.random()<.3?20:0)+(isTestPhase?25:0)+growthBoost+resurfaceBoost+(isNewUser?(v.likes_count||0)*2:0)-fastSkips/totalViews*30-tagOverlapPenalty-killPenalty-seenPenalty});let scored=[...videos||[]].sort((a,b)=>b._score-a._score),bangers=scored.filter(v=>(v.likes_count||0)>20||(v.views_count||0)>200);if(bangers.length&&scored.length>4){let banger=bangers[Math.floor(Math.random()*bangers.length)],insertAt=4+Math.floor(Math.random()*4),ci=scored.indexOf(banger);ci>insertAt&&(scored.splice(ci,1),scored.splice(insertAt,0,banger))}
 // Légère randomisation pour éviter le feed trop déterministe
@@ -1797,7 +1797,7 @@ let challengesList=document.getElementById(`challengesList`);if(challengesList){
         <span style="font-size:18px;color:rgba(255,255,255,0.3)">›</span>
       </div>`).join(``)}
 // Recent videos grid
-let{data:recent}=await sb.from(`videos`).select(`id,thumbnail_url,views_count,video_url,title,likes_count,comments_count,profiles(username)`).eq(`status`,`active`).order(`views_count`,{ascending:!1}).limit(18),grid=document.getElementById(`recentGrid`);(recent||[]).forEach(v=>_vcStore(v));grid.innerHTML=(recent||[]).map(v=>`
+let{data:recent}=await sb.from(`videos`).select(`id,thumbnail_url,views_count,video_url,title,likes_count,comments_count,profiles!videos_user_id_fkey(username)`).eq(`status`,`active`).order(`views_count`,{ascending:!1}).limit(18),grid=document.getElementById(`recentGrid`);(recent||[]).forEach(v=>_vcStore(v));grid.innerHTML=(recent||[]).map(v=>`
     <div class="search-thumb" data-vid="${v.id}">
       <img src="${v.thumbnail_url||``}" loading="lazy" alt="">
       <span class="search-thumb-views">👁 ${fmtNum(v.views_count)}</span>
@@ -1882,7 +1882,7 @@ async function playFromSearch(videoId) {
   let v = null;
   try {
     const res = await sb.from('videos')
-      .select('*, profiles(username,avatar_url)')
+      .select('*, profiles!videos_user_id_fkey(username,avatar_url)')
       .eq('id', videoId)
       .maybeSingle();
     v = res.data;
@@ -1903,7 +1903,7 @@ if(!data?.length){
   let dateFilter=new Date();
   if(period==='week')dateFilter.setDate(dateFilter.getDate()-7);
   else if(period==='month')dateFilter.setDate(dateFilter.getDate()-30);
-  let q=sb.from('videos').select('id,title,thumbnail_url,views_count,likes_count,comments_count,user_id,profiles(username)').eq('status','active').order('likes_count',{ascending:false}).limit(20);
+  let q=sb.from('videos').select('id,title,thumbnail_url,video_url,views_count,likes_count,comments_count,user_id,profiles!videos_user_id_fkey(username)').eq('status','active').order('likes_count',{ascending:false}).limit(20);
   if(period!=='all')q=q.gte('created_at',dateFilter.toISOString());
   let{data:vids}=await q;
   data=(vids||[]).map(v=>({...v,username:v.profiles?.username||'user'}));
@@ -2057,7 +2057,7 @@ let avatarEl=document.getElementById(`pubAvatar`);avatarEl.innerHTML=p.avatar_ur
 // Bouton ban admin
 let banBtn=document.getElementById(`adminBanBtn`);if(banBtn&&(banBtn.style.display=_isAdmin&&currentUser?.id!==userId?`block`:`none`),currentPublicIsFollowing=!1,currentUser){let{data}=await sb.from(`follows`).select(`id`).eq(`follower_id`,currentUser.id).eq(`following_id`,userId).single();currentPublicIsFollowing=!!data}let btn=document.getElementById(`pubFollowBtn`);btn.textContent=currentPublicIsFollowing?`✓ Abonné`:`S'abonner`,btn.className=`pub-follow-btn ${currentPublicIsFollowing?`following`:`follow`}`;
 // Videos grid
-let{data:videos}=await sb.from(`videos`).select(`id,thumbnail_url,views_count,video_url,title,likes_count,comments_count,profiles(username)`).eq(`user_id`,userId).eq(`status`,`active`).order(`created_at`,{ascending:!1}).limit(18);(videos||[]).forEach(v=>_vcStore(v));document.getElementById(`pubGrid`).innerHTML=(videos||[]).map(v=>`
+let{data:videos}=await sb.from(`videos`).select(`id,thumbnail_url,views_count,video_url,title,likes_count,comments_count,profiles!videos_user_id_fkey(username)`).eq(`user_id`,userId).eq(`status`,`active`).order(`created_at`,{ascending:!1}).limit(18);(videos||[]).forEach(v=>_vcStore(v));document.getElementById(`pubGrid`).innerHTML=(videos||[]).map(v=>`
     <div class="search-thumb" data-vid="${v.id}" data-close-pub="1">
       <img src="${v.thumbnail_url||``}" loading="lazy" alt="">
       <span class="search-thumb-views">👁 ${fmtNum(v.views_count)}</span>
@@ -2838,7 +2838,7 @@ let _adminTab=`stats`;function openAdminPanel(){_isAdmin&&(document.getElementBy
           ${u.is_banned?`<button class="admin-btn-unban" onclick="adminUnbanUser('${u.id}')">Débannir</button>`:`<button class="admin-btn-ban" onclick="adminBanUser('${u.id}','${escHtml(u.username)}')">Bannir</button>`}
         </div>
       </div>`).join(``)}
-    ${users?.length?``:`<div class="admin-empty">Aucun utilisateur trouvé</div>`}`}async function renderAdminVideos(search=``){let body=document.getElementById(`adminBody`),query=sb.from(`videos`).select(`id, title, status, views_count, likes_count, created_at, thumbnail_url, profiles(username)`).order(`created_at`,{ascending:!1}).limit(50);search&&(query=query.ilike(`title`,`%${search}%`));let{data:videos}=await query;body.innerHTML=`
+    ${users?.length?``:`<div class="admin-empty">Aucun utilisateur trouvé</div>`}`}async function renderAdminVideos(search=``){let body=document.getElementById(`adminBody`),query=sb.from(`videos`).select(`id, title, status, views_count, likes_count, created_at, thumbnail_url, profiles!videos_user_id_fkey(username)`).order(`created_at`,{ascending:!1}).limit(50);search&&(query=query.ilike(`title`,`%${search}%`));let{data:videos}=await query;body.innerHTML=`
     <div class="admin-search-bar">
       <span>🔍</span>
       <input type="text" placeholder="Rechercher une vidéo..." oninput="renderAdminVideos(this.value)" value="${search}">
@@ -3154,7 +3154,7 @@ async function acceptChallengeFromNotif(notifId) {
   // Reconstruire depuis related_id (video_id du challenger)
   if (notif.related_id) {
     const { data: vid } = await sb.from('videos')
-      .select('id, video_url, thumbnail_url, title, user_id, profiles(username)')
+      .select('id, video_url, thumbnail_url, title, user_id, profiles!videos_user_id_fkey(username)')
       .eq('id', notif.related_id).single();
     if (vid) {
       data = {
