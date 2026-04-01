@@ -2537,11 +2537,15 @@ async function submitUpload() {
         }
       } catch(e) { console.warn('insert video err', e); }
 
+      // Capturer les valeurs DOM avant closeUpload() qui reset le modal
+      const _matchCat = document.getElementById('uploadCategory')?.value || null;
+      const _matchSubcat = document.getElementById('uploadSubcategory')?.value || null;
+
       if (!insertedVideoId) {
         // Fallback: attendre et chercher en base
         await new Promise(r => setTimeout(r, 2000));
         try {
-          const fallbackCat = document.getElementById('uploadCategory')?.value || null;
+          const fallbackCat = _matchCat;
           let fbQuery = sb.from('videos').select('id').eq('user_id', currentUser.id).eq('status', 'active').order('created_at', { ascending: false }).limit(1);
           if (fallbackCat) fbQuery = fbQuery.eq('category', fallbackCat);
           const { data: fbVid } = await fbQuery.single();
@@ -2549,11 +2553,12 @@ async function submitUpload() {
         } catch(e) {}
       }
 
+      // Capturer les valeurs DOM avant closeUpload() qui reset le modal
       // Matchmaking auto par catégorie
       (async () => {
         try {
-          const uploadCategory = document.getElementById('uploadCategory')?.value || null;
-          const uploadSubcategory = document.getElementById('uploadSubcategory')?.value || null;
+          const uploadCategory = _matchCat;
+          const uploadSubcategory = _matchSubcat;
           const myVidId = insertedVideoId;
           if (!myVidId) { console.warn('matchmaking: pas d\'ID vidéo'); return; }
 
