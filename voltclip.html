@@ -1319,7 +1319,7 @@ function showWinnerAnimation(battleId, side, username) {
 // ── Logique son séquentiel pour les battles ──
 // Quand un battle est visible: vidéo HAUT joue avec son
 // Tap sur une vidéo = switcher le son sur cette vidéo
-function switchBattleSound(battleId, toSide) {
+async function switchBattleSound(battleId, toSide) {
   const vidRight = document.getElementById('bvid-right-' + battleId)
   const vidLeft  = document.getElementById('bvid-left-'  + battleId)
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
@@ -1329,12 +1329,24 @@ function switchBattleSound(battleId, toSide) {
   const other  = toSide === 'right' ? vidLeft  : vidRight
   if (!target) return
 
-  // Les deux vidéos jouent en permanence — on switch juste muted
-  // Ne JAMAIS pauser : une vidéo pausée ne peut pas être unmutée sans nouveau geste
-  if (other)  other.muted = true
-  target.muted = false
+  // Première fois : unlock les deux vidéos via ce geste utilisateur
+  if (!item._audioUnlocked) {
+    item._audioUnlocked = true
+    // Les deux doivent play() dans le même geste pour être autorisées
+    const p1 = vidRight ? vidRight.play().catch(() => {}) : Promise.resolve()
+    const p2 = vidLeft  ? vidLeft.play().catch(()  => {}) : Promise.resolve()
+    await Promise.all([p1, p2])
+    // Mute les deux, on switche juste après
+    if (vidRight) vidRight.muted = true
+    if (vidLeft)  vidLeft.muted  = true
+  }
 
-  // Si la vidéo s'est arrêtée pour une raison (réseau etc), la relancer
+  // Switch : mute l'autre, unmute la cible
+  if (other) {
+    other.muted = true
+    if (other.paused) other.play().catch(() => {})
+  }
+  target.muted = false
   if (target.paused) target.play().catch(() => {})
 
   item._soundSide = toSide
