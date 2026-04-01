@@ -1124,16 +1124,23 @@ async function loadBattles(append = false) {
         if (e.isIntersecting) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
-          // Mute tout d'abord, puis unmute la video right (son par defaut)
+          // Mute toutes les vidéos, jouer left en muted d'abord
           vids.forEach(v => { v.muted = true; })
-          if (vidRight) { vidRight.muted = false; e.target._soundSide = 'right'; }
-          // Jouer les deux videos - si right bloque l'autoplay, fallback muted
-          vids.forEach(v => {
-            v.play().catch(() => {
-              v.muted = true
-              v.play().catch(() => {})
-            })
-          })
+          e.target._soundSide = 'right';
+          // Jouer la vidéo left (muted - autoplay garanti)
+          const vidLeft2 = bid ? document.getElementById('bvid-left-'+bid) : null
+          if (vidLeft2) vidLeft2.play().catch(() => {})
+          // Jouer right avec son après un tick - évite la race condition mobile
+          if (vidRight) {
+            setTimeout(() => {
+              vidRight.muted = false
+              vidRight.play().catch(() => {
+                // Autoplay bloqué : jouer muted
+                vidRight.muted = true
+                vidRight.play().catch(() => {})
+              })
+            }, 50)
+          }
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
           const items = feedEl ? feedEl.querySelectorAll('.battle-item') : []
@@ -1330,29 +1337,40 @@ function switchBattleSound(battleId, toSide) {
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
   if (!item) return
 
-  // Sur iOS/Android, une video creee avec l'attribut muted garde un verrou interne.
-  // Il faut pause -> muted=false -> currentTime inchange -> play() pour le debloquer.
-  function unmute(vid) {
-    if (!vid) return
-    const t = vid.currentTime
-    vid.pause()
-    vid.muted = false
-    vid.currentTime = t
-    vid.play().catch(() => {
-      vid.muted = true
-      vid.play().catch(() => {})
-    })
-  }
-
+  // Mute l'autre côté immédiatement
   if (toSide === 'right') {
-    if (vidLeft)  { vidLeft.muted = true }
-    unmute(vidRight)
-    item._soundSide = 'right'
+    if (vidLeft) { vidLeft.muted = true }
   } else {
     if (vidRight) { vidRight.muted = true }
-    unmute(vidLeft)
-    item._soundSide = 'left'
   }
+
+  // Unmute la vidéo cible avec délai pour laisser le navigateur traiter le geste tactile
+  const target = toSide === 'right' ? vidRight : vidLeft
+  if (!target) return
+
+  function doUnmute() {
+    const t = target.currentTime
+    target.muted = false
+    // Si la vidéo est en pause, la relancer
+    if (target.paused) {
+      target.currentTime = t
+      target.play().catch(() => {
+        target.muted = true
+        target.play().catch(() => {})
+      })
+    }
+    // Vérifier après 100ms que le son est bien actif (certains navigateurs ignorent le unmute)
+    setTimeout(() => {
+      if (target.muted) {
+        target.muted = false
+      }
+    }, 100)
+  }
+
+  // Petit délai pour laisser le navigateur enregistrer le geste utilisateur (requis sur mobile)
+  setTimeout(doUnmute, 30)
+
+  item._soundSide = toSide
   updateBattleSoundBadge(battleId, toSide)
 }
 
@@ -2918,19 +2936,23 @@ async function acceptChallengeFromNotif(notifId) {
 }
 
 async function rejectChallenge(notifId, btn) {
-  // Supprimer la notif en base (pas juste marquer lue)
-  await sb.from('notifications').delete().eq('id', notifId).catch(()=>{});
-  // Retirer du DOM de manière robuste
-  const item = btn ? btn.closest('.notif-item') : document.querySelector(`[data-notif-id="${notifId}"]`);
+  // 1. Retirer du DOM IMMÉDIATEMENT (pas d'attente DB)
+  const item = btn ? btn.closest('.notif-item') : document.querySelector('[data-notif-id="' + notifId + '"]');
   if (item) {
-    item.style.transition = 'opacity .2s, max-height .3s';
+    item.style.transition = 'opacity .25s, max-height .3s, padding .3s';
     item.style.opacity = '0';
     item.style.overflow = 'hidden';
     item.style.maxHeight = item.offsetHeight + 'px';
-    setTimeout(() => { item.style.maxHeight = '0'; item.style.padding = '0'; }, 200);
-    setTimeout(() => item.remove(), 500);
+    requestAnimationFrame(() => {
+      item.style.maxHeight = '0';
+      item.style.padding = '0';
+      item.style.borderWidth = '0';
+    });
+    setTimeout(() => item.remove(), 350);
   }
   toast('Défi refusé');
+  // 2. Marquer lue en background (RLS bloque DELETE, update suffit)
+  sb.from('notifications').update({ is_read: true }).eq('id', notifId).then(() => {}).catch(() => {});
 }
 
 // ── Accepter un défi dans les notifications ──
