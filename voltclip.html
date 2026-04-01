@@ -1125,11 +1125,19 @@ async function loadBattles(append = false) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
           const vidLeft  = bid ? document.getElementById('bvid-left-'+bid)  : null
-          // Au scroll : vidéo droite joue muted en preview
-          // Le son est débloqué uniquement via un vrai tap utilisateur
-          vids.forEach(v => { v.pause(); v.muted = true; })
-          e.target._soundSide = null  // null = pas encore de geste utilisateur
-          if (vidRight) { vidRight.muted = true; vidRight.play().catch(() => {}) }
+          // Au scroll : amorcer les DEUX vidéos muted (play+pause)
+          // Ça "débloque" le contexte audio des deux dans le même event de scroll
+          // Ensuite au tap, play() avec son fonctionnera sur n'importe laquelle
+          vids.forEach(v => { v.muted = true; })
+          e.target._soundSide = null
+          const primeVids = async () => {
+            for (const v of vids) {
+              try { await v.play(); v.pause(); } catch(err) {}
+            }
+            // Après amorçage : vidéo droite joue en preview muted
+            if (vidRight) { vidRight.muted = true; vidRight.play().catch(() => {}) }
+          }
+          primeVids()
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
           const items = feedEl ? feedEl.querySelectorAll('.battle-item') : []
