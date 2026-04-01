@@ -1862,11 +1862,11 @@ function _setupThumbDelegation() {
   }
   document.addEventListener('touchend', function(e) {
     const thumb = e.target.closest('[data-vid]');
-    if (thumb && !thumb.closest('button')) handleThumb(e);
+    if (thumb && !e.target.closest('button')) handleThumb(e);
   }, { passive: false });
   document.addEventListener('click', function(e) {
     const thumb = e.target.closest('[data-vid]');
-    if (thumb && !thumb.closest('button')) handleThumb(e);
+    if (thumb && !e.target.closest('button')) handleThumb(e);
   });
 }
 document.addEventListener('DOMContentLoaded', _setupThumbDelegation);
@@ -3498,3 +3498,4 @@ async function bfsVoteFromFullscreen() {
     <button id="bfsVoteBtn" onclick="bfsVoteFromFullscreen()" style="background:linear-gradient(135deg,#fc5c7d,#7c5cfc);border:2px solid rgba(255,255,255,.3);color:#fff;font-family:'Space Mono',monospace;font-size:13px;font-weight:700;padding:12px 20px;border-radius:20px;cursor:pointer;flex-shrink:0">⚡ Voter</button>
   </div>
 </div>
+</html>
