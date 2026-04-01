@@ -958,7 +958,7 @@ const SUPABASE_URL=`https://czdfoqgcjbsoupekpxpg.supabase.co`,SUPABASE_ANON=`eyJ
 // ══════════════════════════════════════════
 // STATE GLOBAL
 // ══════════════════════════════════════════
-let currentUser=null,currentTab='feed',uploadType='video',uploadFile=null,_uploadOriginalFile=null,uploadMaxDuration=240,activeVideoEl=null,commentsVideoId=null,storyInterval=null,audioCtx=null;function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext);return audioCtx}function playUISound(type){try{let ctx=getAudioCtx(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain),gain.connect(ctx.destination);let now=ctx.currentTime;type===`like`?(osc.frequency.setValueAtTime(600,now),osc.frequency.exponentialRampToValueAtTime(900,now+.08),gain.gain.setValueAtTime(.15,now),gain.gain.exponentialRampToValueAtTime(.001,now+.15),osc.start(now),osc.stop(now+.15)):type===`follow`?(osc.frequency.setValueAtTime(400,now),osc.frequency.exponentialRampToValueAtTime(700,now+.12),osc.frequency.exponentialRampToValueAtTime(900,now+.2),gain.gain.setValueAtTime(.12,now),gain.gain.exponentialRampToValueAtTime(.001,now+.25),osc.start(now),osc.stop(now+.25)):type===`bookmark`?(osc.type=`sine`,osc.frequency.setValueAtTime(500,now),osc.frequency.setValueAtTime(700,now+.06),gain.gain.setValueAtTime(.1,now),gain.gain.exponentialRampToValueAtTime(.001,now+.18),osc.start(now),osc.stop(now+.18)):type===`comment`&&(osc.type=`sine`,osc.frequency.setValueAtTime(450,now),osc.frequency.exponentialRampToValueAtTime(550,now+.1),gain.gain.setValueAtTime(.08,now),gain.gain.exponentialRampToValueAtTime(.001,now+.15),osc.start(now),osc.stop(now+.15))}catch{}}function haptic(pattern){navigator.vibrate&&navigator.vibrate(pattern)}
+let currentUser=null,currentTab='feed',uploadType='video',uploadFile=null,_uploadOriginalFile=null,uploadMaxDuration=240,activeVideoEl=null,commentsVideoId=null,storyInterval=null,audioCtx=null;function getAudioCtx(){return audioCtx||=new(window.AudioContext||window.webkitAudioContext),audioCtx}function playUISound(type){try{let ctx=getAudioCtx(),osc=ctx.createOscillator(),gain=ctx.createGain();osc.connect(gain),gain.connect(ctx.destination);let now=ctx.currentTime;type===`like`?(osc.frequency.setValueAtTime(600,now),osc.frequency.exponentialRampToValueAtTime(900,now+.08),gain.gain.setValueAtTime(.15,now),gain.gain.exponentialRampToValueAtTime(.001,now+.15),osc.start(now),osc.stop(now+.15)):type===`follow`?(osc.frequency.setValueAtTime(400,now),osc.frequency.exponentialRampToValueAtTime(700,now+.12),osc.frequency.exponentialRampToValueAtTime(900,now+.2),gain.gain.setValueAtTime(.12,now),gain.gain.exponentialRampToValueAtTime(.001,now+.25),osc.start(now),osc.stop(now+.25)):type===`bookmark`?(osc.type=`sine`,osc.frequency.setValueAtTime(500,now),osc.frequency.setValueAtTime(700,now+.06),gain.gain.setValueAtTime(.1,now),gain.gain.exponentialRampToValueAtTime(.001,now+.18),osc.start(now),osc.stop(now+.18)):type===`comment`&&(osc.type=`sine`,osc.frequency.setValueAtTime(450,now),osc.frequency.exponentialRampToValueAtTime(550,now+.1),gain.gain.setValueAtTime(.08,now),gain.gain.exponentialRampToValueAtTime(.001,now+.15),osc.start(now),osc.stop(now+.15))}catch{}}function haptic(pattern){navigator.vibrate&&navigator.vibrate(pattern)}
 // Reset session count chaque nouveau jour
 const _todaySession=(/* @__PURE__ */ new Date()).toDateString();localStorage.getItem(`voltclip_session_day`)!==_todaySession&&(localStorage.setItem(`voltclip_session_day`,_todaySession),localStorage.setItem(`voltclip_session_count`,`0`));
 // ══════════════════════════════════════════
@@ -1125,18 +1125,27 @@ async function loadBattles(append = false) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
           const vidLeft  = bid ? document.getElementById('bvid-left-'+bid)  : null
-          // Au scroll : vidéo droite joue en preview muette
-          // L'unlock audio se fait au premier vrai tap dans switchBattleSound
-          vids.forEach(v => { v.muted = true; })
+          // Reset state
           e.target._soundSide = null
           e.target._audioUnlocked = false
-          if (vidRight) { vidRight.muted = true; vidRight.play().catch(() => {}) }
-          // Afficher le badge "tape pour le son" pendant 2.5s
-          const hint = e.target.querySelector('.battle-sound-hint')
-          if (hint) {
-            hint.style.opacity = '1'
-            clearTimeout(e.target._hintTimer)
-            e.target._hintTimer = setTimeout(() => { hint.style.opacity = '0' }, 2500)
+          // Si l'user a déjà interagi sur la page, jouer la vidéo right avec son direct
+          if (window._userInteracted) {
+            vids.forEach(v => { v.muted = true; v.pause(); })
+            if (vidRight) {
+              vidRight.muted = false
+              vidRight.play().catch(() => {
+                // Autoplay bloqué malgré tout → fallback muet
+                vidRight.muted = true
+                vidRight.play().catch(() => {})
+              })
+              e.target._soundSide = 'right'
+              e.target._audioUnlocked = true
+              updateBattleSoundBadge(bid, 'right')
+            }
+          } else {
+            // Pas encore interagi : muet, attendre le premier tap
+            vids.forEach(v => { v.muted = true; })
+            if (vidRight) { vidRight.muted = true; vidRight.play().catch(() => {}) }
           }
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
@@ -1193,8 +1202,6 @@ function createBattleItem(b, myVotes) {
         <span class="battle-username" style="position:absolute;bottom:8px;right:10px;pointer-events:auto;cursor:pointer" onclick="event.stopPropagation();openPublicProfile('${userRightId}')">@${escHtml(userRight)} 🔴</span>
       </div>
       <div class="battle-divider"></div>
-      <!-- Badge son -->
-      <div class="battle-sound-hint" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:30;background:rgba(0,0,0,0.65);color:#fff;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;padding:7px 14px;border-radius:20px;pointer-events:none;white-space:nowrap;opacity:1;transition:opacity 0.5s">🔇 Tape pour le son</div>
       <!-- Vidéo BAS/GAUCHE (left) -->
       <div class="battle-side" id="bs-left-${b.id}" onclick="switchBattleSound('${b.id}','left')">
         <video src="${b.video_left?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}"></video>
@@ -1332,6 +1339,8 @@ function showWinnerAnimation(battleId, side, username) {
 // puis joue la cible avec son.
 // Taps suivants : switch direct.
 async function switchBattleSound(battleId, toSide) {
+  // Marquer l'interaction utilisateur (pour débloquer l'autoplay avec son au scroll suivant)
+  window._userInteracted = true
   const vidRight = document.getElementById('bvid-right-' + battleId)
   const vidLeft  = document.getElementById('bvid-left-'  + battleId)
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
@@ -1361,9 +1370,6 @@ async function switchBattleSound(battleId, toSide) {
   }
 
   item._soundSide = toSide
-  // Cacher le badge "tape pour le son" dès le premier tap
-  const hint = item.querySelector('.battle-sound-hint')
-  if (hint) { clearTimeout(item._hintTimer); hint.style.opacity = '0'; }
   updateBattleSoundBadge(battleId, toSide)
 }
 
@@ -1516,7 +1522,7 @@ activeVideoEl&&activeVideoEl!==vid&&(activeVideoEl.pause(),activeVideoEl.current
 // Throttle : ne compter qu\'une fois par video par session
 let _viewedThisSession=window._vcViewedSession||(window._vcViewedSession=/* @__PURE__ */ new Set);if(!_viewedThisSession.has(vidId)){_viewedThisSession.add(vidId),sb.rpc(`increment_views`,{vid_id:vidId}),checkViralMilestone(vidId);let seen=new Set(JSON.parse(localStorage.getItem(`voltclip_seen`)||`[]`));if(seen.add(vidId),seen.size>200){let arr=[...seen];arr.splice(0,50),seen.clear(),arr.forEach(i=>seen.add(i))}localStorage.setItem(`voltclip_seen`,JSON.stringify([...seen]));let sc=parseInt(localStorage.getItem(`voltclip_session_count`)||`0`)+1;localStorage.setItem(`voltclip_session_count`,sc),sc===5&&toast(`🔥 T'as vu 5 vidéos — encore une ?`),sc===15&&toast(`⚡ 15 vidéos ! Tu es accro 😂`)}}vidId&&(watchTimers[vidId]={start:Date.now(),sent:!1});startLiveReactions(vidId),navigator.vibrate&&navigator.vibrate(8)}else{if(vid?.pause(),stopLiveReactions(),vidId&&watchTimers[vidId]&&!watchTimers[vidId].sent){let watchSec=Math.round((Date.now()-watchTimers[vidId].start)/1e3);watchSec>=1&&currentUser&&(sb.from(`video_watch_times`).insert({user_id:currentUser.id,video_id:vidId,watch_seconds:watchSec,skipped_fast:watchSec<2}).then(()=>{}),watchTimers[vidId].sent=!0)}let items=feed.querySelectorAll(`.video-item`);Array.from(items).indexOf(e.target)>=items.length-3&&!feedAllLoaded&&!feedLoading&&(feedPage++,loadFeed(!0))}})},{threshold:.6})}
 // Virtualisation DOM avec debounce
-if(feed.querySelectorAll(`.video-item`).forEach(el=>{if(!el._observed){feed._observer.observe(el);el._observed=true}}),!feed._virtListener){feed._virtListener=!0;let _virtRaf=null;feed.addEventListener(`scroll`,()=>{if(!_virtRaf)_virtRaf=requestAnimationFrame(()=>{_virtRaf=null;let items=Array.from(feed.querySelectorAll(`.video-item`)),feedRect=feed.getBoundingClientRect();items.forEach(item=>{let vid=item.querySelector(`video`);vid&&(Math.abs(item.getBoundingClientRect().top-feedRect.top)>window.innerHeight*3?vid.src&&!vid.dataset.srcBak&&(vid.dataset.srcBak=vid.src,vid.pause(),vid.removeAttribute(`src`),vid.load()):vid.dataset.srcBak&&!vid.src&&(vid.src=vid.dataset.srcBak,delete vid.dataset.srcBak))})})},{passive:!0})}}
+if(feed.querySelectorAll(`.video-item`).forEach(el=>{el._observed||=(feed._observer.observe(el),!0)}),!feed._virtListener){feed._virtListener=!0;let _virtRaf=null;feed.addEventListener(`scroll`,()=>{_virtRaf||=requestAnimationFrame(()=>{_virtRaf=null;let items=Array.from(feed.querySelectorAll(`.video-item`)),feedRect=feed.getBoundingClientRect();items.forEach(item=>{let vid=item.querySelector(`video`);vid&&(Math.abs(item.getBoundingClientRect().top-feedRect.top)>window.innerHeight*3?vid.src&&!vid.dataset.srcBak&&(vid.dataset.srcBak=vid.src,vid.pause(),vid.removeAttribute(`src`),vid.load()):vid.dataset.srcBak&&!vid.src&&(vid.src=vid.dataset.srcBak,delete vid.dataset.srcBak))})})},{passive:!0})}}
 // ── Suggestions d'abonnements ──
 async function loadSuggestFollow(){if(!currentUser)return;let bar=document.getElementById(`suggestBar`),list=document.getElementById(`suggestList`);if(!bar||!list)return;
 // Qui je suis déjà
@@ -1577,11 +1583,11 @@ let labelEl=bar.querySelector(`.suggest-label`);labelEl&&(labelEl.textContent=la
       </button>`:``}
     </div>
     <div class="video-progress"><div class="video-progress-fill" id="prog-${v.id}"></div></div>
-  `;let videoEl=div.querySelector(`video`),_progRaf=null;videoEl.addEventListener(`timeupdate`,function(){if(!_progRaf)_progRaf=requestAnimationFrame(()=>{_progRaf=null;let p=document.getElementById(`prog-`+v.id);p&&this.duration&&(p.style.width=this.currentTime/this.duration*100+`%`)})});
+  `;let videoEl=div.querySelector(`video`),_progRaf=null;videoEl.addEventListener(`timeupdate`,function(){_progRaf||=requestAnimationFrame(()=>{_progRaf=null;let p=document.getElementById(`prog-`+v.id);p&&this.duration&&(p.style.width=this.currentTime/this.duration*100+`%`)})});
 // Double tap to like
 let lastTap=0;div.addEventListener(`touchend`,function(e){if(e.target.closest(`.video-actions`)||e.target.closest(`.video-info`))return;let now=Date.now();if(now-lastTap<300){let heart=document.getElementById(`heart-`+v.id);heart.classList.remove(`pop`),heart.offsetWidth,heart.classList.add(`pop`),navigator.vibrate&&navigator.vibrate(30),document.getElementById(`like-`+v.id).classList.contains(`liked`)||toggleLike(v.id,!1)}lastTap=now});
 // Maintien doigt = pause
-let holdTimer=null;return div.addEventListener(`touchstart`,function(e){e.target.closest(`.video-actions`)||e.target.closest(`.video-info`)||(holdTimer=setTimeout(()=>{videoEl.pause(),document.getElementById(`pause-`+v.id).classList.add(`show`)},400))}),div.addEventListener(`touchend`,function(e){holdTimer&&(clearTimeout(holdTimer),holdTimer=null),videoEl.paused&&currentTab===`feed`&&(videoEl.play().catch(()=>{}),document.getElementById(`pause-`+v.id).classList.remove(`show`))}),videoEl.addEventListener(`click`,function(){this.paused?(this.play(),document.getElementById(`pause-`+v.id).classList.remove(`show`)):(this.pause(),document.getElementById(`pause-`+v.id).classList.add(`show`))}),div}
+let holdTimer=null;return div.addEventListener(`touchstart`,function(e){e.target.closest(`.video-actions`)||e.target.closest(`.video-info`)||(holdTimer=setTimeout(()=>{videoEl.pause(),document.getElementById(`pause-`+v.id).classList.add(`show`)},400))}),div.addEventListener(`touchend`,function(e){holdTimer&&=(clearTimeout(holdTimer),null),videoEl.paused&&currentTab===`feed`&&(videoEl.play().catch(()=>{}),document.getElementById(`pause-`+v.id).classList.remove(`show`))}),videoEl.addEventListener(`click`,function(){this.paused?(this.play(),document.getElementById(`pause-`+v.id).classList.remove(`show`)):(this.pause(),document.getElementById(`pause-`+v.id).classList.add(`show`))}),div}
 
 
 // ── Helper: insérer une notification de façon robuste ──
@@ -1700,7 +1706,7 @@ let[usersRes,videosRes]=await Promise.all([sb.from(`profiles`).select(`id,userna
           <span class="search-thumb-views">👁 ${fmtNum(v.views_count)}</span>
         </div>
       `).join(``)}
-    </div>`);if(!html)html=`<div class="empty-state"><span class="ei">🔍</span><p>Aucun résultat pour "`+escHtml(q)+`"</p></div>`;res.innerHTML=html}function searchByTag(tag){document.getElementById(`searchInput`).value=`#`+tag,showTab(`search`),doSearch(tag)}async function playFromSearch(videoId){
+    </div>`),html||=`<div class="empty-state"><span class="ei">🔍</span><p>Aucun résultat pour "`+escHtml(q)+`"</p></div>`,res.innerHTML=html}function searchByTag(tag){document.getElementById(`searchInput`).value=`#`+tag,showTab(`search`),doSearch(tag)}async function playFromSearch(videoId){
   // Ouvrir un lecteur vidéo inline sans quitter la recherche
   let existing = document.getElementById('searchVideoPlayer');
   if (existing) existing.remove();
@@ -2568,7 +2574,7 @@ av.innerHTML=avatarUrl?`<img src="${avatarUrl}" alt="" style="width:100%;height:
       <div class="msg-bubble">${escHtml(m.content)}</div>
       <div class="msg-time">${timeAgo(m.created_at)}</div>
     </div>
-  `).join(``),msgs.scrollTop=msgs.scrollHeight}async function sendDm(){if(!currentUser){openAuth();return}let input=document.getElementById(`convInput`),text=input.value.trim();!text||!currentConvUserId||(input.value=``,playUISound(`comment`),await sb.from(`messages`).insert({sender_id:currentUser.id,receiver_id:currentConvUserId,content:text}),loadMessages())}function closeDmConv(){document.getElementById(`dmConvPage`).classList.remove(`open`),dmRealtimeChannel&&(sb.removeChannel(dmRealtimeChannel),dmRealtimeChannel=null),currentConvUserId=null}function openNewDm(){document.getElementById(`newDmModal`).style.display=`flex`}function closeNewDm(){document.getElementById(`newDmModal`).style.display=`none`}async function searchDmUser(q){if(!q.trim()){document.getElementById(`dmUserResults`).innerHTML=``;return}let{data}=await sb.from(`profiles`).select(`id,username,avatar_url`).ilike(`username`,`%${q}%`).neq(`id`,currentUser?.id).limit(8);document.getElementById(`dmUserResults`).innerHTML=(data||[]).map(u=>`
+  `).join(``),msgs.scrollTop=msgs.scrollHeight}async function sendDm(){if(!currentUser){openAuth();return}let input=document.getElementById(`convInput`),text=input.value.trim();!text||!currentConvUserId||(input.value=``,playUISound(`comment`),await sb.from(`messages`).insert({sender_id:currentUser.id,receiver_id:currentConvUserId,content:text}),loadMessages())}function closeDmConv(){document.getElementById(`dmConvPage`).classList.remove(`open`),dmRealtimeChannel&&=(sb.removeChannel(dmRealtimeChannel),null),currentConvUserId=null}function openNewDm(){document.getElementById(`newDmModal`).style.display=`flex`}function closeNewDm(){document.getElementById(`newDmModal`).style.display=`none`}async function searchDmUser(q){if(!q.trim()){document.getElementById(`dmUserResults`).innerHTML=``;return}let{data}=await sb.from(`profiles`).select(`id,username,avatar_url`).ilike(`username`,`%${q}%`).neq(`id`,currentUser?.id).limit(8);document.getElementById(`dmUserResults`).innerHTML=(data||[]).map(u=>`
     <div class="dm-item" onclick="startDmWithUser('${u.id}','${u.username}','${u.avatar_url||``}')">
       <div class="dm-avatar">${u.avatar_url?`<img src="${u.avatar_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:u.username[0].toUpperCase()}</div>
       <div class="dm-info"><div class="dm-username">@${u.username}</div></div>
@@ -3117,71 +3123,25 @@ async function confirmAcceptChallenge() {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ── Mute/Unmute fullscreen ──
-function updateBfsMuteBtn() {
-  const vid = document.getElementById('bfsVideo');
-  const btn = document.getElementById('bfsMuteBtn');
-  if (!btn || !vid) return;
-  btn.textContent = vid.muted ? '🔇' : '🔊';
-  btn.title = vid.muted ? 'Activer le son' : 'Couper le son';
-}
-
-function toggleBfsMute() {
-  const vid = document.getElementById('bfsVideo');
-  if (!vid) return;
-  if (vid.muted) {
-    vid.muted = false;
-    // Si la vidéo était en pause à cause du mute, on relance
-    if (vid.paused) vid.play().catch(() => {});
-  } else {
-    vid.muted = true;
-  }
-  updateBfsMuteBtn();
-}
-
 // CAST (Chromecast + AirPlay)
 // ══════════════════════════════════════════════════════════════
 function initCastButton() {
   const castBtn = document.getElementById('bfsCastBtn');
   if (!castBtn) return;
-
+  
   const vid = document.getElementById('bfsVideo');
-
-  // AirPlay Safari : toujours visible si supporté
+  // Remote Playback API dispo (Chrome Android, Edge)
+  if (vid && vid.remote) {
+    castBtn.style.display = 'flex';
+    return;
+  }
+  // AirPlay Safari
   if (vid && vid.webkitShowPlaybackTargetPicker) {
     castBtn.style.display = 'flex';
     return;
   }
-
-  // Remote Playback API (Chrome/Edge) :
-  // On affiche le bouton par défaut et on le cache seulement si
-  // watchAvailability confirme explicitement qu'il n'y a rien.
-  // La détection Chromecast peut prendre plusieurs secondes.
-  if (vid && vid.remote) {
-    castBtn.style.display = 'flex'; // visible par défaut pendant la détection
-    let detected = false;
-
-    const watch = () => {
-      vid.remote.watchAvailability(available => {
-        detected = true;
-        castBtn.style.display = available ? 'flex' : 'none';
-        castBtn.style.alignItems = 'center';
-        castBtn.style.justifyContent = 'center';
-      }).catch(() => {
-        // watchAvailability peut échouer si la vidéo n'est pas encore chargée → retry dans 1s
-        if (!detected) setTimeout(watch, 1000);
-      });
-    };
-
-    watch();
-
-    // Sécurité : si après 8s aucun appareil détecté, on cache le bouton
-    setTimeout(() => {
-      if (!detected) castBtn.style.display = 'none';
-    }, 8000);
-  } else {
-    castBtn.style.display = 'none';
-  }
+  // Pas supporté
+  castBtn.style.display = 'none';
 }
 
 async function castBattleVideo() {
@@ -3255,13 +3215,7 @@ function openBattleFullscreen(battleId, side) {
   vid.src = videoSrc;
   vid.currentTime = srcEl ? (srcEl.currentTime || 0) : 0;
   vid.muted = false;
-  vid.play().catch(() => {
-    // Autoplay bloqué → on joue muet et on met le bouton en mode muet
-    vid.muted = true;
-    vid.play().catch(() => {});
-  });
-  // Sync le bouton mute après que le play() soit résolu
-  setTimeout(updateBfsMuteBtn, 400);
+  vid.play().catch(() => { vid.muted = true; vid.play().catch(()=>{}); });
 
   const uname = usernameEl ? usernameEl.textContent.trim() : '';
   document.getElementById('bfsUsername').textContent = uname;
@@ -3287,7 +3241,7 @@ function openBattleFullscreen(battleId, side) {
 
   modal.style.display = 'flex';
   modal.style.flexDirection = 'column';
-  setTimeout(initCastButton, 2000);
+  setTimeout(initCastButton, 300);
   haptic && haptic([10]);
 }
 
@@ -3323,7 +3277,6 @@ async function bfsVoteFromFullscreen() {
     <button onclick="closeBattleFullscreen()" style="background:#ffffff26;border:none;color:#fff;border-radius:50%;width:40px;height:40px;font-size:20px;cursor:pointer;flex-shrink:0">✕</button>
     <span id="bfsUsername" style="font-family:'Space Mono',monospace;color:#fff;font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
     <button id="bfsCastBtn" onclick="castBattleVideo()" title="📺 Envoyer sur TV" style="display:flex;align-items:center;justify-content:center;background:#ffffff26;border:none;color:#fff;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;flex-shrink:0">📺</button>
-    <button id="bfsMuteBtn" onclick="toggleBfsMute()" title="Son" style="display:flex;align-items:center;justify-content:center;background:#ffffff26;border:none;color:#fff;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;flex-shrink:0">🔊</button>
     <span id="bfsSideLabel" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);color:#fff"></span>
   </div>
   <video id="bfsVideo" playsinline loop style="width:100%;height:100%;object-fit:contain;background:#000"></video>
