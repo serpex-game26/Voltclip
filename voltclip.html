@@ -1124,22 +1124,16 @@ async function loadBattles(append = false) {
         if (e.isIntersecting) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
-          // Mute toutes les vidéos, jouer left en muted d'abord
+          // Mute tout, jouer les deux vidéos en muted (autoplay garanti)
           vids.forEach(v => { v.muted = true; })
           e.target._soundSide = 'right';
-          // Jouer la vidéo left (muted - autoplay garanti)
-          const vidLeft2 = bid ? document.getElementById('bvid-left-'+bid) : null
-          if (vidLeft2) vidLeft2.play().catch(() => {})
-          // Jouer right avec son après un tick - évite la race condition mobile
+          vids.forEach(v => v.play().catch(() => {}))
+          // Tenter unmute right - ici pas de geste user donc limité par le navigateur
+          // Si ça échoue, l'user peut cliquer pour activer le son
           if (vidRight) {
-            setTimeout(() => {
-              vidRight.muted = false
-              vidRight.play().catch(() => {
-                // Autoplay bloqué : jouer muted
-                vidRight.muted = true
-                vidRight.play().catch(() => {})
-              })
-            }, 50)
+            vidRight.muted = false
+            // Si le navigateur a ignoré le unmute (pas de geste), on laisse muted
+            // Le clic de l'user appellera switchBattleSound qui le débloquera
           }
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
@@ -1187,8 +1181,8 @@ function createBattleItem(b, myVotes) {
     <div class="battle-videos">
       <!-- Vidéo HAUT (right) -->
       <!-- Vidéo HAUT/DROITE (right) -->
-      <div class="battle-side" id="bs-right-${b.id}">
-        <video src="${b.video_right?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_right?.thumbnail_url || ''}" id="bvid-right-${b.id}" onclick="switchBattleSound('${b.id}','right')"></video>
+      <div class="battle-side" id="bs-right-${b.id}" onclick="switchBattleSound('${b.id}','right')">
+        <video src="${b.video_right?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_right?.thumbnail_url || ''}" id="bvid-right-${b.id}"></video>
         <div class="battle-side-grad-right"></div>
         <div class="battle-voted-badge" id="badge-right-${b.id}">🔴</div>
         <!-- Bouton fullscreen dédié -->
@@ -1197,8 +1191,8 @@ function createBattleItem(b, myVotes) {
       </div>
       <div class="battle-divider"></div>
       <!-- Vidéo BAS/GAUCHE (left) -->
-      <div class="battle-side" id="bs-left-${b.id}">
-        <video src="${b.video_left?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}" onclick="switchBattleSound('${b.id}','left')"></video>
+      <div class="battle-side" id="bs-left-${b.id}" onclick="switchBattleSound('${b.id}','left')">
+        <video src="${b.video_left?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}"></video>
         <div class="battle-side-grad-left"></div>
         <div class="battle-voted-badge" id="badge-left-${b.id}">🔵</div>
         <!-- Bouton fullscreen dédié -->
@@ -1337,38 +1331,26 @@ function switchBattleSound(battleId, toSide) {
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
   if (!item) return
 
-  // Mute l'autre côté immédiatement
-  if (toSide === 'right') {
-    if (vidLeft) { vidLeft.muted = true }
-  } else {
-    if (vidRight) { vidRight.muted = true }
-  }
-
-  // Unmute la vidéo cible avec délai pour laisser le navigateur traiter le geste tactile
   const target = toSide === 'right' ? vidRight : vidLeft
+  const other  = toSide === 'right' ? vidLeft  : vidRight
   if (!target) return
 
-  function doUnmute() {
-    const t = target.currentTime
-    target.muted = false
-    // Si la vidéo est en pause, la relancer
-    if (target.paused) {
-      target.currentTime = t
-      target.play().catch(() => {
-        target.muted = true
-        target.play().catch(() => {})
-      })
-    }
-    // Vérifier après 100ms que le son est bien actif (certains navigateurs ignorent le unmute)
-    setTimeout(() => {
-      if (target.muted) {
-        target.muted = false
-      }
-    }, 100)
-  }
+  // Mute l'autre SYNCHRONE (dans le même tick que le geste)
+  if (other) other.muted = true
 
-  // Petit délai pour laisser le navigateur enregistrer le geste utilisateur (requis sur mobile)
-  setTimeout(doUnmute, 30)
+  // Unmute la cible SYNCHRONE - on est dans le handler du geste, le navigateur l'autorise
+  target.muted = false
+
+  // Si la vidéo était en pause, la relancer (toujours dans le même tick)
+  if (target.paused) {
+    target.play().catch(() => {
+      // Fallback : si autoplay bloqué malgré le geste, on recharge avec son
+      target.muted = true
+      target.load()
+      target.muted = false
+      target.play().catch(() => { target.muted = true; target.play().catch(()=>{}) })
+    })
+  }
 
   item._soundSide = toSide
   updateBattleSoundBadge(battleId, toSide)
