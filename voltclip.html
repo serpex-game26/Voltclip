@@ -1079,9 +1079,16 @@ async function loadBattles(append = false) {
         if (e.isIntersecting) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
-          vids.forEach(v => { v.muted = true; v.currentTime = 0; })
+          // Mute tout d'abord, puis unmute la video right (son par defaut)
+          vids.forEach(v => { v.muted = true; })
           if (vidRight) { vidRight.muted = false; e.target._soundSide = 'right'; }
-          vids.forEach(v => v.play().catch(()=>{}))
+          // Jouer les deux videos - si right bloque l'autoplay, fallback muted
+          vids.forEach(v => {
+            v.play().catch(() => {
+              v.muted = true
+              v.play().catch(() => {})
+            })
+          })
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
           const items = feedEl ? feedEl.querySelectorAll('.battle-item') : []
@@ -1139,7 +1146,7 @@ function createBattleItem(b, myVotes) {
       <div class="battle-divider"></div>
       <!-- Vidéo BAS/GAUCHE (left) -->
       <div class="battle-side" id="bs-left-${b.id}">
-        <video src="${b.video_left?.video_url || ''}" loop muted playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}" onclick="switchBattleSound('${b.id}','left')"></video>
+        <video src="${b.video_left?.video_url || ''}" loop playsinline preload="auto" poster="${b.video_left?.thumbnail_url || ''}" id="bvid-left-${b.id}" onclick="switchBattleSound('${b.id}','left')"></video>
         <div class="battle-side-grad-left"></div>
         <div class="battle-voted-badge" id="badge-left-${b.id}">🔵</div>
         <!-- Bouton fullscreen dédié -->
@@ -1274,17 +1281,31 @@ function showWinnerAnimation(battleId, side, username) {
 // Tap sur une vidéo = switcher le son sur cette vidéo
 function switchBattleSound(battleId, toSide) {
   const vidRight = document.getElementById('bvid-right-' + battleId)
-  const vidLeft = document.getElementById('bvid-left-' + battleId)
+  const vidLeft  = document.getElementById('bvid-left-'  + battleId)
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
   if (!item) return
-  
+
+  // Sur iOS/Android, une video creee avec l'attribut muted garde un verrou interne.
+  // Il faut pause -> muted=false -> currentTime inchange -> play() pour le debloquer.
+  function unmute(vid) {
+    if (!vid) return
+    const t = vid.currentTime
+    vid.pause()
+    vid.muted = false
+    vid.currentTime = t
+    vid.play().catch(() => {
+      vid.muted = true
+      vid.play().catch(() => {})
+    })
+  }
+
   if (toSide === 'right') {
-    if (vidRight) vidRight.muted = false
-    if (vidLeft) vidLeft.muted = true
+    if (vidLeft)  { vidLeft.muted = true }
+    unmute(vidRight)
     item._soundSide = 'right'
   } else {
-    if (vidLeft) vidLeft.muted = false
-    if (vidRight) vidRight.muted = true
+    if (vidRight) { vidRight.muted = true }
+    unmute(vidLeft)
     item._soundSide = 'left'
   }
   updateBattleSoundBadge(battleId, toSide)
@@ -1701,7 +1722,7 @@ function renderNotifItem(n) {
   if (n.type === 'battle_challenge') {
     const challengerUsername = n.actor?.username || '?';
     return `
-      <div class="notif-item ${n.is_read?'':'unread'}" style="flex-direction:column;gap:8px;align-items:stretch">
+      <div class="notif-item ${n.is_read?'':'unread'}" data-notif-id="${n.id}" style="flex-direction:column;gap:8px;align-items:stretch">
         <div style="display:flex;align-items:center;gap:10px">
           <div class="notif-avatar" style="font-size:20px">⚔️</div>
           <div class="notif-text" style="flex:1">
@@ -2775,8 +2796,18 @@ async function acceptChallengeFromNotif(notifId) {
 }
 
 async function rejectChallenge(notifId, btn) {
-  await sb.from('notifications').update({is_read: true}).eq('id', notifId).catch(()=>{});
-  btn?.closest('.notif-item')?.remove();
+  // Supprimer la notif en base (pas juste marquer lue)
+  await sb.from('notifications').delete().eq('id', notifId).catch(()=>{});
+  // Retirer du DOM de manière robuste
+  const item = btn ? btn.closest('.notif-item') : document.querySelector(`[data-notif-id="${notifId}"]`);
+  if (item) {
+    item.style.transition = 'opacity .2s, max-height .3s';
+    item.style.opacity = '0';
+    item.style.overflow = 'hidden';
+    item.style.maxHeight = item.offsetHeight + 'px';
+    setTimeout(() => { item.style.maxHeight = '0'; item.style.padding = '0'; }, 200);
+    setTimeout(() => item.remove(), 500);
+  }
   toast('Défi refusé');
 }
 
@@ -2923,6 +2954,10 @@ async function confirmAcceptChallenge() {
 
   // Marquer la notification comme lue
   await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+  // Retirer du DOM
+  const notifEl = document.querySelector(`[data-notif-id="${notifId}"]`) || 
+    document.getElementById(`notif-${notifId}`);
+  if (notifEl) notifEl.remove();
 
   // Notifier le challenger que son défi a été accepté
   await sb.from('notifications').insert({
