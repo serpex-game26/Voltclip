@@ -1124,11 +1124,12 @@ async function loadBattles(append = false) {
         if (e.isIntersecting) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
-          // Les deux vidéos jouent en permanence - on switch juste muted
-          vids.forEach(v => { v.muted = true; })
-          e.target._soundSide = 'right'
-          vids.forEach(v => v.play().catch(() => {}))
-          if (vidRight) vidRight.muted = false
+          const vidLeft  = bid ? document.getElementById('bvid-left-'+bid)  : null
+          // Au scroll : vidéo droite joue muted en preview
+          // Le son est débloqué uniquement via un vrai tap utilisateur
+          vids.forEach(v => { v.pause(); v.muted = true; })
+          e.target._soundSide = null  // null = pas encore de geste utilisateur
+          if (vidRight) { vidRight.muted = true; vidRight.play().catch(() => {}) }
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
           const items = feedEl ? feedEl.querySelectorAll('.battle-item') : []
@@ -1316,10 +1317,12 @@ function showWinnerAnimation(battleId, side, username) {
   }, 3500)
 }
 
-// ── Logique son séquentiel pour les battles ──
-// Quand un battle est visible: vidéo HAUT joue avec son
-// Tap sur une vidéo = switcher le son sur cette vidéo
-async function switchBattleSound(battleId, toSide) {
+// ── Logique son battle ──
+// Principe simple : une seule vidéo joue avec son à la fois.
+// Le premier tap débloque le son (geste utilisateur requis par le navigateur).
+// Tap gauche → pause droite, joue gauche avec son.
+// Tap droite → pause gauche, joue droite avec son.
+function switchBattleSound(battleId, toSide) {
   const vidRight = document.getElementById('bvid-right-' + battleId)
   const vidLeft  = document.getElementById('bvid-left-'  + battleId)
   const item = document.querySelector('[data-battle-id="' + battleId + '"]')
@@ -1329,25 +1332,15 @@ async function switchBattleSound(battleId, toSide) {
   const other  = toSide === 'right' ? vidLeft  : vidRight
   if (!target) return
 
-  // Première fois : unlock les deux vidéos via ce geste utilisateur
-  if (!item._audioUnlocked) {
-    item._audioUnlocked = true
-    // Les deux doivent play() dans le même geste pour être autorisées
-    const p1 = vidRight ? vidRight.play().catch(() => {}) : Promise.resolve()
-    const p2 = vidLeft  ? vidLeft.play().catch(()  => {}) : Promise.resolve()
-    await Promise.all([p1, p2])
-    // Mute les deux, on switche juste après
-    if (vidRight) vidRight.muted = true
-    if (vidLeft)  vidLeft.muted  = true
-  }
-
-  // Switch : mute l'autre, unmute la cible
+  // Pause + mute l'autre vidéo complètement
   if (other) {
     other.muted = true
-    if (other.paused) other.play().catch(() => {})
+    other.pause()
   }
+
+  // Joue la cible avec son (ce tap = geste utilisateur = navigateur autorise le son)
   target.muted = false
-  if (target.paused) target.play().catch(() => {})
+  target.play().catch(() => {})
 
   item._soundSide = toSide
   updateBattleSoundBadge(battleId, toSide)
