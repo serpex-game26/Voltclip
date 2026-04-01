@@ -1124,17 +1124,13 @@ async function loadBattles(append = false) {
         if (e.isIntersecting) {
           const bid = e.target.dataset.battleId
           const vidRight = bid ? document.getElementById('bvid-right-'+bid) : null
-          // Mute tout, jouer les deux vidéos en muted (autoplay garanti)
+          // Les deux vidéos jouent en muted (autoplay garanti sur mobile)
+          // On essaie d'unmute right - si bloqué par le navigateur, les deux restent muted
+          // L'user peut taper pour switcher le son à tout moment
           vids.forEach(v => { v.muted = true; })
-          e.target._soundSide = 'right';
+          e.target._soundSide = 'right'
           vids.forEach(v => v.play().catch(() => {}))
-          // Tenter unmute right - ici pas de geste user donc limité par le navigateur
-          // Si ça échoue, l'user peut cliquer pour activer le son
-          if (vidRight) {
-            vidRight.muted = false
-            // Si le navigateur a ignoré le unmute (pas de geste), on laisse muted
-            // Le clic de l'user appellera switchBattleSound qui le débloquera
-          }
+          if (vidRight) vidRight.muted = false
           // Infinite scroll
           const feedEl = document.getElementById('battleFeed')
           const items = feedEl ? feedEl.querySelectorAll('.battle-item') : []
@@ -1145,7 +1141,7 @@ async function loadBattles(append = false) {
             loadBattles(true)
           }
         } else {
-          vids.forEach(v => { v.pause(); v.muted = true; })
+          vids.forEach(v => { v.pause(); v.muted = true; v.currentTime = 0; })
         }
       })
     }, { threshold: 0.5 })
@@ -1335,20 +1331,25 @@ function switchBattleSound(battleId, toSide) {
   const other  = toSide === 'right' ? vidLeft  : vidRight
   if (!target) return
 
-  // Mute l'autre SYNCHRONE (dans le même tick que le geste)
-  if (other) other.muted = true
+  // Sauvegarder la position de la vidéo cible avant de toucher à quoi que ce soit
+  const savedTime = target.currentTime
 
-  // Unmute la cible SYNCHRONE - on est dans le handler du geste, le navigateur l'autorise
+  // 1. Couper et pauser l'autre vidéo
+  if (other) {
+    other.muted = true
+    other.pause()
+  }
+
+  // 2. Activer le son sur la cible - on est dans le handler du tap utilisateur (synchrone)
   target.muted = false
 
-  // Si la vidéo était en pause, la relancer (toujours dans le même tick)
+  // 3. Reprendre depuis la même position si elle était en pause
   if (target.paused) {
+    target.currentTime = savedTime
     target.play().catch(() => {
-      // Fallback : si autoplay bloqué malgré le geste, on recharge avec son
+      // Le navigateur a quand même bloqué malgré le geste - on force muted + play
       target.muted = true
-      target.load()
-      target.muted = false
-      target.play().catch(() => { target.muted = true; target.play().catch(()=>{}) })
+      target.play().catch(() => {})
     })
   }
 
