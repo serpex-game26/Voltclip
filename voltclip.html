@@ -1016,12 +1016,19 @@ let _lbCurrentTab = 'voters'
 async function detectAndSaveLocation() {
   if (!currentUser) return
   try {
-    const r = await fetch('https://ipapi.co/json/')
+    // Si le pays est déjà enregistré, on ne rappelle pas l'API
+    const { data: prof } = await sb.from('profiles')
+      .select('country')
+      .eq('id', currentUser.id)
+      .single()
+    if (prof?.country) return
+    // ip-api.com : 45 000 req/min gratuit, pas de clé API
+    const r = await fetch('http://ip-api.com/json/?fields=country,countryCode,city')
     const d = await r.json()
-    if (!d.country_name) return
+    if (!d.country) return
     await sb.from('profiles').update({
-      country: d.country_name,
-      country_code: d.country_code,
+      country: d.country,
+      country_code: d.countryCode,
       city: d.city || null
     }).eq('id', currentUser.id)
   } catch(e) { console.warn('geo error:', e) }
