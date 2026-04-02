@@ -1,48 +1,5 @@
 <!doctype html><html lang=fr><meta charset=UTF-8><meta content="width=device-width,initial-scale=1,user-scalable=no" name=viewport><title>VoltClip — Battle de clips ⚔️</title><meta content="VoltClip — Battle de clips. Vote pour le meilleur contenu. ⚔️🔥" name=description><meta content=#7c5cfc name=theme-color><meta content=yes name=mobile-web-app-capable><meta content=yes name=apple-mobile-web-app-capable><meta content=black-translucent name=apple-mobile-web-app-status-bar-style><meta content=VoltClip name=apple-mobile-web-app-title><link href=manifest.json rel=manifest><link href=icon-192.png rel=apple-touch-icon><link rel="icon" href="icon-192.png"><link href=https://fonts.googleapis.com rel=preconnect><link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap" rel=stylesheet><script src=https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2></script>
 <script>
-// FFmpeg.wasm — chargé en lazy uniquement si besoin
-let _ffmpegLoaded = false, _ffmpeg = null;
-async function loadFFmpeg() {
-  if (_ffmpegLoaded) return _ffmpeg;
-  const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-  const { fetchFile, toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
-  _ffmpeg = new FFmpeg();
-  const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
-  await _ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-  });
-  _ffmpeg._fetchFile = fetchFile;
-  _ffmpegLoaded = true;
-  return _ffmpeg;
-}
-
-async function trimVideoFFmpeg(file, maxSeconds, progEl) {
-  const dur = await getVideoDuration(file);
-  if (!dur || dur <= maxSeconds) return file;
-  try {
-    if (progEl) progEl.textContent = 'FFmpeg...';
-    const ff = await loadFFmpeg();
-    ff.on('progress', ({ progress }) => {
-      if (progEl) progEl.textContent = `Decoupe... ${Math.round(progress * 100)}%`;
-    });
-    const ext = file.name.split('.').pop().toLowerCase() || 'mp4';
-    const inName = `input.${ext}`;
-    const outName = 'output.mp4';
-    await ff.writeFile(inName, await ff._fetchFile(file));
-    await ff.exec(['-i', inName, '-t', String(maxSeconds), '-c', 'copy', '-avoid_negative_ts', '1', outName]);
-    const data = await ff.readFile(outName);
-    await ff.deleteFile(inName);
-    await ff.deleteFile(outName);
-    const blob = new Blob([data.buffer], { type: 'video/mp4' });
-    if (blob.size < 10000) return file;
-    return new File([blob], file.name.replace(/\.[^.]+$/, '.mp4'), { type: 'video/mp4' });
-  } catch (err) {
-    console.warn('FFmpeg trim echoue, fallback:', err);
-    return file;
-  }
-}
-
 function getVideoDuration(file) {
   return new Promise(resolve => {
     const v = document.createElement('video');
@@ -1327,7 +1284,7 @@ async function likeBattleVideo(videoId, slotKey) {
       )
     );
     await sb.from('likes').delete().eq('user_id', currentUser.id).eq('video_id', videoId);
-    if (iconEl) iconEl.textContent = '🤍';
+    if (iconEl) { iconEl.textContent = '🤍'; iconEl.style.color = ''; }
     if (cntEl)  cntEl.textContent = Math.max(0, parseInt(cntEl.textContent||'0') - 1);
   } else {
     // Like
@@ -1339,7 +1296,7 @@ async function likeBattleVideo(videoId, slotKey) {
         sb.from('videos').update({ likes_count: (data?.likes_count||0)+1 }).eq('id', videoId)
       )
     );
-    if (iconEl) { iconEl.textContent = '❤️'; iconEl.style.animation = 'likePop .3s'; setTimeout(()=>iconEl.style.animation='',400); }
+    if (iconEl) { iconEl.textContent = '❤️'; iconEl.style.color = '#fc5c7d'; iconEl.style.animation = 'likePop .3s'; setTimeout(()=>iconEl.style.animation='',400); }
     if (cntEl)  cntEl.textContent = parseInt(cntEl.textContent||'0') + 1;
     haptic && haptic([15]);
   }
@@ -2230,81 +2187,12 @@ function closeWebcamRecorder(){
   document.getElementById('webcamModal')?.remove();
 }function handleFileSelect(input){let file=input.files[0];if(!file)return;_uploadOriginalFile=file;// Sur Android caméra, file.type peut être vide ou 'video/mp4' — on accepte si extension vidéo ou type absent
 const ext=(file.name||'').split('.').pop().toLowerCase();const validExt=['mp4','mov','webm','avi','mkv','3gp','m4v','ts',''].includes(ext);// Caméra Android : file.type souvent vide — on bloque seulement si type clairement non-vidéo
-if(file.type&&!file.type.startsWith('video/')&&!file.type.startsWith('application/octet')&&ext&&!validExt){document.getElementById('uploadErr').textContent=`Format non supporté`;return}if(file.size>2*1024*1024*1024){document.getElementById('uploadErr').textContent=`Fichier trop lourd (max 2GB)`;return}let goStep2=(resolvedFile)=>{uploadFile=resolvedFile||file;let blobUrl=URL.createObjectURL(file);let bg=document.getElementById(`uploadBgPreview`);bg.src=blobUrl,bg.style.display=`block`,document.getElementById(`uploadStep1`).style.display=`none`,document.getElementById(`uploadStep2`).style.display=`flex`,document.getElementById(`uploadPreviewVideo`).src=blobUrl,document.getElementById(`uploadSubmit`).style.display=`block`,document.getElementById(`uploadErr`).textContent=``,document.getElementById(`uploadProgress`).style.display=`none`,openUploadStep2()};let url=URL.createObjectURL(file),tmpVid=document.createElement(`video`);tmpVid.preload=`metadata`;let _goStep2Called=false;let _safeGoStep2=(resolvedFile)=>{if(_goStep2Called)return;_goStep2Called=true;URL.revokeObjectURL(url);goStep2(resolvedFile);};// Lire immédiatement en ArrayBuffer pour éviter la perte de référence sur Android
-file.arrayBuffer().then(buf=>{const safeBlob=new Blob([buf],{type:file.type||'video/mp4'});const safeFile=new File([safeBlob],file.name||'video.mp4',{type:file.type||'video/mp4'});tmpVid.onloadedmetadata=()=>{let dur=tmpVid.duration;if(dur&&isFinite(dur)&&dur>uploadMaxDuration){toast(`✂️ Vidéo longue — sera coupée à ${Math.round(uploadMaxDuration/60)} min`)}else{toast(`Vidéo sélectionnée ✓`)}_safeGoStep2(safeFile)};tmpVid.onerror=()=>{toast(`Vidéo sélectionnée ✓`);_safeGoStep2(safeFile)};setTimeout(()=>{if(!_goStep2Called){toast(`Vidéo sélectionnée ✓`);_safeGoStep2(safeFile)}},3000);tmpVid.src=url}).catch(()=>{tmpVid.onloadedmetadata=()=>{_safeGoStep2(file)};tmpVid.onerror=()=>{_safeGoStep2(file)};setTimeout(()=>{if(!_goStep2Called)_safeGoStep2(file)},3000);tmpVid.src=url})}
+if(file.type&&!file.type.startsWith('video/')&&!file.type.startsWith('application/octet')&&ext&&!validExt){document.getElementById('uploadErr').textContent=`Format non supporté`;return}if(file.size>200*1024*1024){document.getElementById('uploadErr').textContent=`Fichier trop lourd (max 200 MB)`;return}let goStep2=(resolvedFile)=>{uploadFile=resolvedFile||file;let blobUrl=URL.createObjectURL(file);let bg=document.getElementById(`uploadBgPreview`);bg.src=blobUrl,bg.style.display=`block`,document.getElementById(`uploadStep1`).style.display=`none`,document.getElementById(`uploadStep2`).style.display=`flex`,document.getElementById(`uploadPreviewVideo`).src=blobUrl,document.getElementById(`uploadSubmit`).style.display=`block`,document.getElementById(`uploadErr`).textContent=``,document.getElementById(`uploadProgress`).style.display=`none`,openUploadStep2()};let url=URL.createObjectURL(file),tmpVid=document.createElement(`video`);tmpVid.preload=`metadata`;let _goStep2Called=false;let _safeGoStep2=(resolvedFile)=>{if(_goStep2Called)return;_goStep2Called=true;URL.revokeObjectURL(url);goStep2(resolvedFile);};// Lire immédiatement en ArrayBuffer pour éviter la perte de référence sur Android
+file.arrayBuffer().then(buf=>{const safeBlob=new Blob([buf],{type:file.type||'video/mp4'});const safeFile=new File([safeBlob],file.name||'video.mp4',{type:file.type||'video/mp4'});tmpVid.onloadedmetadata=()=>{let dur=tmpVid.duration;if(dur&&isFinite(dur)&&dur>uploadMaxDuration){document.getElementById('uploadErr').textContent=`Vidéo trop longue — maximum 4 minutes autorisé sur VoltClip.`;return;}else{toast(`Vidéo sélectionnée ✓`)}_safeGoStep2(safeFile)};tmpVid.onerror=()=>{toast(`Vidéo sélectionnée ✓`);_safeGoStep2(safeFile)};setTimeout(()=>{if(!_goStep2Called){toast(`Vidéo sélectionnée ✓`);_safeGoStep2(safeFile)}},3000);tmpVid.src=url}).catch(()=>{tmpVid.onloadedmetadata=()=>{_safeGoStep2(file)};tmpVid.onerror=()=>{_safeGoStep2(file)};setTimeout(()=>{if(!_goStep2Called)_safeGoStep2(file)},3000);tmpVid.src=url})}
 // compressVideo() défini ci-dessous
 // ── Rate limiting upload : max 5 uploads par heure ──
 // ══════════════════════════════════════════
-// COMPRESSION VIDEO (MediaRecorder)
-// ══════════════════════════════════════════
-async function compressVideo(file, progEl) {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video');
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = 'auto';
-    const blobUrl = URL.createObjectURL(file);
-    video.src = blobUrl;
 
-    video.onloadedmetadata = () => {
-      const canvas = document.createElement('canvas');
-      // Réduire à 720p max
-      const maxW = 720, maxH = 1280;
-      let w = video.videoWidth, h = video.videoHeight;
-      if (w > maxW || h > maxH) {
-        const ratio = Math.min(maxW / w, maxH / h);
-        w = Math.round(w * ratio);
-        h = Math.round(h * ratio);
-      }
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
-
-      // Choisir le meilleur codec dispo
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
-        ? 'video/webm;codecs=vp8'
-        : 'video/webm';
-
-      if (!window.MediaRecorder) { URL.revokeObjectURL(blobUrl); reject(new Error('MediaRecorder non supporté')); return; }
-
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 1500000 });
-      const chunks = [];
-
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-      recorder.onstop = () => {
-        URL.revokeObjectURL(blobUrl);
-        const compressed = new Blob(chunks, { type: mimeType });
-        const compFile = new File([compressed], file.name.replace(/\.[^.]+$/, '.webm'), { type: mimeType });
-        resolve(compFile);
-      };
-      recorder.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('Erreur compression')); };
-
-      recorder.start(1000);
-      video.currentTime = 0;
-
-      let frameCount = 0;
-      const drawFrame = () => {
-        if (video.ended || video.paused) { recorder.stop(); return; }
-        ctx.drawImage(video, 0, 0, w, h);
-        frameCount++;
-        if (frameCount % 60 === 0 && progEl) {
-          const pct = Math.round((video.currentTime / video.duration) * 100);
-          progEl.textContent = `🗜️ Compression… ${pct}%`;
-        }
-        requestAnimationFrame(drawFrame);
-      };
-
-      video.onplay = () => requestAnimationFrame(drawFrame);
-      video.onended = () => { setTimeout(() => recorder.stop(), 200); };
-      video.play().catch(() => { URL.revokeObjectURL(blobUrl); reject(new Error('Lecture vidéo impossible')); });
-    };
-
-    video.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('Vidéo illisible')); };
-  });
-}
 
 const _uploadLog = [];
 
@@ -2432,29 +2320,17 @@ async function submitUpload() {
     }
     if (!fileToUpload || fileToUpload.size === 0) throw new Error('Fichier inaccessible — resélectionne la vidéo');
 
-    // 1b. Trim FFmpeg si vidéo trop longue
+    // 1b. Vérification durée max 4 minutes
     const rawDurCheck = await getVideoDuration(fileToUpload);
     if (rawDurCheck && isFinite(rawDurCheck) && rawDurCheck > uploadMaxDuration) {
-      prog.textContent = `⏳ Chargement FFmpeg (1ère fois ~5s)…`;
-      fileToUpload = await trimVideoFFmpeg(fileToUpload, uploadMaxDuration, prog);
-      toast(`✂️ Vidéo découpée à ${Math.round(uploadMaxDuration / 60)} min`);
+      throw new Error(`Vidéo trop longue — maximum 4 minutes autorisé sur VoltClip.`);
     }
 
-    // Compression si fichier > 80MB
     const sizeMB = (fileToUpload.size / 1024 / 1024).toFixed(1);
     if (fileToUpload.size > 200 * 1024 * 1024) {
-      prog.textContent = `🗜️ Compression en cours… (${sizeMB}MB)`;
-      try {
-        fileToUpload = await compressVideo(fileToUpload, prog);
-        const newMB = (fileToUpload.size / 1024 / 1024).toFixed(1);
-        prog.textContent = `☁️ Envoi (${newMB}MB)…`;
-      } catch (compErr) {
-        // Si compression échoue, on tente quand même avec l'original
-        prog.textContent = `☁️ Envoi (${sizeMB}MB)…`;
-      }
-    } else {
-      prog.textContent = `☁️ Envoi (${sizeMB}MB)…`;
+      throw new Error(`Fichier trop lourd (max 200 MB). Réduis la qualité ou raccourcis ta vidéo.`);
     }
+    prog.textContent = `☁️ Envoi (${sizeMB}MB)…`;
 
     // 2. Upload Cloudinary via XHR
     const formData = new FormData();
