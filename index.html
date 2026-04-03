@@ -3,32 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VoltClip — Là où les talents du monde entier s'affrontent pour se faire repérer</title>
-<meta name="description" content="VoltClip est la plateforme mondiale de découverte de talents. Publie tes clips, affronte d'autres créateurs en battle, et fais-toi repérer par des producteurs et labels du monde entier.">
-<meta name="keywords" content="VoltClip, talent, découverte talent, producteur, label, battle vidéo, tremplin, Got Talent mondial, créateurs, clips, repérage talent">
+<title>VoltClip — La plateforme de battle vidéo où les créateurs s'affrontent</title>
+<meta name="description" content="VoltClip — Publie tes clips, affronte d'autres créateurs en battle vidéo, vote pour les meilleurs talents. Danse, vocal, gaming, humour. Feed plein écran, classement mondial 2026.">
+<meta name="keywords" content="VoltClip, battle vidéo, duel créateur, vote talent, danse battle, vocal battle, gaming clips, humour, feed plein écran, classement mondial, clips courts">
 <meta name="robots" content="index, follow">
 <meta name="author" content="VoltClip">
 <meta name="theme-color" content="#7c5cfc">
 <meta property="og:type" content="website">
-<meta property="og:title" content="VoltClip — Là où les talents du monde entier s'affrontent">
-<meta property="og:description" content="La plateforme mondiale de découverte de talents. Affronte, impressionne, fais-toi repérer.">
+<meta property="og:title" content="VoltClip — Battle de clips ⚔️ | Danse · Vocal · Gaming · Humour">
+<meta property="og:description" content="Publie tes clips, affronte d'autres créateurs en duel vidéo, vote pour les meilleurs. Feed plein écran, battles, classement mondial.">
 <meta property="og:locale" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="VoltClip — Le Got Talent mondial en version battle vidéo">
-<meta name="twitter:description" content="Publie ton talent, affronte les meilleurs, et fais-toi repérer par des producteurs du monde entier.">
+<meta name="twitter:title" content="VoltClip — Battle de clips ⚔️ Danse, Vocal, Gaming & Humour">
+<meta name="twitter:description" content="La plateforme de battle créatif. Publie tes clips, affronte d'autres créateurs en duel, vote pour le meilleur. Feed, algo, DM, classement ⚔️">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648" crossorigin="anonymous"></script>
+<script>
+if (localStorage.getItem('voltclip_cookies') === 'accepted') {
+  var s = document.createElement('script');
+  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648';
+  s.async = true; s.crossOrigin = 'anonymous';
+  document.head.appendChild(s);
+}
+</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "VoltClip",
-  "description": "Plateforme mondiale de découverte et battle de talents vidéo.",
-  "applicationCategory": "EntertainmentApplication",
+  "description": "Plateforme de battle créatif. Clips plein écran, duels vidéo avec votes, classement mondial, algorithme personnalisé, messagerie privée.",
+  "applicationCategory": "SocialNetworkingApplication",
   "operatingSystem": "Web, Android, iOS",
-  "inLanguage": ["fr","en"],
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+  "inLanguage": "fr",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "featureList": ["Battles vidéo avec vote communautaire","Feed plein écran","Classement mondial","Danse · Vocal · Gaming · Humour · Freestyle","Messagerie privée","Notifications push","Streak quotidien"]
 }
 </script>
 <style>
@@ -67,6 +75,49 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nav-cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:var(--font-mono);font-size:12px;font-weight:700;padding:10px 22px;border-radius:30px;text-decoration:none;letter-spacing:.04em;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(124,92,252,.35)}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,92,252,.5)}
 @media(max-width:600px){.nav-links{display:none}}
+
+/* ── RESPONSIVE TABLETTE ── */
+@media(max-width:900px){
+  .dual{grid-template-columns:1fr}
+  .dual-panel:first-child{border-right:none;border-bottom:1px solid var(--border)}
+  .features-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .journey{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+/* ── RESPONSIVE MOBILE ── */
+@media(max-width:600px){
+  #hero{padding:100px 16px 60px;gap:20px}
+  .hero-title{font-size:clamp(52px,16vw,80px)}
+  .hero-tagline{font-size:clamp(13px,4vw,18px)}
+  .hero-sub{font-size:14px}
+  .talent-stage{max-width:100%;height:110px}
+  .talent-card{padding:8px 10px;gap:7px}
+  .talent-card .votes{display:none}
+  .hero-actions{flex-direction:column;width:100%;padding:0 8px}
+  .btn-primary,.btn-gold{width:100%;justify-content:center;font-size:13px;padding:15px 20px}
+  .stats-bar{flex-direction:column}
+  .stat-item{border-right:none;border-bottom:1px solid var(--border);padding:18px 16px}
+  .stat-item:last-child{border-bottom:none}
+  .stat-val{font-size:34px}
+  .section-wrap{padding:48px 16px}
+  .section-title{font-size:clamp(28px,8vw,40px)}
+  .dual{grid-template-columns:1fr}
+  .dual-panel:first-child{border-right:none;border-bottom:1px solid var(--border)}
+  .dual-panel{padding:28px 20px}
+  .battle-showcase{grid-template-columns:1fr;gap:10px}
+  .battle-vs{margin:0 auto}
+  .categories-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .cat-card{padding:14px 8px}
+  .cat-emoji{font-size:22px}
+  .cat-name{font-size:9px}
+  .cat-count{display:none}
+  .journey{grid-template-columns:1fr 1fr}
+  .features-grid{grid-template-columns:1fr}
+  .cta-actions{flex-direction:column;padding:0 8px}
+  .cta-actions a{width:100%;justify-content:center}
+  footer{flex-direction:column;text-align:center}
+  .footer-links{justify-content:center}
+  .ad-slot{margin:16px 8px}
+}
 
 #hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 24px 80px;gap:28px;overflow:hidden}
 
@@ -244,10 +295,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
     <span class="bolt">⚡</span> VOLTCLIP
   </a>
   <div class="nav-links">
-    <a href="#talent">Talents</a>
-    <a href="#producteurs">Producteurs</a>
     <a href="#battles">Battles</a>
     <a href="#categories">Catégories</a>
+    <a href="#features">Features</a>
   </div>
   <a href="voltclip.html" class="nav-cta">Lancer l'app ⚡</a>
 </nav>
@@ -255,16 +305,17 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 <header id="hero" role="banner">
   <div class="hero-spotlight" aria-hidden="true"></div>
 
-  <div class="hero-eyebrow" aria-hidden="true">Plateforme mondiale · Découverte de talents · 2026</div>
+  <div class="hero-eyebrow" aria-hidden="true">Plateforme de battle créatif · 2026</div>
 
   <h1 class="hero-title">
     <span class="volt">VOLT</span><span>CLIP</span>
   </h1>
 
-  <p class="hero-tagline">LÀ OÙ LES TALENTS S'AFFRONTENT</p>
+  <p class="hero-tagline">AFFRONTE. VOTE. DOMINE.</p>
 
   <p class="hero-sub">
-    La première plateforme mondiale où les créateurs s'affrontent en <strong>battle vidéo</strong> et se font repérer par des <strong>producteurs, labels et scouts</strong> du monde entier. Ton moment de gloire est à un clip.
+    Publie tes clips, affronte d'autres créateurs en <strong>duel vidéo</strong>,
+    vote pour les meilleurs. La communauté décide qui domine l'arène.
   </p>
 
   <div class="talent-stage" aria-hidden="true">
@@ -294,9 +345,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 
   <div class="hero-actions">
     <a href="voltclip.html" class="btn-primary">
-      Montrer mon talent <span class="arrow">→</span>
+      ⚡ Lancer VoltClip <span class="arrow">→</span>
     </a>
-    <a href="#producteurs" class="btn-gold">🎯 Je suis producteur</a>
+    <a href="#battles" class="btn-ghost">Voir les battles</a>
   </div>
 </header>
 
@@ -307,33 +358,32 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
   <div class="stat-item"><div class="stat-val gold">🌍</div><div class="stat-label">Accessible partout</div></div>
 </div>
 
-<!-- DUAL AUDIENCE -->
+<!-- POURQUOI VOLTCLIP -->
 <div style="position:relative;z-index:1;padding:80px 24px;max-width:1080px;margin:0 auto" id="talent">
   <div class="dual reveal">
     <div class="dual-panel">
-      <span class="dual-tag creator">🎬 CRÉATEUR / TALENT</span>
-      <h2 class="dual-title">TON TALENT<br>MÉRITE<br>D'ÊTRE VU</h2>
-      <p class="dual-text">Publie tes clips, affronte d'autres créateurs en battle et grimpe dans le classement mondial. Plus tu gagnes de votes, plus tu deviens visible aux yeux des professionnels.</p>
+      <span class="dual-tag creator">🎬 CRÉATEURS</span>
+      <h2 class="dual-title">TON CLIP<br>MÉRITE<br>D'ÊTRE VU</h2>
+      <p class="dual-text">Publie tes vidéos, entre automatiquement en battle dans ta catégorie et grimpe dans le classement mondial. Plus tu gagnes de votes, plus tu deviens visible.</p>
       <div class="dual-perks">
-        <div class="perk"><div class="perk-icon purple">🎯</div>Battle automatique dès l'upload dans ta catégorie</div>
-        <div class="perk"><div class="perk-icon purple">🏆</div>Classement mondial en temps réel par discipline</div>
-        <div class="perk"><div class="perk-icon purple">📊</div>Analytics — vues, votes, taux de complétion</div>
-        <div class="perk"><div class="perk-icon purple">💬</div>Contact direct par les producteurs via DM</div>
+        <div class="perk"><div class="perk-icon purple">🎯</div>Battle automatique dès l'upload</div>
+        <div class="perk"><div class="perk-icon purple">🏆</div>Classement mondial en temps réel</div>
+        <div class="perk"><div class="perk-icon purple">📊</div>Stats — vues, votes, taux de complétion</div>
+        <div class="perk"><div class="perk-icon purple">💬</div>DM direct avec la communauté</div>
       </div>
       <a href="voltclip.html" class="btn-primary" style="align-self:flex-start">Publier mon clip ⚡</a>
     </div>
-
-    <div class="dual-panel" id="producteurs">
-      <span class="dual-tag producer">🎯 PRODUCTEUR / LABEL / SCOUT</span>
-      <h2 class="dual-title">TROUVEZ VOS<br>PROCHAINES<br>STARS</h2>
-      <p class="dual-text">VoltClip est votre vivier de talents mondial. Les créateurs s'affrontent, le public vote — vous repérez ceux qui émergent. Filtrez par catégorie, pays, votes, engagement.</p>
+    <div class="dual-panel">
+      <span class="dual-tag" style="background:rgba(46,204,113,.12);color:#2ecc71;border:1px solid rgba(46,204,113,.3)">🗳️ VOTANTS</span>
+      <h2 class="dual-title">DECIDE<br>QUI EST<br>LE MEILLEUR</h2>
+      <p class="dual-text">Scroll infini de battles côte à côte. Un vote par battle, des centaines de duels à juger. Deviens l'un des top votants du classement mondial.</p>
       <div class="dual-perks">
-        <div class="perk"><div class="perk-icon gold">🌍</div>Talents de tous les pays dans une seule interface</div>
-        <div class="perk"><div class="perk-icon gold">📈</div>Stats publiques : votes, vues, engagement, historique</div>
-        <div class="perk"><div class="perk-icon gold">⚡</div>Classement live — les meilleurs remontent naturellement</div>
-        <div class="perk"><div class="perk-icon gold">💬</div>Contacter un créateur directement via DM intégré</div>
+        <div class="perk"><div class="perk-icon" style="background:rgba(46,204,113,.12)">🎬</div>Feed de battles plein écran snap</div>
+        <div class="perk"><div class="perk-icon" style="background:rgba(46,204,113,.12)">⚡</div>Résultats en temps réel animés</div>
+        <div class="perk"><div class="perk-icon" style="background:rgba(46,204,113,.12)">🏅</div>Classement mondial des meilleurs votants</div>
+        <div class="perk"><div class="perk-icon" style="background:rgba(46,204,113,.12)">🔥</div>Streak quotidien — médaille or/argent/bronze</div>
       </div>
-      <a href="voltclip.html" class="btn-gold" style="align-self:flex-start">Explorer les talents →</a>
+      <a href="voltclip.html" class="btn-ghost" style="align-self:flex-start">Voter maintenant →</a>
     </div>
   </div>
 </div>
@@ -391,7 +441,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 <!-- JOURNEY -->
 <div class="section-wrap">
   <div class="section-label">Parcours</div>
-  <h2 class="section-title">De l'upload<br><span class="grad">au repérage</span></h2>
+  <h2 class="section-title">De l'upload<br><span class="grad">au sommet</span></h2>
 
   <div class="journey reveal">
     <div class="journey-step" data-num="01">
@@ -416,9 +466,9 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
       <p class="j-text">Chaque victoire te fait monter dans le classement mondial de ta discipline. Semaine après semaine.</p>
     </div>
     <div class="journey-step" data-num="05">
-      <div class="j-icon">🎯</div>
-      <h3 class="j-title">TU ES REPÉRÉ</h3>
-      <p class="j-text">Producteurs, labels et scouts consultent les tops du classement. Ton moment arrive.</p>
+      <div class="j-icon">👑</div>
+      <h3 class="j-title">TU DOMINES</h3>
+      <p class="j-text">Cumule les victoires, grimpe dans le classement mondial de ta discipline. Le #1 de ta catégorie, c'est toi.</p>
       <span class="j-badge gold">🏆 OBJECTIF</span>
     </div>
   </div>
@@ -427,7 +477,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 <!-- FEATURES -->
 <div class="section-wrap">
   <div class="section-label">Plateforme</div>
-  <h2 class="section-title">Tout ce qu'il faut<br><span class="grad">pour percer</span></h2>
+  <h2 class="section-title">Tout pour<br><span class="grad">dominer l'arène</span></h2>
 
   <div class="features-grid reveal">
     <article class="feature-card">
@@ -459,8 +509,8 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
     </article>
     <article class="feature-card">
       <span class="feature-icon">💬</span>
-      <h3 class="feature-name">Contact direct producteur → talent</h3>
-      <p class="feature-desc">DM intégré. Un producteur repère un talent et le contacte directement depuis son profil. Zéro intermédiaire.</p>
+      <h3 class="feature-name">Messagerie privée intégrée</h3>
+      <p class="feature-desc">DM temps réel. Envoie un message à n'importe quel créateur depuis son profil. Zéro intermédiaire.</p>
     </article>
     <article class="feature-card">
       <span class="feature-icon">👤</span>
@@ -478,30 +528,41 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32
 <!-- CTA -->
 <section id="cta" style="max-width:none;padding:80px 24px 100px;text-align:center;position:relative;z-index:1">
   <div class="cta-bg" aria-hidden="true"></div>
-  <h2 class="cta-title">Ton talent<br><span style="background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">mérite une scène</span><br>mondiale.</h2>
-  <p class="cta-sub">Rejoins VoltClip gratuitement. Publie ton clip, affronte les meilleurs, grimpe dans le classement et fais-toi repérer.</p>
+  <h2 class="cta-title">Prêt à entrer<br><span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">dans l'arène ?</span></h2>
+  <p class="cta-sub">Rejoins VoltClip gratuitement. Publie tes clips, lance des battles, vote pour les meilleurs. Fonctionne dans ton navigateur.</p>
   <div class="cta-actions">
     <a href="voltclip.html" class="btn-primary" style="font-size:15px;padding:18px 38px">
       ⚡ Lancer VoltClip <span class="arrow">→</span>
     </a>
-    <a href="#producteurs" class="btn-gold" style="font-size:14px;padding:17px 30px">🎯 Espace producteur</a>
   </div>
 </section>
 
-<!-- ADSENSE -->
-<div style="text-align:center;padding:24px;position:relative;z-index:1">
-  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5433648295830648" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+<!-- PUB ADSENSE BANNIÈRE MILIEU -->
+<div class="ad-slot" style="text-align:center;padding:20px 24px;position:relative;z-index:1;max-width:1080px;margin:0 auto" id="adMid">
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-5433648295830648"
+       data-ad-slot="auto"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
 </div>
+<script>
+if (localStorage.getItem('voltclip_cookies') === 'accepted') {
+  document.getElementById('adMid').style.display = 'block';
+  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+} else {
+  document.getElementById('adMid').style.display = 'none';
+}
+</script>
 
 <footer role="contentinfo">
   <div class="footer-logo">⚡ <span>VOLT</span>CLIP</div>
   <nav aria-label="Liens footer">
     <ul class="footer-links">
       <li><a href="voltclip.html">App</a></li>
-      <li><a href="#talent">Talents</a></li>
-      <li><a href="#producteurs">Producteurs</a></li>
       <li><a href="#battles">Battles</a></li>
+      <li><a href="#categories">Catégories</a></li>
+      <li><a href="#features">Features</a></li>
     </ul>
   </nav>
   <nav aria-label="Liens légaux" style="margin-top:12px">
@@ -557,7 +618,25 @@ setInterval(() => {
   if (el) el.textContent = count
 }, 2800)
 
-function acceptCookies() { localStorage.setItem('voltclip_cookies','accepted'); document.getElementById('cookieBanner').style.display='none' }
+function acceptCookies() {
+  localStorage.setItem('voltclip_cookies','accepted');
+  document.getElementById('cookieBanner').style.display='none';
+  if (!window._adsLoaded) {
+    window._adsLoaded = true;
+    var s = document.createElement('script');
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648';
+    s.async = true; s.crossOrigin = 'anonymous';
+    s.onload = function() {
+      var adSlots = document.querySelectorAll('.adsbygoogle');
+      adSlots.forEach(function() {
+        try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+      });
+    };
+    document.head.appendChild(s);
+  }
+  var adMid = document.getElementById('adMid');
+  if (adMid) adMid.style.display = 'block';
+}
 function refuseCookies() { localStorage.setItem('voltclip_cookies','refused'); document.getElementById('cookieBanner').style.display='none' }
 if (!localStorage.getItem('voltclip_cookies')) document.getElementById('cookieBanner').style.display='flex'
 </script>
