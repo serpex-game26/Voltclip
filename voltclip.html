@@ -2106,7 +2106,7 @@ let[usersRes,videosRes]=await Promise.all([sb.from(`profiles`).select(`id,userna
 const _vcCache = {};
 function _vcStore(v) { if (v && v.id) _vcCache[v.id] = v; }
 
-function _openPlayer(v) {
+async function _openPlayer(v) {
   let old = document.getElementById('searchVideoPlayer');
   if (old) old.remove();
   const username = (v.profiles && v.profiles.username) || v.username || 'user';
@@ -2121,12 +2121,20 @@ function _openPlayer(v) {
     </div>
     <video src="${v.video_url}" autoplay playsinline loop controls style="width:100%;height:100%;object-fit:contain;background:#000"></video>
     <div style="position:absolute;bottom:0;left:0;right:0;padding:14px 16px max(20px,env(safe-area-inset-bottom));background:linear-gradient(#0000,#000c);display:flex;gap:12px;align-items:center">
-      <button onclick="toggleLike('${v.id}',false);var c=parseInt(this.dataset.c||0)+1;this.textContent='\u2764\uFE0F '+c;this.dataset.c=c" data-c="${v.likes_count||0}" style="background:rgba(255,255,255,.1);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer">❤️ ${fmtNum(v.likes_count||0)}</button>
+      <button id="like-${v.id}" onclick="toggleLike('${v.id}',this.classList.contains('liked'))" style="background:rgba(255,255,255,.1);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer"><span class="vi">🤍</span> <span class="vc" id="lc-${v.id}" data-raw="${v.likes_count||0}">${fmtNum(v.likes_count||0)}</span></button>
       <button onclick="openComments('${v.id}',${v.comments_count||0})" style="background:rgba(255,255,255,.1);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer">💬 ${fmtNum(v.comments_count||0)}</button>
       <button onclick="shareVideo('${v.id}')" style="background:rgba(255,255,255,.1);border:none;color:#fff;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer">🔗 Share</button>
     </div>`;
   document.body.appendChild(ov);
-  sb.rpc('increment_views', { video_id: v.id }).catch(function(){});
+  try { await sb.rpc('increment_views', { video_id: v.id }); } catch(e) {}
+  // Sync état liked depuis DB
+  if(currentUser){
+    try{
+      const{data:lrow}=await sb.from('likes').select('id').eq('user_id',currentUser.id).eq('video_id',v.id).maybeSingle();
+      const likeBtn=document.getElementById('like-'+v.id);
+      if(likeBtn&&lrow){likeBtn.classList.add('liked');likeBtn.querySelector('.vi').textContent='❤️';}
+    }catch(e){}
+  }
 }
 
 // Event delegation sur document — capte tous les clics sur data-vid
