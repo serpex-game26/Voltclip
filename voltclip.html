@@ -1999,8 +1999,8 @@ async function toggleLike(videoId,isLiked){
   btn.dataset.likeLoading=`1`;
   try{
     // Vérifier l'état RÉEL en DB (source de vérité), ignore isLiked passé en param
-    const{data:existingRow}=await sb.from(`likes`).select(`id`).eq(`user_id`,currentUser.id).eq(`video_id`,videoId).limit(1);
-    const alreadyLiked=!!(existingRow&&existingRow.length>0);
+    const{data:existingRow,error:chkErr}=await sb.from(`likes`).select(`id`).eq(`user_id`,currentUser.id).eq(`video_id`,videoId).maybeSingle();
+    const alreadyLiked=!chkErr&&existingRow!==null;
     const cnt=document.getElementById(`lc-`+videoId);
     const newLiked=!alreadyLiked;
     // Mise à jour UI optimiste
