@@ -1994,12 +1994,16 @@ async function toggleBookmark(videoId,isBookmarked){if(!currentUser){openAuth();
 // ══════════════════════════════════════════
 async function toggleLike(videoId,isLiked){
   if(!currentUser){openAuth();return}
-  // Guard local : bloque les double-clics pendant que la requête tourne
   const btn=document.getElementById(`like-`+videoId);
   if(!btn||btn.dataset.likeLoading===`1`)return;
   btn.dataset.likeLoading=`1`;
   try{
-    const cnt=document.getElementById(`lc-`+videoId),newLiked=!isLiked;
+    // Vérifier l'état RÉEL en DB (source de vérité), ignore isLiked passé en param
+    const{data:existingRow}=await sb.from(`likes`).select(`id`).eq(`user_id`,currentUser.id).eq(`video_id`,videoId).limit(1);
+    const alreadyLiked=!!(existingRow&&existingRow.length>0);
+    const cnt=document.getElementById(`lc-`+videoId);
+    const newLiked=!alreadyLiked;
+    // Mise à jour UI optimiste
     btn.querySelector(`.vi`).textContent=newLiked?`❤️`:`🤍`;
     newLiked?(btn.classList.add(`liked`),playUISound(`like`),haptic([10,5,20])):btn.classList.remove(`liked`);
     btn.setAttribute(`onclick`,`toggleLike('${videoId}',${newLiked})`);
@@ -2009,12 +2013,16 @@ async function toggleLike(videoId,isLiked){
       // Track interests
       let item=document.querySelector(`[data-video-id="${videoId}"]`);
       if(item){let tags=Array.from(item.querySelectorAll(`.video-tag`)).map(t=>t.textContent.replace(`#`,``).toLowerCase());if(tags.length){let stored=new Set((_cachedProfile?.interests?.length?_cachedProfile.interests:JSON.parse(localStorage.getItem(`voltclip_interests`)||`[]`)));tags.forEach(t=>stored.add(t));const ni=[...stored].slice(0,50);localStorage.setItem(`voltclip_interests`,JSON.stringify(ni));if(currentUser){sb.from(`profiles`).update({interests:ni}).eq(`id`,currentUser.id).then(()=>{});if(_cachedProfile)_cachedProfile.interests=ni;}}}
-      // upsert = idempotent si UNIQUE(user_id, video_id) existe en DB
-      const{error:likeErr}=await sb.from(`likes`).upsert({user_id:currentUser.id,video_id:videoId},{onConflict:`user_id,video_id`,ignoreDuplicates:true});
+      const{error:likeErr}=await sb.from(`likes`).insert({user_id:currentUser.id,video_id:videoId});
       if(!likeErr){
         await sb.rpc(`increment_likes`,{video_id:videoId}).catch(()=>sb.from(`videos`).update({likes_count:newCount}).eq(`id`,videoId));
         let{data:vid}=await sb.from(`videos`).select(`user_id,title`).eq(`id`,videoId).single();
         if(vid&&vid.user_id!==currentUser.id){let{data:prof}=await sb.from(`profiles`).select(`username`).eq(`id`,currentUser.id).single();await insertNotification({user_id:vid.user_id,type:'like',content:'❤️ @'+(prof?.username||"quelqu'un")+' a aimé ta vidéo "'+(vid.title||'').slice(0,30)+'"',related_id:videoId,is_read:false});}
+      }else{
+        // Rollback UI si erreur DB (ex: doublon bloqué par contrainte)
+        btn.querySelector(`.vi`).textContent=`🤍`;btn.classList.remove(`liked`);
+        cnt.dataset.raw=rawCount;cnt.textContent=fmtNum(rawCount);
+        btn.setAttribute(`onclick`,`toggleLike('${videoId}',false)`);
       }
     }else{
       await sb.from(`likes`).delete().eq(`user_id`,currentUser.id).eq(`video_id`,videoId);
