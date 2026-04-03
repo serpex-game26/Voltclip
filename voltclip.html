@@ -929,14 +929,14 @@ html, body {
     <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;background:linear-gradient(135deg,#7c5cfc,#fc5c7d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">⚔️ BATTLES</div>
     <div id="battleCategoryFilters" style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px">
       <button class="bcat-btn active" onclick="setBattleCategory(null,this)">🌍 Tous</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Solo danse',this)">🕺 Solo danse</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Duo danse',this)">👯 Duo danse</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Solo vocal',this)">🎙️ Vocal solo</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Duo vocal',this)">🎤 Vocal duo</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Freestyle',this)">⚡ Freestyle</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Humour',this)">😂 Humour</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Gaming',this)">🎮 Gaming</button>
-      <button class="bcat-btn" onclick="setBattleCategory('Sketch',this)">🎭 Sketch</button>
+      <button class="bcat-btn" onclick="setBattleCategory('solo_danse',this)">🕺 Solo danse</button>
+      <button class="bcat-btn" onclick="setBattleCategory('duo_danse',this)">👯 Duo danse</button>
+      <button class="bcat-btn" onclick="setBattleCategory('solo_vocal',this)">🎙️ Solo vocal</button>
+      <button class="bcat-btn" onclick="setBattleCategory('duo_vocal',this)">🎤 Duo vocal</button>
+      <button class="bcat-btn" onclick="setBattleCategory('freestyle',this)">⚡ Freestyle</button>
+      <button class="bcat-btn" onclick="setBattleCategory('humour',this)">😂 Humour</button>
+      <button class="bcat-btn" onclick="setBattleCategory('gaming',this)">🎮 Gaming</button>
+      <button class="bcat-btn" onclick="setBattleCategory('sketch',this)">🎭 Sketch</button>
     </div>
   </div>
   <div id=battleFeed></div>
@@ -3129,7 +3129,16 @@ async function pinVideo(videoId){currentUser&&(await sb.from(`videos`).update({i
 // ══════════════════════════════════════════
 // ONBOARDING INTÉRÊTS
 // ══════════════════════════════════════════
-const INTERESTS=[`🕺 Solo danse`,`👯 Duo danse`,`🎙️ Solo vocal`,`🎤 Duo vocal`,`⚡ Freestyle`,`😂 Bêtisier / Humour`,`🎮 Gaming`,`🎭 Sketch`];let selectedInterests=/* @__PURE__ */ new Set;
+const INTERESTS=[
+  {label:`🕺 Solo danse`, id:`solo_danse`},
+  {label:`👯 Duo danse`,  id:`duo_danse`},
+  {label:`🎙️ Solo vocal`, id:`solo_vocal`},
+  {label:`🎤 Duo vocal`,  id:`duo_vocal`},
+  {label:`⚡ Freestyle`,  id:`freestyle`},
+  {label:`😂 Humour`,     id:`humour`},
+  {label:`🎮 Gaming`,     id:`gaming`},
+  {label:`🎭 Sketch`,     id:`sketch`}
+];let selectedInterests=/* @__PURE__ */ new Set;
 // ══════════════════════════════════════════
 // AGE GATE
 // ══════════════════════════════════════════
@@ -3141,7 +3150,7 @@ if(localStorage.getItem(`voltclip_age_ok`)===`1`)return;
 let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-15),document.getElementById(`ageGateModal`).classList.add(`open`)}function submitAgeGate(){let errEl=document.getElementById(`ageGateErr`),day=document.getElementById(`ageDaySelect`).value,month=document.getElementById(`ageMonthSelect`).value,year=document.getElementById(`ageYearSelect`).value;if(!day||!month||!year){errEl.textContent=`Indique ta date de naissance complète`,errEl.style.display=`block`;return}let birth=new Date(parseInt(year),parseInt(month)-1,parseInt(day)),now=/* @__PURE__ */ new Date;if(now.getFullYear()-birth.getFullYear()-(now<new Date(now.getFullYear(),birth.getMonth(),birth.getDate())?1:0)<15){errEl.textContent=`🚫 Tu dois avoir au moins 15 ans pour accéder à VoltClip.`,errEl.style.display=`block`;return}let val=`${year}-${String(month).padStart(2,`0`)}-${String(day).padStart(2,`0`)}`;localStorage.setItem(`voltclip_age_ok`,`1`),document.getElementById(`ageGateModal`).classList.remove(`open`),currentUser&&sb.from(`profiles`).update({birthdate:val}).eq(`id`,currentUser.id).then(()=>{}),checkOnboarding()}
 // Remplir les selects jour et année au chargement
 (function initAgeSelects(){let daySelect=document.getElementById(`ageDaySelect`),yearSelect=document.getElementById(`ageYearSelect`);if(!daySelect||!yearSelect)return;for(let d=1;d<=31;d++){let opt=document.createElement(`option`);opt.value=d,opt.textContent=d,daySelect.appendChild(opt)}let currentYear=(/* @__PURE__ */ new Date()).getFullYear();for(let y=currentYear-5;y>=1920;y--){let opt=document.createElement(`option`);opt.value=y,opt.textContent=y,yearSelect.appendChild(opt)}})();function checkOnboarding(){const _hasInterests=(_cachedProfile?.interests?.length>0)||localStorage.getItem(`voltclip_interests`);if(localStorage.getItem(`voltclip_age_ok`)===`1`&&!_hasInterests&&currentUser){let modal=document.getElementById(`onboardingModal`);modal.style.display=`flex`;let grid=document.getElementById(`interestGrid`);grid.innerHTML=INTERESTS.map(i=>`
-      <button onclick="toggleInterest(this,'${i}')" style="padding:8px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;transition:.15s">${i}</button>
+      <button onclick="toggleInterest(this,'${i.id}')" style="padding:8px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;transition:.15s">${i.label}</button>
     `).join(``)}}function toggleInterest(btn,interest){selectedInterests.has(interest)?(selectedInterests.delete(interest),btn.style.background=`none`,btn.style.borderColor=`rgba(255,255,255,.15)`,btn.style.color=`rgba(255,255,255,.7)`):(selectedInterests.add(interest),btn.style.background=`linear-gradient(135deg,rgba(124,92,252,.3),rgba(252,92,125,.15))`,btn.style.borderColor=`#7c5cfc`,btn.style.color=`#fff`)}async function saveInterests(){
   const arr=[...selectedInterests];
   localStorage.setItem(`voltclip_interests`,JSON.stringify(arr));
@@ -3153,17 +3162,10 @@ let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-1
   toast(`Feed personnalisé ⚡`);
   // Appliquer le premier intérêt comme filtre actif sur le feed battle
   if(arr.length){
-    const firstCat = arr[0].replace(/^[^a-zA-ZÀ-ÿ]+/, '').trim();
-    const allBtns = document.querySelectorAll('.bcat-btn');
-    let matched = false;
-    allBtns.forEach(b => {
-      const label = b.textContent.replace(/^[^\w]+/, '').trim().toLowerCase();
-      if(!matched && firstCat.toLowerCase().includes(label.split(' ')[0].toLowerCase())) {
-        setBattleCategory(b.textContent.replace(/^[^\w]+/, '').trim(), b);
-        matched = true;
-      }
-    });
-    if(!matched){ battlePage=0; battleAllLoaded=false; loadBattles(); }
+    const firstId = arr[0]; // arr contient désormais les IDs directs (ex: 'duo_danse')
+    const matchBtn = document.querySelector(`.bcat-btn[onclick*="'${firstId}'"]`);
+    if(matchBtn){ setBattleCategory(firstId, matchBtn); }
+    else { battlePage=0; battleAllLoaded=false; loadBattles(); }
   }
 }
 // ══════════════════════════════════════════
