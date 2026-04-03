@@ -3,45 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VoltClip — Battle de clips ⚔️ | Danse, Vocal, Gaming, Humour</title>
-<meta name="description" content="VoltClip — La plateforme de battle créatif. Publie tes clips, affronte d'autres créateurs en duel vidéo, vote pour le meilleur talent. Danse, vocal, gaming, humour, freestyle. Feed plein écran, algo intelligent, DM, classement mondial 2026.">
-<meta name="keywords" content="VoltClip, battle clips, duel vidéo, vote talent, danse battle, vocal battle, gaming clips, humour sketch, freestyle, réseau social créatifs, vidéos courtes, TikTok alternatif">
+<title>VoltClip — Là où les talents du monde entier s'affrontent pour se faire repérer</title>
+<meta name="description" content="VoltClip est la plateforme mondiale de découverte de talents. Publie tes clips, affronte d'autres créateurs en battle, et fais-toi repérer par des producteurs et labels du monde entier.">
+<meta name="keywords" content="VoltClip, talent, découverte talent, producteur, label, battle vidéo, tremplin, Got Talent mondial, créateurs, clips, repérage talent">
 <meta name="robots" content="index, follow">
 <meta name="author" content="VoltClip">
 <meta name="theme-color" content="#7c5cfc">
 <meta property="og:type" content="website">
-<meta property="og:title" content="VoltClip — Battle de clips ⚔️ | Danse · Vocal · Gaming · Humour">
-<meta property="og:description" content="Affronte d'autres créateurs en duel vidéo, vote pour le meilleur talent, grimpe dans le classement mondial. Feed plein écran, battles ⚔️, algo personnalisé.">
-<meta property="og:image" content="https://serpex-game26.github.io/Voltclip/icon-512.png">
-<meta property="og:image:width" content="512">
-<meta property="og:image:height" content="512">
-<meta name="twitter:image" content="https://serpex-game26.github.io/Voltclip/icon-512.png">
+<meta property="og:title" content="VoltClip — Là où les talents du monde entier s'affrontent">
+<meta property="og:description" content="La plateforme mondiale de découverte de talents. Affronte, impressionne, fais-toi repérer.">
 <meta property="og:locale" content="fr_FR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="VoltClip — Battle de clips ⚔️ Danse, Vocal, Gaming & Humour">
-<meta name="twitter:description" content="La plateforme de battle créatif. Publie tes clips, affronte d'autres créateurs en duel, vote pour le meilleur. Feed, algo, DM, classement ⚔️">
+<meta name="twitter:title" content="VoltClip — Le Got Talent mondial en version battle vidéo">
+<meta name="twitter:description" content="Publie ton talent, affronte les meilleurs, et fais-toi repérer par des producteurs du monde entier.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-<script>
-// Charge AdSense uniquement si consentement déjà donné
-if (localStorage.getItem('voltclip_cookies') === 'accepted') {
-  var s = document.createElement('script');
-  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648';
-  s.async = true; s.crossOrigin = 'anonymous';
-  document.head.appendChild(s);
-}
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648" crossorigin="anonymous"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "VoltClip",
-  "description": "Plateforme de battle créatif. Clips plein écran, duels vidéo avec votes, classement mondial en temps réel, algorithme personnalisé, messagerie privée.",
-  "applicationCategory": "SocialNetworkingApplication",
+  "description": "Plateforme mondiale de découverte et battle de talents vidéo.",
+  "applicationCategory": "EntertainmentApplication",
   "operatingSystem": "Web, Android, iOS",
-  "inLanguage": "fr",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-  "featureList": ["Battles vidéo avec vote communautaire","Feed plein écran","Classement mondial","Danse · Vocal · Gaming · Humour · Freestyle · Sketch","Messagerie privée temps réel","Notifications push","Leaderboard voters & géo","Streak quotidien"]
+  "inLanguage": ["fr","en"],
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
 }
 </script>
 <style>
@@ -51,1114 +38,474 @@ if (localStorage.getItem('voltclip_cookies') === 'accepted') {
   --surface2: #1c1c27;
   --border: rgba(255,255,255,0.07);
   --text: #f0f0f5;
-  --muted: rgba(240,240,245,0.45);
+  --muted: rgba(255,255,255,0.38);
   --accent: #7c5cfc;
   --accent2: #fc5c7d;
-  --gold: #ffd700;
+  --gold: #f5c842;
+  --green: #2ecc71;
   --font-mono: 'Space Mono', monospace;
   --font: 'DM Sans', sans-serif;
-  --font-display: 'Syne', sans-serif;
+  --font-display: 'Bebas Neue', sans-serif;
 }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;min-height:100vh}
 
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box }
-html { scroll-behavior:smooth }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
-  overflow-x: hidden;
-  min-height: 100vh;
-}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
 
-/* ── GRAIN OVERLAY ── */
-body::after {
-  content:'';
-  position:fixed;
-  inset:0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events:none;
-  z-index:0;
-}
+.glow-orb{position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0}
+.glow-orb.purple{width:700px;height:700px;background:rgba(124,92,252,.1);top:-200px;right:-200px}
+.glow-orb.pink{width:500px;height:500px;background:rgba(252,92,125,.07);bottom:5%;left:-150px}
+.glow-orb.gold{width:300px;height:300px;background:rgba(245,200,66,.05);top:40%;left:50%;transform:translateX(-50%)}
 
-/* ── ORB BACKGROUNDS ── */
-.orb {
-  position:fixed;
-  border-radius:50%;
-  filter:blur(140px);
-  pointer-events:none;
-  z-index:0;
-}
-.orb-1 { width:700px; height:700px; background:rgba(124,92,252,0.11); top:-250px; right:-200px; }
-.orb-2 { width:500px; height:500px; background:rgba(252,92,125,0.07); bottom:5%; left:-150px; }
-.orb-3 { width:300px; height:300px; background:rgba(255,215,0,0.04); top:50%; left:50%; transform:translate(-50%,-50%); }
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:rgba(10,10,15,.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-mono);font-size:17px;font-weight:700;color:#fff;text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-logo .bolt{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:20px}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.06em;transition:color .15s}
+.nav-links a:hover{color:#fff}
+.nav-cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:var(--font-mono);font-size:12px;font-weight:700;padding:10px 22px;border-radius:30px;text-decoration:none;letter-spacing:.04em;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 20px rgba(124,92,252,.35)}
+.nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,92,252,.5)}
+@media(max-width:600px){.nav-links{display:none}}
 
-/* ── NAV ── */
-nav {
-  position:fixed;
-  top:0; left:0; right:0;
-  z-index:100;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:14px 28px;
-  background:rgba(10,10,15,0.8);
-  backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);
-}
-.nav-logo {
-  font-family: var(--font-mono);
-  font-size:16px;
-  font-weight:700;
-  color:#fff;
-  text-decoration:none;
-  display:flex;
-  align-items:center;
-  gap:6px;
-  letter-spacing:0.04em;
-}
-.nav-logo .bolt {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.nav-cta {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color:#fff;
-  font-family: var(--font-mono);
-  font-size:11px;
-  font-weight:700;
-  padding:10px 22px;
-  border-radius:30px;
-  text-decoration:none;
-  letter-spacing:0.05em;
-  transition:transform .15s, box-shadow .15s;
-  box-shadow:0 4px 24px rgba(124,92,252,0.35);
-}
-.nav-cta:hover { transform:translateY(-1px); box-shadow:0 8px 32px rgba(124,92,252,0.5); }
+#hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 24px 80px;gap:28px;overflow:hidden}
 
-/* ── HERO ── */
-#hero {
-  position:relative;
-  z-index:1;
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:120px 24px 80px;
-  gap:24px;
-}
+.hero-spotlight{position:absolute;top:0;left:50%;transform:translateX(-50%);width:1px;height:60%;background:linear-gradient(to bottom,rgba(245,200,66,.35),transparent);pointer-events:none}
+.hero-spotlight::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:280px;height:280px;background:radial-gradient(ellipse,rgba(245,200,66,.1),transparent 70%);border-radius:50%}
 
-.hero-pill {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(124,92,252,0.12);
-  border:1px solid rgba(124,92,252,0.3);
-  border-radius:40px;
-  padding:7px 18px;
-  font-family: var(--font-mono);
-  font-size:10px;
-  font-weight:700;
-  letter-spacing:0.14em;
-  color:var(--accent);
-  text-transform:uppercase;
-  animation: fadeUp .5s ease both;
-}
-.hero-pill .dot {
-  width:6px; height:6px;
-  border-radius:50%;
-  background: var(--accent2);
-  animation: blink 1.8s ease-in-out infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.hero-eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:10px;animation:fadeUp .6s ease both;opacity:.9}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:24px;height:1px;background:var(--gold);opacity:.5}
 
-.hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(68px, 14vw, 148px);
-  font-weight:800;
-  line-height:0.9;
-  letter-spacing:-0.01em;
-  color:#fff;
-  animation: fadeUp .5s .08s ease both;
-  position:relative;
-}
-.hero-title .v {
-  background: linear-gradient(135deg, var(--accent) 20%, var(--accent2) 80%);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.hero-title .clip-word {
-  position:relative;
-  display:inline-block;
-}
-.hero-title .clip-word::after {
-  content:'';
-  position:absolute;
-  bottom:-4px;
-  left:0; right:0;
-  height:4px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  border-radius:2px;
-}
+.hero-title{font-family:var(--font-display);font-size:clamp(60px,13vw,130px);line-height:.92;letter-spacing:.02em;color:#fff;animation:fadeUp .6s .1s ease both}
+.hero-title .volt{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-.hero-sub {
-  font-size:17px;
-  color:var(--muted);
-  max-width:480px;
-  line-height:1.7;
-  animation: fadeUp .5s .16s ease both;
-}
-.hero-sub strong { color:#fff; font-weight:600; }
+.hero-tagline{font-family:var(--font-display);font-size:clamp(16px,3.5vw,30px);color:rgba(255,255,255,.5);letter-spacing:.08em;animation:fadeUp .6s .15s ease both;line-height:1.1}
 
-.hero-cats {
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  justify-content:center;
-  animation: fadeUp .5s .22s ease both;
-}
-.cat-chip {
-  background: var(--surface);
-  border:1px solid var(--border);
-  border-radius:30px;
-  padding:7px 16px;
-  font-size:12px;
-  font-family: var(--font-mono);
-  color: var(--muted);
-  transition:border-color .2s, color .2s, background .2s;
-}
-.cat-chip:hover {
-  border-color:rgba(124,92,252,0.5);
-  color:var(--text);
-  background:rgba(124,92,252,0.08);
-}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.58);max-width:540px;line-height:1.7;animation:fadeUp .6s .2s ease both}
+.hero-sub strong{color:#fff;font-weight:600}
 
-.hero-cta {
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-  justify-content:center;
-  animation: fadeUp .5s .28s ease both;
-}
-.btn-main {
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color:#fff;
-  font-family: var(--font-mono);
-  font-size:13px;
-  font-weight:700;
-  padding:16px 34px;
-  border-radius:40px;
-  text-decoration:none;
-  letter-spacing:0.05em;
-  transition:transform .15s, box-shadow .15s;
-  box-shadow:0 6px 36px rgba(124,92,252,0.45);
-}
-.btn-main:hover { transform:translateY(-2px); box-shadow:0 12px 48px rgba(124,92,252,0.6); }
-.btn-main .arr { transition:transform .2s; }
-.btn-main:hover .arr { transform:translateX(4px); }
-.btn-outline {
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:transparent;
-  border:1.5px solid var(--border);
-  color:var(--text);
-  font-family: var(--font-mono);
-  font-size:12px;
-  padding:15px 28px;
-  border-radius:40px;
-  text-decoration:none;
-  transition:border-color .2s, background .2s;
-}
-.btn-outline:hover { border-color:rgba(124,92,252,0.4); background:rgba(124,92,252,0.07); }
+.talent-stage{position:relative;width:100%;max-width:480px;height:130px;animation:fadeUp .6s .25s ease both}
+.talent-card{position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(10px);white-space:nowrap}
+.talent-card .avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.talent-card .info{text-align:left}
+.talent-card .name{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fff}
+.talent-card .cat{font-size:10px;color:var(--muted);margin-top:1px}
+.talent-card .votes{font-family:var(--font-mono);font-size:10px;color:var(--gold);margin-left:auto;padding-left:10px}
+.talent-card:nth-child(1){left:0;top:14px;transform:rotate(-3deg);border-color:rgba(124,92,252,.3);animation:float1 4s ease-in-out infinite}
+.talent-card:nth-child(2){left:50%;transform:translateX(-50%) rotate(1deg);top:4px;border-color:rgba(245,200,66,.35);box-shadow:0 8px 28px rgba(245,200,66,.1);animation:float2 3.5s ease-in-out infinite}
+.talent-card:nth-child(3){right:0;top:18px;transform:rotate(4deg);border-color:rgba(252,92,125,.3);animation:float3 4.5s ease-in-out infinite}
+@keyframes float1{0%,100%{transform:rotate(-3deg) translateY(0)}50%{transform:rotate(-3deg) translateY(-8px)}}
+@keyframes float2{0%,100%{transform:translateX(-50%) rotate(1deg) translateY(0)}50%{transform:translateX(-50%) rotate(1deg) translateY(-12px)}}
+@keyframes float3{0%,100%{transform:rotate(4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-6px)}}
 
-/* ── BATTLE MOCKUP ── */
-.hero-mockup {
-  position:relative;
-  width:260px;
-  height:200px;
-  margin:8px auto 0;
-  animation: fadeUp .5s .34s ease both;
-}
-.mock-phone {
-  position:absolute;
-  border-radius:22px;
-  border:2px solid rgba(255,255,255,0.1);
-  overflow:hidden;
-  box-shadow:0 24px 80px rgba(0,0,0,0.6);
-}
-.mock-phone.center {
-  width:110px;
-  height:185px;
-  left:50%;
-  top:0;
-  transform:translateX(-50%);
-  background: var(--surface);
-  border-color:rgba(124,92,252,0.4);
-  box-shadow:0 24px 80px rgba(124,92,252,0.3), 0 0 0 1px rgba(124,92,252,0.15);
-  z-index:3;
-}
-.mock-phone.left {
-  width:85px;
-  height:150px;
-  left:10px;
-  top:25px;
-  transform:rotate(-7deg);
-  background:#0d0d18;
-  z-index:2;
-}
-.mock-phone.right {
-  width:85px;
-  height:150px;
-  right:10px;
-  top:25px;
-  transform:rotate(7deg);
-  background:#0d0d18;
-  z-index:2;
-}
-.mock-inner {
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  position:relative;
-  overflow:hidden;
-}
-.mock-top { height:50%; background:linear-gradient(160deg,#12122a,#1c1c30); display:flex;align-items:center;justify-content:center;font-size:22px;border-bottom:2px solid; }
-.mock-top.left-col { border-color:rgba(124,92,252,0.6); }
-.mock-top.right-col { border-color:rgba(252,92,125,0.6); }
-.mock-bottom { height:50%; background:linear-gradient(160deg,#1c1c30,#0d0d1a); display:flex;align-items:center;justify-content:center; font-size:22px; }
-.mock-vs {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-family: var(--font-mono);
-  font-size:11px;
-  font-weight:700;
-  color: var(--accent2);
-  background: rgba(10,10,15,0.9);
-  border:1.5px solid rgba(252,92,125,0.4);
-  border-radius:20px;
-  padding:3px 8px;
-  z-index:5;
-}
-.mock-vote-bar {
-  position:absolute;
-  bottom:0; left:0; right:0;
-  height:28px;
-  background:rgba(10,10,15,0.95);
-  display:flex;
-  align-items:center;
-  justify-content:space-around;
-  font-family: var(--font-mono);
-  font-size:9px;
-  font-weight:700;
-  z-index:5;
-}
-.mock-vote-left { color:var(--accent); }
-.mock-vote-right { color:var(--accent2); }
+.talent-ticker{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:40px;padding:10px 22px;animation:fadeUp .6s .3s ease both}
+.ticker-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 7px var(--green);animation:pdot 2s ease-in-out infinite;flex-shrink:0}
+.ticker-text{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.06em}
+.ticker-count{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fff}
+@keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
 
-/* ── STATS BAR ── */
-.stats-strip {
-  position:relative;
-  z-index:1;
-  display:flex;
-  justify-content:center;
-  background:var(--surface);
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-}
-.stat-cell {
-  flex:1;
-  min-width:120px;
-  padding:24px 16px;
-  text-align:center;
-  border-right:1px solid var(--border);
-}
-.stat-cell:last-child { border-right:none; }
-.stat-v {
-  font-family: var(--font-display);
-  font-size:38px;
-  font-weight:800;
-  background:linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  line-height:1;
-}
-.stat-l {
-  font-family: var(--font-mono);
-  font-size:9px;
-  color:var(--muted);
-  letter-spacing:0.12em;
-  margin-top:5px;
-  text-transform:uppercase;
-}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;animation:fadeUp .6s .35s ease both}
 
-/* ── SECTIONS ── */
-section {
-  position:relative;
-  z-index:1;
-  padding:80px 24px;
-  max-width:1080px;
-  margin:0 auto;
-}
-.s-label {
-  font-family: var(--font-mono);
-  font-size:9px;
-  letter-spacing:0.22em;
-  color:var(--accent);
-  text-transform:uppercase;
-  margin-bottom:14px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.s-label::before { content:''; width:20px; height:1px; background:var(--accent); opacity:0.5; }
-.s-title {
-  font-family: var(--font-display);
-  font-size:clamp(34px,5.5vw,56px);
-  font-weight:800;
-  line-height:1.0;
-  color:#fff;
-  margin-bottom:14px;
-}
-.s-title .g {
-  background:linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-.s-sub {
-  font-size:15px;
-  color:var(--muted);
-  max-width:520px;
-  line-height:1.7;
-  margin-bottom:44px;
-}
+.btn-primary{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:var(--font-mono);font-size:14px;font-weight:700;padding:16px 32px;border-radius:40px;text-decoration:none;letter-spacing:.04em;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 32px rgba(124,92,252,.45);position:relative;overflow:hidden}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(124,92,252,.6)}
+.btn-primary:active{transform:scale(.97)}
+.btn-primary .arrow{transition:transform .2s}
+.btn-primary:hover .arrow{transform:translateX(4px)}
+.btn-gold{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px solid rgba(245,200,66,.35);color:var(--gold);font-family:var(--font-mono);font-size:13px;padding:15px 26px;border-radius:40px;text-decoration:none;transition:border-color .2s,background .2s;letter-spacing:.04em}
+.btn-gold:hover{border-color:var(--gold);background:rgba(245,200,66,.08);color:#fff}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);color:var(--text);font-family:var(--font-mono);font-size:13px;padding:15px 26px;border-radius:40px;text-decoration:none;transition:border-color .2s,background .2s}
+.btn-ghost:hover{border-color:rgba(124,92,252,.5);background:rgba(124,92,252,.08)}
 
-/* ── BATTLE CATEGORIES SHOWCASE ── */
-.battle-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
-  gap:14px;
-}
-.battle-card {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:24px 20px;
-  position:relative;
-  overflow:hidden;
-  transition:transform .2s, border-color .2s;
-  cursor:default;
-}
-.battle-card::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  opacity:0;
-  transition:opacity .3s;
-  pointer-events:none;
-}
-.battle-card:hover { transform:translateY(-4px); }
-.battle-card:hover::before { opacity:1; }
-.battle-card.c1::before { background:radial-gradient(circle at top left, rgba(124,92,252,0.1), transparent 65%); }
-.battle-card.c2::before { background:radial-gradient(circle at top left, rgba(252,92,125,0.08), transparent 65%); }
-.battle-card.c3::before { background:radial-gradient(circle at top left, rgba(255,215,0,0.07), transparent 65%); }
-.battle-card:hover { border-color:rgba(124,92,252,0.25); }
-.bc-icon { font-size:36px; margin-bottom:12px; display:block; }
-.bc-name {
-  font-family: var(--font-mono);
-  font-size:12px;
-  font-weight:700;
-  color:#fff;
-  margin-bottom:6px;
-  letter-spacing:0.03em;
-}
-.bc-subs {
-  display:flex;
-  flex-wrap:wrap;
-  gap:5px;
-  margin-top:10px;
-}
-.bc-sub-chip {
-  background:var(--surface2);
-  border-radius:20px;
-  padding:3px 10px;
-  font-size:10px;
-  color:var(--muted);
-  font-family: var(--font-mono);
-}
+.stats-bar{position:relative;z-index:1;display:flex;justify-content:center;flex-wrap:wrap;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stat-item{flex:1;min-width:140px;padding:28px 20px;text-align:center;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:var(--font-display);font-size:44px;line-height:1}
+.stat-val.purple{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-val.gold{background:linear-gradient(135deg,var(--gold),#f58c42);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:6px;text-transform:uppercase}
+@media(max-width:600px){.stats-bar{flex-direction:column}.stat-item{border-right:none;border-bottom:1px solid var(--border)}.stat-item:last-child{border-bottom:none}}
 
-/* ── HOW IT WORKS ── */
-.steps {
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  position:relative;
-}
-.steps::before {
-  content:'';
-  position:absolute;
-  left:22px;
-  top:46px;
-  bottom:46px;
-  width:1px;
-  background:linear-gradient(to bottom, var(--accent), var(--accent2), transparent);
-  opacity:0.2;
-}
-.step {
-  display:flex;
-  gap:20px;
-  padding:26px 0;
-  border-bottom:1px solid var(--border);
-  align-items:flex-start;
-}
-.step:last-child { border-bottom:none; }
-.step-n {
-  flex-shrink:0;
-  width:44px; height:44px;
-  border-radius:50%;
-  background:var(--surface2);
-  border:1.5px solid rgba(124,92,252,0.25);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family: var(--font-mono);
-  font-size:13px;
-  font-weight:700;
-  color:var(--accent);
-}
-.step-t {
-  font-family: var(--font-mono);
-  font-size:13px;
-  font-weight:700;
-  color:#fff;
-  margin-bottom:5px;
-}
-.step-d { font-size:13px; color:var(--muted); line-height:1.65; }
+.section-wrap{position:relative;z-index:1;padding:80px 24px;max-width:1080px;margin:0 auto}
+.section-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:16px}
+.section-label.gold{color:var(--gold)}
+.section-title{font-family:var(--font-display);font-size:clamp(36px,6vw,58px);line-height:1;color:#fff;margin-bottom:16px}
+.section-title .grad{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-title .grad-gold{background:linear-gradient(135deg,var(--gold),#f58c42);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-sub{font-size:15px;color:var(--muted);max-width:540px;line-height:1.65;margin-bottom:44px}
 
-/* ── FEATURES GRID ── */
-.features-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
-  gap:14px;
-}
-.feat-card {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:26px 22px;
-  position:relative;
-  overflow:hidden;
-  transition:border-color .2s, transform .2s;
-}
-.feat-card:hover { border-color:rgba(124,92,252,0.25); transform:translateY(-2px); }
-.feat-card::before {
-  content:'';
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at top left, rgba(124,92,252,0.05), transparent 60%);
-  pointer-events:none;
-}
-.feat-badge {
-  position:absolute;
-  top:14px; right:14px;
-  background:linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius:20px;
-  padding:3px 9px;
-  font-family: var(--font-mono);
-  font-size:8px;
-  font-weight:700;
-  color:#fff;
-  letter-spacing:0.06em;
-}
-.feat-icon { font-size:30px; margin-bottom:12px; display:block; }
-.feat-name {
-  font-family: var(--font-mono);
-  font-size:12px;
-  font-weight:700;
-  color:#fff;
-  margin-bottom:7px;
-}
-.feat-desc { font-size:12px; color:var(--muted); line-height:1.65; }
+/* DUAL */
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:24px;overflow:hidden}
+.dual-panel{padding:48px 40px;position:relative;overflow:hidden}
+.dual-panel:first-child{background:linear-gradient(135deg,rgba(124,92,252,.07),rgba(124,92,252,.02));border-right:1px solid var(--border)}
+.dual-panel:last-child{background:linear-gradient(135deg,rgba(245,200,66,.05),rgba(245,200,66,.01))}
+.dual-panel::before{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;pointer-events:none}
+.dual-panel:first-child::before{background:radial-gradient(circle,rgba(124,92,252,.14),transparent 70%)}
+.dual-panel:last-child::before{background:radial-gradient(circle,rgba(245,200,66,.1),transparent 70%)}
+.dual-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;border-radius:20px;padding:4px 12px;display:inline-block;margin-bottom:16px}
+.dual-tag.creator{background:rgba(124,92,252,.15);color:var(--accent);border:1px solid rgba(124,92,252,.3)}
+.dual-tag.producer{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3)}
+.dual-title{font-family:var(--font-display);font-size:clamp(26px,3.5vw,42px);color:#fff;margin-bottom:14px;line-height:1}
+.dual-text{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px}
+.dual-perks{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.perk{display:flex;align-items:center;gap:12px;font-size:13px;color:rgba(255,255,255,.7)}
+.perk-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.perk-icon.purple{background:rgba(124,92,252,.15)}
+.perk-icon.gold{background:rgba(245,200,66,.12)}
+@media(max-width:680px){.dual{grid-template-columns:1fr}.dual-panel:first-child{border-right:none;border-bottom:1px solid var(--border)}}
 
-/* ── LEADERBOARD PREVIEW ── */
-.lb-preview {
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:24px;
-  overflow:hidden;
-}
-.lb-header {
-  background:linear-gradient(135deg, #1a0a2e, #0f0f1a);
-  border-bottom:2px solid rgba(255,215,0,0.15);
-  padding:20px 24px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.lb-header-title {
-  font-family: var(--font-mono);
-  font-size:14px;
-  font-weight:700;
-  color:var(--gold);
-}
-.lb-tabs-mini {
-  display:flex;
-  gap:6px;
-  margin-left:auto;
-}
-.lb-tab-mini {
-  font-family: var(--font-mono);
-  font-size:9px;
-  font-weight:700;
-  padding:4px 12px;
-  border-radius:20px;
-  letter-spacing:0.06em;
-  color:var(--muted);
-  background:var(--surface2);
-}
-.lb-tab-mini.a { color:#fff; background:var(--accent); }
-.lb-rows { display:flex; flex-direction:column; }
-.lb-row {
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:14px 24px;
-  border-bottom:1px solid var(--border);
-}
-.lb-row:last-child { border-bottom:none; }
-.lb-pos {
-  font-family: var(--font-mono);
-  font-weight:700;
-  font-size:18px;
-  width:32px;
-  text-align:center;
-  flex-shrink:0;
-}
-.lb-pos.gold { color:var(--gold); }
-.lb-pos.silver { color:#c0c0c0; }
-.lb-pos.bronze { color:#cd7f32; }
-.lb-ava {
-  width:40px; height:40px;
-  border-radius:50%;
-  background:var(--surface2);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  font-family: var(--font-mono);
-  font-weight:700;
-  flex-shrink:0;
-}
-.lb-info { flex:1; }
-.lb-name { font-family: var(--font-mono); font-size:12px; font-weight:700; color:#fff; }
-.lb-meta { font-size:11px; color:var(--muted); margin-top:2px; }
-.lb-badge-mini {
-  font-family: var(--font-mono);
-  font-size:9px;
-  font-weight:700;
-  padding:3px 10px;
-  border-radius:20px;
-}
-.lb-badge-mini.gold { background:var(--gold); color:#000; }
-.lb-badge-mini.silver { background:#c0c0c0; color:#000; }
-.lb-badge-mini.bronze { background:#cd7f32; color:#fff; }
+/* BATTLE */
+.battle-showcase{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:32px;position:relative;overflow:hidden}
+.battle-showcase::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,92,252,.07),transparent 60%);pointer-events:none}
+.battle-side{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.battle-avatar{width:66px;height:66px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.battle-avatar.left{background:linear-gradient(135deg,rgba(124,92,252,.2),rgba(124,92,252,.05));border:2px solid rgba(124,92,252,.3)}
+.battle-avatar.right{background:linear-gradient(135deg,rgba(252,92,125,.2),rgba(252,92,125,.05));border:2px solid rgba(252,92,125,.3)}
+.battle-name{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff}
+.battle-country{font-size:11px;color:var(--muted)}
+.battle-score{font-family:var(--font-display);font-size:26px;color:#fff;line-height:1}
+.battle-votes{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.08em}
+.battle-vs{font-family:var(--font-display);font-size:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;padding:0 4px}
+.battle-bar{width:100%;height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-top:6px}
+.battle-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+@media(max-width:560px){.battle-showcase{grid-template-columns:1fr}.battle-vs{margin:0 auto}}
 
-/* ── CTA ── */
-#cta {
-  position:relative;
-  z-index:1;
-  text-align:center;
-  padding:80px 24px 100px;
-  overflow:hidden;
-  max-width:none;
-}
-.cta-ring {
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:600px; height:600px;
-  border-radius:50%;
-  border:1px solid rgba(124,92,252,0.08);
-  pointer-events:none;
-}
-.cta-ring-2 {
-  position:absolute;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:400px; height:400px;
-  border-radius:50%;
-  border:1px solid rgba(252,92,125,0.07);
-  pointer-events:none;
-}
-.cta-glow {
-  position:absolute;
-  inset:0;
-  background:radial-gradient(ellipse at 50% 60%, rgba(124,92,252,0.12), transparent 65%);
-  pointer-events:none;
-}
-.cta-eyebrow {
-  font-family: var(--font-mono);
-  font-size:10px;
-  letter-spacing:0.18em;
-  color:var(--accent2);
-  text-transform:uppercase;
-  margin-bottom:16px;
-  position:relative;
-}
-.cta-title {
-  font-family: var(--font-display);
-  font-size:clamp(40px,7.5vw,80px);
-  font-weight:800;
-  line-height:0.95;
-  color:#fff;
-  margin-bottom:18px;
-  position:relative;
-}
-.cta-sub {
-  font-size:15px;
-  color:var(--muted);
-  max-width:440px;
-  margin:0 auto 36px;
-  line-height:1.7;
-  position:relative;
-}
+/* JOURNEY */
+.journey{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:2px;background:var(--border);border-radius:18px;overflow:hidden}
+.journey-step{background:var(--bg);padding:28px 20px;position:relative}
+.journey-step::after{content:attr(data-num);position:absolute;top:12px;right:16px;font-family:var(--font-display);font-size:48px;color:rgba(255,255,255,.04);line-height:1}
+.j-icon{font-size:26px;margin-bottom:12px}
+.j-title{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#fff;margin-bottom:6px}
+.j-text{font-size:12px;color:var(--muted);line-height:1.6}
+.j-badge{display:inline-block;margin-top:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;padding:3px 10px;font-family:var(--font-mono);font-size:9px;font-weight:700;color:#fff;letter-spacing:.06em}
+.j-badge.gold{background:linear-gradient(135deg,var(--gold),#f58c42)}
 
-/* ── FOOTER ── */
-footer {
-  position:relative;
-  z-index:1;
-  border-top:1px solid var(--border);
-  padding:28px 24px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:16px;
-  max-width:1080px;
-  margin:0 auto;
-}
-.footer-logo {
-  font-family: var(--font-mono);
-  font-size:13px;
-  font-weight:700;
-  color:var(--muted);
-}
-.footer-logo span { color:var(--accent); }
-.footer-links {
-  display:flex;
-  gap:18px;
-  list-style:none;
-  flex-wrap:wrap;
-}
-.footer-links a {
-  font-family: var(--font-mono);
-  font-size:10px;
-  color:var(--muted);
-  text-decoration:none;
-  letter-spacing:0.05em;
-  transition:color .15s;
-}
-.footer-links a:hover { color:var(--text); }
-.footer-copy {
-  font-family: var(--font-mono);
-  font-size:9px;
-  color:rgba(255,255,255,0.15);
-  letter-spacing:0.05em;
-}
+/* CATEGORIES */
+.categories-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:border-color .2s,transform .2s,background .2s;position:relative;overflow:hidden;text-decoration:none;display:block}
+.cat-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;pointer-events:none}
+.cat-card:hover{transform:translateY(-3px)}
+.cat-card:hover::before{opacity:1}
+.cat-emoji{font-size:28px;display:block;margin-bottom:8px}
+.cat-name{font-family:var(--font-mono);font-size:10px;font-weight:700;color:#fff;letter-spacing:.04em}
+.cat-count{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3}
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(22px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.reveal {
-  opacity:0;
-  transform:translateY(24px);
-  transition:opacity .55s ease, transform .55s ease;
-}
-.reveal.visible { opacity:1; transform:translateY(0); }
+.cat-card:nth-child(1){border-color:rgba(252,92,125,.15)}.cat-card:nth-child(1)::before{background:radial-gradient(circle at top,rgba(252,92,125,.06),transparent 70%)}.cat-card:nth-child(1):hover{border-color:rgba(252,92,125,.4);background:rgba(252,92,125,.04)}
+.cat-card:nth-child(2){border-color:rgba(124,92,252,.15)}.cat-card:nth-child(2)::before{background:radial-gradient(circle at top,rgba(124,92,252,.06),transparent 70%)}.cat-card:nth-child(2):hover{border-color:rgba(124,92,252,.4);background:rgba(124,92,252,.04)}
+.cat-card:nth-child(3){border-color:rgba(46,204,113,.15)}.cat-card:nth-child(3)::before{background:radial-gradient(circle at top,rgba(46,204,113,.06),transparent 70%)}.cat-card:nth-child(3):hover{border-color:rgba(46,204,113,.4);background:rgba(46,204,113,.04)}
+.cat-card:nth-child(4){border-color:rgba(245,200,66,.15)}.cat-card:nth-child(4)::before{background:radial-gradient(circle at top,rgba(245,200,66,.06),transparent 70%)}.cat-card:nth-child(4):hover{border-color:rgba(245,200,66,.4);background:rgba(245,200,66,.04)}
+.cat-card:nth-child(5){border-color:rgba(52,152,219,.15)}.cat-card:nth-child(5)::before{background:radial-gradient(circle at top,rgba(52,152,219,.06),transparent 70%)}.cat-card:nth-child(5):hover{border-color:rgba(52,152,219,.4);background:rgba(52,152,219,.04)}
+.cat-card:nth-child(6){border-color:rgba(230,126,34,.15)}.cat-card:nth-child(6)::before{background:radial-gradient(circle at top,rgba(230,126,34,.06),transparent 70%)}.cat-card:nth-child(6):hover{border-color:rgba(230,126,34,.4);background:rgba(230,126,34,.04)}
+.cat-card:nth-child(7){border-color:rgba(155,89,182,.15)}.cat-card:nth-child(7)::before{background:radial-gradient(circle at top,rgba(155,89,182,.06),transparent 70%)}.cat-card:nth-child(7):hover{border-color:rgba(155,89,182,.4);background:rgba(155,89,182,.04)}
+.cat-card:nth-child(8){border-color:rgba(231,76,60,.15)}.cat-card:nth-child(8)::before{background:radial-gradient(circle at top,rgba(231,76,60,.06),transparent 70%)}.cat-card:nth-child(8):hover{border-color:rgba(231,76,60,.4);background:rgba(231,76,60,.04)}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:var(--bg); }
-::-webkit-scrollbar-thumb { background:var(--surface2); border-radius:3px; }
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:26px 22px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.feature-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top left,rgba(124,92,252,.05),transparent 60%);pointer-events:none}
+.feature-card:hover{border-color:rgba(124,92,252,.28);transform:translateY(-2px)}
+.feature-icon{font-size:28px;margin-bottom:12px;display:block}
+.feature-name{font-family:var(--font-mono);font-size:12px;font-weight:700;color:#fff;margin-bottom:7px}
+.feature-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.feature-badge{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:20px;padding:3px 9px;font-family:var(--font-mono);font-size:9px;font-weight:700;color:#fff;letter-spacing:.06em}
+.feature-badge.gold{background:linear-gradient(135deg,var(--gold),#f58c42)}
 
-/* ── COOKIE BANNER ── */
-#cookieBanner {
-  display:none;
-  position:fixed;
-  bottom:0; left:0; right:0;
-  z-index:9999;
-  background:rgba(19,19,26,0.98);
-  backdrop-filter:blur(24px);
-  border-top:1px solid var(--border);
-  padding:16px 24px;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:12px;
-}
+#cta{position:relative;z-index:1;padding:80px 24px 100px;text-align:center;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(124,92,252,.12),transparent 70%);pointer-events:none}
+.cta-title{font-family:var(--font-display);font-size:clamp(40px,8vw,84px);line-height:.95;color:#fff;margin-bottom:20px;position:relative}
+.cta-sub{font-size:15px;color:var(--muted);max-width:440px;margin:0 auto 36px;line-height:1.6;position:relative}
+.cta-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;position:relative}
 
-/* ── RESPONSIVE ── */
-@media (max-width:600px) {
-  .stats-strip { flex-direction:column; }
-  .stat-cell { border-right:none; border-bottom:1px solid var(--border); }
-  .stat-cell:last-child { border-bottom:none; }
-  footer { flex-direction:column; text-align:center; }
-  .footer-links { justify-content:center; }
-  .hero-mockup { display:none; }
-  .lb-tabs-mini { display:none; }
-}
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;max-width:1080px;margin:0 auto}
+.footer-logo{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--muted)}
+.footer-logo span{color:var(--accent)}
+.footer-links{display:flex;gap:18px;list-style:none;flex-wrap:wrap}
+.footer-links a{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:.05em;transition:color .15s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.05em}
+@media(max-width:600px){footer{flex-direction:column;text-align:center}.footer-links{justify-content:center}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
 </style>
 </head>
 <body>
 
-<div class="orb orb-1" aria-hidden="true"></div>
-<div class="orb orb-2" aria-hidden="true"></div>
-<div class="orb orb-3" aria-hidden="true"></div>
+<div class="glow-orb purple" aria-hidden="true"></div>
+<div class="glow-orb pink" aria-hidden="true"></div>
+<div class="glow-orb gold" aria-hidden="true"></div>
 
-<!-- NAV -->
 <nav role="navigation" aria-label="Navigation principale">
   <a href="/" class="nav-logo" aria-label="VoltClip accueil">
     <span class="bolt">⚡</span> VOLTCLIP
   </a>
-  <a href="voltclip.html" class="nav-cta">Entrer dans l'arène ⚔️</a>
+  <div class="nav-links">
+    <a href="#talent">Talents</a>
+    <a href="#producteurs">Producteurs</a>
+    <a href="#battles">Battles</a>
+    <a href="#categories">Catégories</a>
+  </div>
+  <a href="voltclip.html" class="nav-cta">Lancer l'app ⚡</a>
 </nav>
 
-<!-- HERO -->
 <header id="hero" role="banner">
-  <div class="hero-pill"><span class="dot"></span>Plateforme de battle créatif · 2026</div>
+  <div class="hero-spotlight" aria-hidden="true"></div>
+
+  <div class="hero-eyebrow" aria-hidden="true">Plateforme mondiale · Découverte de talents · 2026</div>
 
   <h1 class="hero-title">
-    <span class="v">VOLT</span><span class="clip-word">CLIP</span>
+    <span class="volt">VOLT</span><span>CLIP</span>
   </h1>
 
+  <p class="hero-tagline">LÀ OÙ LES TALENTS S'AFFRONTENT</p>
+
   <p class="hero-sub">
-    Publie tes clips, affronte d'autres créateurs en <strong>duel vidéo</strong>,
-    vote pour le meilleur talent. La communauté décide.
+    La première plateforme mondiale où les créateurs s'affrontent en <strong>battle vidéo</strong> et se font repérer par des <strong>producteurs, labels et scouts</strong> du monde entier. Ton moment de gloire est à un clip.
   </p>
 
-  <div class="hero-cats">
-    <span class="cat-chip">🕺 Danse</span>
-    <span class="cat-chip">🎙️ Vocal</span>
-    <span class="cat-chip">⚡ Freestyle</span>
-    <span class="cat-chip">🎮 Gaming</span>
-    <span class="cat-chip">😂 Humour</span>
-    <span class="cat-chip">🎭 Sketch</span>
-  </div>
-
-  <div class="hero-mockup" aria-hidden="true">
-    <div class="mock-phone left">
-      <div class="mock-inner">
-        <div style="flex:1;background:linear-gradient(160deg,#0d0d18,#1a1a2e);display:flex;align-items:center;justify-content:center;font-size:28px;">🕺</div>
-      </div>
+  <div class="talent-stage" aria-hidden="true">
+    <div class="talent-card">
+      <div class="avatar" style="background:rgba(124,92,252,.15)">🎤</div>
+      <div class="info"><div class="name">@maya_sings</div><div class="cat">🇺🇸 Musique</div></div>
+      <div class="votes">⚡ 14.2k</div>
     </div>
-    <div class="mock-phone center">
-      <div class="mock-inner">
-        <div class="mock-top left-col">🎤</div>
-        <div class="mock-bottom">🕺</div>
-        <div class="mock-vs">VS</div>
-        <div class="mock-vote-bar">
-          <span class="mock-vote-left">⚡ 58%</span>
-          <span style="color:var(--muted);font-size:8px;">VOTE</span>
-          <span class="mock-vote-right">42% 🔥</span>
-        </div>
-      </div>
+    <div class="talent-card">
+      <div class="avatar" style="background:rgba(245,200,66,.12)">🏆</div>
+      <div class="info"><div class="name">@street_art_rio</div><div class="cat">🇧🇷 Art · #1</div></div>
+      <div class="votes">🔥 TOP</div>
     </div>
-    <div class="mock-phone right">
-      <div class="mock-inner">
-        <div style="flex:1;background:linear-gradient(160deg,#1a1018,#2a0d14);display:flex;align-items:center;justify-content:center;font-size:28px;">🎤</div>
-      </div>
+    <div class="talent-card">
+      <div class="avatar" style="background:rgba(252,92,125,.12)">💃</div>
+      <div class="info"><div class="name">@seoul_dancer</div><div class="cat">🇰🇷 Danse</div></div>
+      <div class="votes">⚡ 9.8k</div>
     </div>
   </div>
 
-  <div class="hero-cta">
-    <a href="voltclip.html" class="btn-main">
-      ⚡ Lancer l'app <span class="arr">→</span>
+  <div class="talent-ticker">
+    <div class="ticker-dot"></div>
+    <span class="ticker-text">BATTLES EN COURS ·&nbsp;</span>
+    <span class="ticker-count" id="liveCount">247</span>
+    <span class="ticker-text">&nbsp;· TALENTS EN LIGNE</span>
+  </div>
+
+  <div class="hero-actions">
+    <a href="voltclip.html" class="btn-primary">
+      Montrer mon talent <span class="arrow">→</span>
     </a>
-    <a href="#battles" class="btn-outline">Voir les battles</a>
+    <a href="#producteurs" class="btn-gold">🎯 Je suis producteur</a>
   </div>
 </header>
 
-<!-- STATS -->
-<div class="stats-strip" role="region" aria-label="Chiffres clés">
-  <div class="stat-cell"><div class="stat-v">100%</div><div class="stat-l">Gratuit</div></div>
-  <div class="stat-cell"><div class="stat-v">8</div><div class="stat-l">Catégories</div></div>
-  <div class="stat-cell"><div class="stat-v">⚔️</div><div class="stat-l">Duels vidéo</div></div>
-  <div class="stat-cell"><div class="stat-v">∞</div><div class="stat-l">Feed personnalisé</div></div>
+<div class="stats-bar" role="region" aria-label="Chiffres clés">
+  <div class="stat-item"><div class="stat-val purple">∞</div><div class="stat-label">Talents mondiaux</div></div>
+  <div class="stat-item"><div class="stat-val gold">⚔️</div><div class="stat-label">Battles par catégorie</div></div>
+  <div class="stat-item"><div class="stat-val purple">100%</div><div class="stat-label">Gratuit</div></div>
+  <div class="stat-item"><div class="stat-val gold">🌍</div><div class="stat-label">Accessible partout</div></div>
 </div>
 
-<!-- BATTLES -->
-<section id="battles" aria-labelledby="battles-title">
-  <div class="s-label">Catégories de battle</div>
-  <h2 class="s-title" id="battles-title">Choisis ton<br><span class="g">arène</span></h2>
-  <p class="s-sub">8 catégories, des dizaines de sous-genres. Affronte les meilleurs dans ta discipline.</p>
+<!-- DUAL AUDIENCE -->
+<div style="position:relative;z-index:1;padding:80px 24px;max-width:1080px;margin:0 auto" id="talent">
+  <div class="dual reveal">
+    <div class="dual-panel">
+      <span class="dual-tag creator">🎬 CRÉATEUR / TALENT</span>
+      <h2 class="dual-title">TON TALENT<br>MÉRITE<br>D'ÊTRE VU</h2>
+      <p class="dual-text">Publie tes clips, affronte d'autres créateurs en battle et grimpe dans le classement mondial. Plus tu gagnes de votes, plus tu deviens visible aux yeux des professionnels.</p>
+      <div class="dual-perks">
+        <div class="perk"><div class="perk-icon purple">🎯</div>Battle automatique dès l'upload dans ta catégorie</div>
+        <div class="perk"><div class="perk-icon purple">🏆</div>Classement mondial en temps réel par discipline</div>
+        <div class="perk"><div class="perk-icon purple">📊</div>Analytics — vues, votes, taux de complétion</div>
+        <div class="perk"><div class="perk-icon purple">💬</div>Contact direct par les producteurs via DM</div>
+      </div>
+      <a href="voltclip.html" class="btn-primary" style="align-self:flex-start">Publier mon clip ⚡</a>
+    </div>
 
-  <div class="battle-grid reveal">
-    <div class="battle-card c1">
-      <span class="bc-icon">🕺</span>
-      <div class="bc-name">Solo Danse</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Hip-Hop</span>
-        <span class="bc-sub-chip">Afro</span>
-        <span class="bc-sub-chip">TikTok / Viral</span>
-        <span class="bc-sub-chip">Waacking</span>
+    <div class="dual-panel" id="producteurs">
+      <span class="dual-tag producer">🎯 PRODUCTEUR / LABEL / SCOUT</span>
+      <h2 class="dual-title">TROUVEZ VOS<br>PROCHAINES<br>STARS</h2>
+      <p class="dual-text">VoltClip est votre vivier de talents mondial. Les créateurs s'affrontent, le public vote — vous repérez ceux qui émergent. Filtrez par catégorie, pays, votes, engagement.</p>
+      <div class="dual-perks">
+        <div class="perk"><div class="perk-icon gold">🌍</div>Talents de tous les pays dans une seule interface</div>
+        <div class="perk"><div class="perk-icon gold">📈</div>Stats publiques : votes, vues, engagement, historique</div>
+        <div class="perk"><div class="perk-icon gold">⚡</div>Classement live — les meilleurs remontent naturellement</div>
+        <div class="perk"><div class="perk-icon gold">💬</div>Contacter un créateur directement via DM intégré</div>
       </div>
-    </div>
-    <div class="battle-card c2">
-      <span class="bc-icon">👯</span>
-      <div class="bc-name">Duo Danse</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Hip-Hop</span>
-        <span class="bc-sub-chip">Afro</span>
-        <span class="bc-sub-chip">Classique</span>
-        <span class="bc-sub-chip">Vogue</span>
-      </div>
-    </div>
-    <div class="battle-card c1">
-      <span class="bc-icon">🎙️</span>
-      <div class="bc-name">Solo Vocal</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Rap / Freestyle</span>
-        <span class="bc-sub-chip">R&B / Soul</span>
-        <span class="bc-sub-chip">Pop</span>
-        <span class="bc-sub-chip">Lo-fi</span>
-      </div>
-    </div>
-    <div class="battle-card c2">
-      <span class="bc-icon">🎤</span>
-      <div class="bc-name">Duo Vocal</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Rap</span>
-        <span class="bc-sub-chip">Gospel</span>
-        <span class="bc-sub-chip">Pop</span>
-        <span class="bc-sub-chip">R&B</span>
-      </div>
-    </div>
-    <div class="battle-card c3">
-      <span class="bc-icon">⚡</span>
-      <div class="bc-name">Freestyle</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:var(--font-mono)">Libre, aucune règle — juste ton flow</div>
-    </div>
-    <div class="battle-card c1">
-      <span class="bc-icon">🎮</span>
-      <div class="bc-name">Gaming</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Mobile</span>
-        <span class="bc-sub-chip">PC / Console</span>
-        <span class="bc-sub-chip">Best Clip</span>
-      </div>
-    </div>
-    <div class="battle-card c2">
-      <span class="bc-icon">😂</span>
-      <div class="bc-name">Humour</div>
-      <div class="bc-subs">
-        <span class="bc-sub-chip">Skit</span>
-        <span class="bc-sub-chip">Fail / Bêtisier</span>
-        <span class="bc-sub-chip">Impro</span>
-      </div>
-    </div>
-    <div class="battle-card c3">
-      <span class="bc-icon">🎭</span>
-      <div class="bc-name">Sketch</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:8px;font-family:var(--font-mono)">Courtes mises en scène, impros, one-shots</div>
+      <a href="voltclip.html" class="btn-gold" style="align-self:flex-start">Explorer les talents →</a>
     </div>
   </div>
-</section>
+</div>
+
+<!-- BATTLE -->
+<div class="section-wrap" id="battles">
+  <div class="section-label">⚔️ ClipBattle</div>
+  <h2 class="section-title">La compétition<br><span class="grad">en temps réel</span></h2>
+  <p class="section-sub">Deux talents s'affrontent dans la même catégorie. Le public vote. Le gagnant monte dans le classement mondial. Simple. Brutal. Décisif.</p>
+
+  <div class="battle-showcase reveal">
+    <div class="battle-side">
+      <div class="battle-avatar left">🎤</div>
+      <div class="battle-name">@maya_sings</div>
+      <div class="battle-country">🇺🇸 New York</div>
+      <div class="battle-score">8 241</div>
+      <div class="battle-votes">VOTES</div>
+      <div style="width:100%;margin-top:4px">
+        <div class="battle-bar"><div class="battle-bar-fill" style="width:62%"></div></div>
+      </div>
+    </div>
+    <div class="battle-vs">VS</div>
+    <div class="battle-side">
+      <div class="battle-avatar right">🎵</div>
+      <div class="battle-name">@paris_remy</div>
+      <div class="battle-country">🇫🇷 Paris</div>
+      <div class="battle-score">5 012</div>
+      <div class="battle-votes">VOTES</div>
+      <div style="width:100%;margin-top:4px">
+        <div class="battle-bar"><div class="battle-bar-fill" style="width:38%;background:linear-gradient(90deg,var(--accent2),var(--accent))"></div></div>
+      </div>
+    </div>
+  </div>
+  <p style="text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:14px;letter-spacing:.06em">CATÉGORIE : MUSIQUE · 🌍 BATTLE MONDIAL · ⏱ 47H RESTANTES</p>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section-wrap" id="categories">
+  <div class="section-label gold">🌟 Disciplines</div>
+  <h2 class="section-title">Toutes les<br><span class="grad-gold">formes de talent</span></h2>
+  <p class="section-sub">Chaque discipline a son propre classement et ses propres battles. Ton talent a forcément sa place ici.</p>
+
+  <div class="categories-grid reveal">
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🎤</span><div class="cat-name">MUSIQUE</div><div class="cat-count">Chant · Rap · Beatbox</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">💃</span><div class="cat-name">DANSE</div><div class="cat-count">Street · Contemporary · Waacking</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🎭</span><div class="cat-name">COMÉDIE</div><div class="cat-count">Stand-up · Sketch · Mime</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🎨</span><div class="cat-name">ART VISUEL</div><div class="cat-count">Dessin · Digital · Graffiti</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🤸</span><div class="cat-name">SPORT</div><div class="cat-count">Freestyle · Acrobatie · Tricks</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🍳</span><div class="cat-name">CUISINE</div><div class="cat-count">Recettes · Plating · Speed cook</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">🎮</span><div class="cat-name">GAMING</div><div class="cat-count">Highlights · Speedrun · IRL</div></a>
+    <a class="cat-card" href="voltclip.html"><span class="cat-emoji">✨</span><div class="cat-name">AUTRE</div><div class="cat-count">Magie · Illusions · Unique</div></a>
+  </div>
+</div>
+
+<!-- JOURNEY -->
+<div class="section-wrap">
+  <div class="section-label">Parcours</div>
+  <h2 class="section-title">De l'upload<br><span class="grad">au repérage</span></h2>
+
+  <div class="journey reveal">
+    <div class="journey-step" data-num="01">
+      <div class="j-icon">📱</div>
+      <h3 class="j-title">TU UPLOADES</h3>
+      <p class="j-text">Publie ton clip depuis ton mobile. Choisis ta catégorie, titre, hashtags. Publie en quelques secondes.</p>
+    </div>
+    <div class="journey-step" data-num="02">
+      <div class="j-icon">⚔️</div>
+      <h3 class="j-title">TU BATTLES</h3>
+      <p class="j-text">VoltClip t'apparie automatiquement avec un autre talent de ta catégorie. La bataille commence.</p>
+      <span class="j-badge">AUTO-MATCH</span>
+    </div>
+    <div class="journey-step" data-num="03">
+      <div class="j-icon">🌍</div>
+      <h3 class="j-title">LE MONDE VOTE</h3>
+      <p class="j-text">Des milliers de viewers du monde entier regardent et votent pour leur favori. En temps réel.</p>
+    </div>
+    <div class="journey-step" data-num="04">
+      <div class="j-icon">📈</div>
+      <h3 class="j-title">TU GRIMPES</h3>
+      <p class="j-text">Chaque victoire te fait monter dans le classement mondial de ta discipline. Semaine après semaine.</p>
+    </div>
+    <div class="journey-step" data-num="05">
+      <div class="j-icon">🎯</div>
+      <h3 class="j-title">TU ES REPÉRÉ</h3>
+      <p class="j-text">Producteurs, labels et scouts consultent les tops du classement. Ton moment arrive.</p>
+      <span class="j-badge gold">🏆 OBJECTIF</span>
+    </div>
+  </div>
+</div>
 
 <!-- FEATURES -->
-<section id="features" aria-labelledby="feat-title" style="padding-top:0">
-  <div class="s-label">Fonctionnalités</div>
-  <h2 class="s-title" id="feat-title">Tout pour<br><span class="g">dominer</span></h2>
+<div class="section-wrap">
+  <div class="section-label">Plateforme</div>
+  <h2 class="section-title">Tout ce qu'il faut<br><span class="grad">pour percer</span></h2>
 
   <div class="features-grid reveal">
-    <article class="feat-card">
-      <span class="feat-badge">⚔️ EXCLU</span>
-      <span class="feat-icon">⚔️</span>
-      <h3 class="feat-name">Battles Vidéo côte à côte</h3>
-      <p class="feat-desc">Deux clips en face-à-face, la communauté vote. Résultats en temps réel avec pourcentages animés et animation winner 🏆.</p>
+    <article class="feature-card">
+      <span class="feature-badge gold">CORE</span>
+      <span class="feature-icon">⚔️</span>
+      <h3 class="feature-name">ClipBattle — Système de battle</h3>
+      <p class="feature-desc">Chaque vidéo est automatiquement mise en battle dans sa catégorie. Le public vote, les stats sont publiques.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">🎬</span>
-      <h3 class="feat-name">Feed plein écran</h3>
-      <p class="feat-desc">Scroll infini snap, lecture auto, deux onglets : "Pour toi" personnalisé et "Abonnements".</p>
+    <article class="feature-card">
+      <span class="feature-icon">🏆</span>
+      <h3 class="feature-name">Classement mondial temps réel</h3>
+      <p class="feature-desc">Semaine, mois, all-time — chaque catégorie a son classement. Les meilleurs talents deviennent visibles naturellement.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">🧠</span>
-      <h3 class="feat-name">Algo v4 personnalisé</h3>
-      <p class="feat-desc">9 signaux comportementaux — complétion, rematch, skip, fraîcheur, boost viral. Feed calibré sur toi en temps réel.</p>
+    <article class="feature-card">
+      <span class="feature-icon">🧠</span>
+      <h3 class="feature-name">Algorithme de découverte v4</h3>
+      <p class="feature-desc">Feed personnalisé qui expose les meilleurs talents au bon public au bon moment. 9 signaux comportementaux analysés.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">🏆</span>
-      <h3 class="feat-name">Leaderboard mondial</h3>
-      <p class="feat-desc">Top votants, classement par pays et par ville. Podium or/argent/bronze mis à jour en continu.</p>
+    <article class="feature-card">
+      <span class="feature-badge">LIVE</span>
+      <span class="feature-icon">🌍</span>
+      <h3 class="feature-name">Audience mondiale sans frontières</h3>
+      <p class="feature-desc">Un talent à Lagos peut battre un créateur à Tokyo. Le vote du public est universel et en temps réel.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">💬</span>
-      <h3 class="feat-name">Messagerie privée</h3>
-      <p class="feat-desc">DM temps réel via Supabase Realtime. Envoie un message à n'importe quel créateur depuis son profil.</p>
+    <article class="feature-card">
+      <span class="feature-icon">📊</span>
+      <h3 class="feature-name">Analytics créateur complet</h3>
+      <p class="feature-desc">Vues, votes gagnés, taux de complétion, historique battles, progression classement, pics d'audience.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-badge">LIVE</span>
-      <span class="feat-icon">🔔</span>
-      <h3 class="feat-name">Notifications push</h3>
-      <p class="feat-desc">Alertes natives pour likes, votes, commentaires et abonnés — même appli fermée.</p>
+    <article class="feature-card">
+      <span class="feature-icon">💬</span>
+      <h3 class="feature-name">Contact direct producteur → talent</h3>
+      <p class="feature-desc">DM intégré. Un producteur repère un talent et le contacte directement depuis son profil. Zéro intermédiaire.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">🔥</span>
-      <h3 class="feat-name">Streak quotidien</h3>
-      <p class="feat-desc">Connecte-toi chaque jour pour maintenir ta flamme. Médaille bronze → argent → or sur ton profil.</p>
+    <article class="feature-card">
+      <span class="feature-icon">👤</span>
+      <h3 class="feature-name">Profil talent public</h3>
+      <p class="feature-desc">Chaque créateur a une vitrine permanente : grille de vidéos, stats, classement actuel, battles gagnées.</p>
     </article>
-    <article class="feat-card">
-      <span class="feat-icon">📌</span>
-      <h3 class="feat-name">Profils & épinglage</h3>
-      <p class="feat-desc">Épingle ta meilleure vidéo et le commentaire clé. Grille publique, stats, abonnements, DM direct.</p>
-    </article>
-    <article class="feat-card">
-      <span class="feat-icon">☁️</span>
-      <h3 class="feat-name">Upload Cloudinary CDN</h3>
-      <p class="feat-desc">Compression auto, thumbnail générée à la 1ère frame, diffusion mondiale fluide.</p>
+    <article class="feature-card">
+      <span class="feature-icon">📱</span>
+      <h3 class="feature-name">100% mobile, zéro installation</h3>
+      <p class="feature-desc">Fonctionne directement dans le navigateur mobile. Upload depuis la galerie ou directement à la caméra.</p>
     </article>
   </div>
-</section>
-
-<!-- LEADERBOARD PREVIEW -->
-<section style="padding-top:0" aria-labelledby="lb-title">
-  <div class="s-label">Classement</div>
-  <h2 class="s-title" id="lb-title">Qui domine<br><span class="g">l'arène ?</span></h2>
-  <p class="s-sub">Leaderboard mondial en temps réel — votants, pays, villes. Ta place t'attend.</p>
-
-  <div class="lb-preview reveal">
-    <div class="lb-header">
-      <span style="font-size:20px">🏆</span>
-      <span class="lb-header-title">LEADERBOARD</span>
-      <div class="lb-tabs-mini">
-        <span class="lb-tab-mini a">Votants</span>
-        <span class="lb-tab-mini">Pays</span>
-        <span class="lb-tab-mini">Villes</span>
-      </div>
-    </div>
-    <div class="lb-rows">
-      <div class="lb-row">
-        <div class="lb-pos gold">1</div>
-        <div class="lb-ava">🦁</div>
-        <div class="lb-info">
-          <div class="lb-name">@_freestyle_king</div>
-          <div class="lb-meta">247 votes · ⚡ Freestyle</div>
-        </div>
-        <span class="lb-badge-mini gold">🥇 OR</span>
-      </div>
-      <div class="lb-row">
-        <div class="lb-pos silver">2</div>
-        <div class="lb-ava">🐺</div>
-        <div class="lb-info">
-          <div class="lb-name">@danseur_pro</div>
-          <div class="lb-meta">189 votes · 🕺 Danse</div>
-        </div>
-        <span class="lb-badge-mini silver">🥈 ARGENT</span>
-      </div>
-      <div class="lb-row">
-        <div class="lb-pos bronze">3</div>
-        <div class="lb-ava">🐯</div>
-        <div class="lb-info">
-          <div class="lb-name">@vocal_slay</div>
-          <div class="lb-meta">154 votes · 🎙️ Vocal</div>
-        </div>
-        <span class="lb-badge-mini bronze">🥉 BRONZE</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section aria-labelledby="howto-title" style="padding-top:0">
-  <div class="s-label">Comment ça marche</div>
-  <h2 class="s-title" id="howto-title">En 4 étapes<br><span class="g">dans l'arène</span></h2>
-
-  <div class="steps reveal">
-    <div class="step">
-      <div class="step-n">01</div>
-      <div>
-        <h3 class="step-t">Crée ton compte</h3>
-        <p class="step-d">Email + pseudo unique, profil prêt en quelques secondes avec avatar, bio et compteurs.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">02</div>
-      <div>
-        <h3 class="step-t">Balance ton clip</h3>
-        <p class="step-d">Sélectionne ta vidéo, choisis la catégorie (danse, vocal, gaming…), ajoute un titre et publie. Upload Cloudinary, visible instantanément.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">03</div>
-      <div>
-        <h3 class="step-t">Lance un battle</h3>
-        <p class="step-d">Défie un créateur dans ta catégorie. Vos clips s'affrontent côte à côte — la communauté vote.</p>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-n">04</div>
-      <div>
-        <h3 class="step-t">Monte dans le classement</h3>
-        <p class="step-d">Cumule votes, likes et streak quotidien. Grimpe dans le leaderboard mondial — votants, pays, villes.</p>
-      </div>
-    </div>
-  </div>
-</section>
+</div>
 
 <!-- CTA -->
-<section id="cta" style="max-width:none; padding:80px 24px 100px; text-align:center; position:relative; z-index:1;">
-  <div class="cta-glow" aria-hidden="true"></div>
-  <div class="cta-ring" aria-hidden="true"></div>
-  <div class="cta-ring-2" aria-hidden="true"></div>
-  <div class="cta-eyebrow">Gratuit · Aucune installation</div>
-  <h2 class="cta-title">Prêt à entrer<br>dans l'arène ?</h2>
-  <p class="cta-sub">Rejoins VoltClip, publie tes clips, lance des battles, vote pour les meilleurs. Fonctionne dans ton navigateur.</p>
-  <a href="voltclip.html" class="btn-main" style="font-size:14px;padding:18px 42px">
-    ⚡ Accéder à VoltClip <span class="arr">→</span>
-  </a>
+<section id="cta" style="max-width:none;padding:80px 24px 100px;text-align:center;position:relative;z-index:1">
+  <div class="cta-bg" aria-hidden="true"></div>
+  <h2 class="cta-title">Ton talent<br><span style="background:linear-gradient(135deg,var(--gold),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">mérite une scène</span><br>mondiale.</h2>
+  <p class="cta-sub">Rejoins VoltClip gratuitement. Publie ton clip, affronte les meilleurs, grimpe dans le classement et fais-toi repérer.</p>
+  <div class="cta-actions">
+    <a href="voltclip.html" class="btn-primary" style="font-size:15px;padding:18px 38px">
+      ⚡ Lancer VoltClip <span class="arrow">→</span>
+    </a>
+    <a href="#producteurs" class="btn-gold" style="font-size:14px;padding:17px 30px">🎯 Espace producteur</a>
+  </div>
 </section>
 
-<!-- ADSENSE (chargé uniquement après consentement cookie) -->
-<div style="text-align:center;padding:24px;position:relative;z-index:1" id="adsenseBlock" style="display:none">
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="ca-pub-5433648295830648"
-       data-ad-slot="auto"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
+<!-- ADSENSE -->
+<div style="text-align:center;padding:24px;position:relative;z-index:1">
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5433648295830648" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 </div>
-<script>
-if (localStorage.getItem('voltclip_cookies') === 'accepted') {
-  var ab = document.getElementById('adsenseBlock');
-  if (ab) ab.style.display = 'block';
-  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
-}
-</script>
 
-<!-- FOOTER -->
 <footer role="contentinfo">
   <div class="footer-logo">⚡ <span>VOLT</span>CLIP</div>
   <nav aria-label="Liens footer">
     <ul class="footer-links">
       <li><a href="voltclip.html">App</a></li>
+      <li><a href="#talent">Talents</a></li>
+      <li><a href="#producteurs">Producteurs</a></li>
       <li><a href="#battles">Battles</a></li>
-      <li><a href="#features">Fonctionnalités</a></li>
     </ul>
   </nav>
-  <nav aria-label="Liens légaux">
-    <ul class="footer-links" style="opacity:.55">
+  <nav aria-label="Liens légaux" style="margin-top:12px">
+    <ul class="footer-links" style="font-size:10px;opacity:.6">
       <li><a href="mentions-legales.html">Mentions légales</a></li>
       <li><a href="politique-confidentialite.html">Confidentialité</a></li>
       <li><a href="cgu.html">CGU</a></li>
@@ -1168,55 +515,49 @@ if (localStorage.getItem('voltclip_cookies') === 'accepted') {
   <div class="footer-copy">© 2026 VoltClip — Caporale Hervé — Tous droits réservés</div>
 </footer>
 
-<!-- COOKIE BANNER -->
-<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(19,19,26,0.98);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.07);padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:12px">
-  <p style="flex:1;min-width:220px;font-size:13px;color:rgba(255,255,255,0.55);margin:0">🍪 VoltClip utilise des cookies pour le service et des publicités personnalisées. <a href="cookies.html" style="color:#7c5cfc">En savoir plus</a></p>
+<div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(19,19,26,0.98);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.07);padding:16px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+  <p style="flex:1;min-width:220px;font-size:13px;color:rgba(255,255,255,0.6);margin:0">🍪 VoltClip utilise des cookies pour le fonctionnement du service et des publicités personnalisées. <a href="cookies.html" style="color:#7c5cfc">En savoir plus</a></p>
   <div style="display:flex;gap:8px;flex-shrink:0">
-    <button onclick="refuseCookies()" style="background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.4);font-size:11px;padding:8px 16px;border-radius:20px;cursor:pointer;font-family:'Space Mono',monospace">Refuser</button>
-    <button onclick="acceptCookies()" style="background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;color:#fff;font-size:11px;font-weight:700;padding:8px 20px;border-radius:20px;cursor:pointer;font-family:'Space Mono',monospace">Accepter</button>
+    <button onclick="refuseCookies()" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:12px;padding:8px 16px;border-radius:20px;cursor:pointer;font-family:'Space Mono',monospace">Refuser</button>
+    <button onclick="acceptCookies()" style="background:linear-gradient(135deg,#7c5cfc,#fc5c7d);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 20px;border-radius:20px;cursor:pointer;font-family:'Space Mono',monospace">Accepter</button>
   </div>
 </div>
 
 <script>
-// Scroll reveal
-const obs = new IntersectionObserver(entries => {
+const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (!e.isIntersecting) return
     e.target.classList.add('visible')
-    const kids = Array.from(e.target.children)
-    if (kids.length > 1) {
-      kids.forEach((k, i) => {
-        k.style.opacity = '0'
-        k.style.transform = 'translateY(18px)'
-        k.style.transition = 'opacity .5s ease, transform .5s ease'
-        setTimeout(() => { k.style.opacity = '1'; k.style.transform = 'translateY(0)' }, i * 60 + 80)
+    const children = Array.from(e.target.children)
+    if (children.length > 1) {
+      children.forEach((child, i) => {
+        child.style.opacity = '0'
+        child.style.transform = 'translateY(20px)'
+        child.style.transition = 'opacity .5s ease, transform .5s ease'
+        setTimeout(() => { child.style.opacity = '1'; child.style.transform = 'translateY(0)' }, i * 60 + 80)
       })
     }
     obs.unobserve(e.target)
   })
-}, { threshold: 0.06 })
+}, { threshold: 0.08 })
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el))
 
-// Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
-    const t = document.querySelector(a.getAttribute('href'))
-    if (t) { e.preventDefault(); t.scrollIntoView({ behavior:'smooth', block:'start' }) }
+    const target = document.querySelector(a.getAttribute('href'))
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
   })
 })
 
-// Cookies
-function acceptCookies() {
-  localStorage.setItem('voltclip_cookies','accepted');
-  document.getElementById('cookieBanner').style.display='none';
-  if (!window._adsLoaded) {
-    window._adsLoaded = true;
-    var s = document.createElement('script');
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5433648295830648';
-    s.async = true; s.crossOrigin = 'anonymous';
-    document.head.appendChild(s);
-  }
-}
+let count = 247
+setInterval(() => {
+  count += Math.floor(Math.random() * 3) - 1
+  count = Math.max(230, Math.min(280, count))
+  const el = document.getElementById('liveCount')
+  if (el) el.textContent = count
+}, 2800)
+
+function acceptCookies() { localStorage.setItem('voltclip_cookies','accepted'); document.getElementById('cookieBanner').style.display='none' }
 function refuseCookies() { localStorage.setItem('voltclip_cookies','refused'); document.getElementById('cookieBanner').style.display='none' }
 if (!localStorage.getItem('voltclip_cookies')) document.getElementById('cookieBanner').style.display='flex'
 </script>
