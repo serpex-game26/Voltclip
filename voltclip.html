@@ -1928,7 +1928,7 @@ let labelEl=bar.querySelector(`.suggest-label`);labelEl&&(labelEl.textContent=la
       </div>
       <button class="vbtn ${liked?`liked`:``}" id="like-${v.id}" onclick="toggleLike('${v.id}',${liked})">
         <span class="vi">${liked?`❤️`:`🤍`}</span>
-        <span class="vc" id="lc-${v.id}">${fmtNum(v.likes_count)}</span>
+        <span class="vc" id="lc-${v.id}" data-raw="${v.likes_count||0}">${fmtNum(v.likes_count)}</span>
       </button>
       <button class="vbtn" onclick="openComments('${v.id}',${v.comments_count})">
         <span class="vi">💬</span>
@@ -2026,6 +2026,10 @@ async function toggleLike(videoId,isLiked){
     }else{
       await sb.from(`likes`).delete().eq(`user_id`,currentUser.id).eq(`video_id`,videoId);
     }
+    // Resync le vrai compteur depuis la DB (évite la désync si plusieurs comptes)
+    sb.from(`videos`).select(`likes_count`).eq(`id`,videoId).single().then(({data:vd})=>{
+      if(vd&&cnt){cnt.dataset.raw=vd.likes_count||0;cnt.textContent=fmtNum(vd.likes_count||0);}
+    });
   }finally{delete btn.dataset.likeLoading;}
 }
 // ══════════════════════════════════════════
