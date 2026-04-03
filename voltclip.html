@@ -1797,7 +1797,7 @@ function startBattleTicker() {
 }
 async function submitBattle() {}
 
-async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null;_currentAuthToken=session?.access_token||null,sb.auth.onAuthStateChange(async(_,session)=>{if(_currentAuthToken=session?.access_token||null,currentUser=session?.user??null,refreshProfile().then(()=>{if(session?.user)checkOnboarding()}),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission(),detectAndSaveLocation()}checkAdmin()}),loadSearch(),loadRank(`week`),refreshProfile(),checkAgeGate(),checkAdmin(),currentUser&&setupRealtimeNotifs(currentUser.id);battlePage=0;battleAllLoaded=false;loadBattles();setupRealtimeBattles();startBattleTicker();}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
+async function init(){currentTab='battle';try{let{data:{session}}=await sb.auth.getSession();currentUser=session?.user??null;_currentAuthToken=session?.access_token||null,sb.auth.onAuthStateChange(async(_,session)=>{if(_currentAuthToken=session?.access_token||null,currentUser=session?.user??null,refreshProfile().then(()=>{if(session?.user){checkOnboarding();applyPreferredBattleCategory();}}),currentTab===`notif`&&loadNotifs(),session?.user){let{data:prof}=await sb.from(`profiles`).select(`is_banned`).eq(`id`,session.user.id).single();if(prof?.is_banned){await sb.auth.signOut(),alert(`🚫 Ton compte a été suspendu.`);return}setupRealtimeNotifs(session.user.id),requestPushPermission(),detectAndSaveLocation()}checkAdmin()}),loadSearch(),loadRank(`week`);checkAgeGate(),checkAdmin();if(currentUser){setupRealtimeNotifs(currentUser.id);await refreshProfile();applyPreferredBattleCategory();}else{refreshProfile();}battlePage=0;battleAllLoaded=false;loadBattles();setupRealtimeBattles();startBattleTicker();}catch(e){console.error('init error:',e);document.getElementById('battleFeed').innerHTML='<div class="empty-state" style="height:calc(100dvh - 60px)"><span class="ei">⚠️</span><p>Erreur de connexion.<br>Vérifie ta connexion et recharge.</p></div>';}
 }
 // ══════════════════════════════════════════
 // NOTIFICATIONS PUSH + REALTIME
@@ -3156,7 +3156,19 @@ let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-1
 // Remplir les selects jour et année au chargement
 (function initAgeSelects(){let daySelect=document.getElementById(`ageDaySelect`),yearSelect=document.getElementById(`ageYearSelect`);if(!daySelect||!yearSelect)return;for(let d=1;d<=31;d++){let opt=document.createElement(`option`);opt.value=d,opt.textContent=d,daySelect.appendChild(opt)}let currentYear=(/* @__PURE__ */ new Date()).getFullYear();for(let y=currentYear-5;y>=1920;y--){let opt=document.createElement(`option`);opt.value=y,opt.textContent=y,yearSelect.appendChild(opt)}})();function checkOnboarding(){if(!currentUser)return;const _hasInterests=_cachedProfile?.interests?.length>0;if(!_hasInterests){let modal=document.getElementById(`onboardingModal`);modal.style.display=`flex`;let grid=document.getElementById(`interestGrid`);grid.innerHTML=INTERESTS.map(i=>`
       <button onclick="toggleInterest(this,'${i.id}')" style="padding:8px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;transition:.15s">${i.label}</button>
-    `).join(``)}}function toggleInterest(btn,interest){selectedInterests.has(interest)?(selectedInterests.delete(interest),btn.style.background=`none`,btn.style.borderColor=`rgba(255,255,255,.15)`,btn.style.color=`rgba(255,255,255,.7)`):(selectedInterests.add(interest),btn.style.background=`linear-gradient(135deg,rgba(124,92,252,.3),rgba(252,92,125,.15))`,btn.style.borderColor=`#7c5cfc`,btn.style.color=`#fff`)}async function saveInterests(){
+    `).join(``)}}function toggleInterest(btn,interest){selectedInterests.has(interest)?(selectedInterests.delete(interest),btn.style.background=`none`,btn.style.borderColor=`rgba(255,255,255,.15)`,btn.style.color=`rgba(255,255,255,.7)`):(selectedInterests.add(interest),btn.style.background=`linear-gradient(135deg,rgba(124,92,252,.3),rgba(252,92,125,.15))`,btn.style.borderColor=`#7c5cfc`,btn.style.color=`#fff`)}// Applique la catégorie préférée (premier intérêt) comme filtre battle actif
+function applyPreferredBattleCategory(){
+  const interests=_cachedProfile?.interests||[];
+  if(!interests.length)return;
+  const firstId=interests[0];
+  const matchBtn=document.querySelector(`.bcat-btn[onclick*="'${firstId}'"]`);
+  if(matchBtn&&!matchBtn.classList.contains('active')){
+    setBattleCategory(firstId,matchBtn);
+    // Scroll le filtre vers le bouton actif
+    matchBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  }
+}
+async function saveInterests(){
   const arr=[...selectedInterests];
   if(!arr.length){toast(`Choisis au moins une catégorie !`);return;}
   await sb.from(`profiles`).update({interests:arr}).eq(`id`,currentUser.id);
@@ -3167,7 +3179,7 @@ let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-1
   if(arr.length){
     const firstId = arr[0]; // arr contient désormais les IDs directs (ex: 'duo_danse')
     const matchBtn = document.querySelector(`.bcat-btn[onclick*="'${firstId}'"]`);
-    if(matchBtn){ setBattleCategory(firstId, matchBtn); }
+    if(matchBtn){ setBattleCategory(firstId, matchBtn); setTimeout(()=>matchBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}),100); }
     else { battlePage=0; battleAllLoaded=false; loadBattles(); }
   }
 }
