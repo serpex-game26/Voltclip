@@ -2026,10 +2026,12 @@ async function toggleLike(videoId,isLiked){
     }else{
       await sb.from(`likes`).delete().eq(`user_id`,currentUser.id).eq(`video_id`,videoId);
     }
-    // Resync le vrai compteur depuis la DB (évite la désync si plusieurs comptes)
-    sb.from(`videos`).select(`likes_count`).eq(`id`,videoId).single().then(({data:vd})=>{
-      if(vd&&cnt){cnt.dataset.raw=vd.likes_count||0;cnt.textContent=fmtNum(vd.likes_count||0);}
-    });
+    // Resync le vrai compteur depuis la DB après délai (laisse le trigger Supabase finir)
+    setTimeout(()=>{
+      sb.from(`videos`).select(`likes_count`).eq(`id`,videoId).single().then(({data:vd})=>{
+        if(vd!=null&&cnt){cnt.dataset.raw=vd.likes_count||0;cnt.textContent=fmtNum(vd.likes_count||0);}
+      });
+    },1000);
   }finally{delete btn.dataset.likeLoading;}
 }
 // ══════════════════════════════════════════
