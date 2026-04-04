@@ -1288,22 +1288,21 @@ async function loadBattles(append = false) {
   const feed = document.getElementById('battleFeed')
   if (!append) feed.innerHTML = '<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>'
 
-  let battleQuery = sb.from('battles')
-    .select('*, video_left:video_left_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username)), video_right:video_right_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username))')
-    .eq('status', 'active')
-    .gt('expires_at', new Date().toISOString())
-    .order('created_at', { ascending: false })
-    .range(battlePage * 10, battlePage * 10 + 9)
+  const SELECT = '*, video_left:video_left_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username)), video_right:video_right_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username))'
+  const prefCat = !currentBattleCategory ? (_cachedProfile?.interests?.[0] || null) : null
+  let battles = [], error = null
+  const pageSize = prefCat ? 20 : 10
+  let battleQuery = sb.from('battles').select(SELECT).eq('status','active').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).range(battlePage*pageSize, battlePage*pageSize+pageSize-1)
   if (currentBattleCategory) battleQuery = battleQuery.eq('category', currentBattleCategory)
-  let { data: battles, error } = await battleQuery
-  if (!currentBattleCategory && battles?.length) {
-    const prefCat = _cachedProfile?.interests?.[0] || null
-    if (prefCat) {
-      battles = [
-        ...battles.filter(b => b.category === prefCat),
-        ...battles.filter(b => b.category !== prefCat)
-      ]
-    }
+  const res = await battleQuery
+  battles = res.data || []
+  error = res.error
+  // Tri : catégorie préférée en tête, reste derrière, ordre créa conservé dans chaque groupe
+  if (prefCat && battles.length) {
+    battles = [
+      ...battles.filter(b => b.category === prefCat),
+      ...battles.filter(b => b.category !== prefCat)
+    ]
   }
 
   if (error) console.warn('battles error:', error)
