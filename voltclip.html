@@ -3940,15 +3940,15 @@ async function bfsVoteFromFullscreen() {
 
 <!-- BATTLE PC NAVIGATION ARROWS -->
 <div id="battleNavArrows" style="display:none;position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:300;flex-direction:column;gap:10px;pointer-events:auto">
-  <button onclick="battleNavScroll(-1)" title="Battle précédent (↑)" style="background:rgba(124,92,252,0.85);border:2px solid rgba(255,255,255,0.25);color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);transition:transform .15s;line-height:1" onmouseover="this.style.transform=\'scale(1.12)\'" onmouseout="this.style.transform=\'scale(1)\'">▲</button>
-  <button onclick="battleNavScroll(1)" title="Battle suivant (↓)" style="background:rgba(252,92,125,0.85);border:2px solid rgba(255,255,255,0.25);color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);transition:transform .15s;line-height:1" onmouseover="this.style.transform=\'scale(1.12)\'" onmouseout="this.style.transform=\'scale(1)\'">▼</button>
+  <button onclick="battleNavScroll(-1)" title="Battle précédent (↑)" style="background:rgba(124,92,252,0.85);border:2px solid rgba(255,255,255,0.25);color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);transition:transform .15s;line-height:1" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">▲</button>
+  <button onclick="battleNavScroll(1)" title="Battle suivant (↓)" style="background:rgba(252,92,125,0.85);border:2px solid rgba(255,255,255,0.25);color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px;cursor:pointer;backdrop-filter:blur(10px);transition:transform .15s;line-height:1" onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform='scale(1)'">▼</button>
 </div>
 <script>
 // ── Navigation battle PC : molette + clavier + boutons ──
 function battleNavScroll(dir) {
-  var feed = document.getElementById(\'battleFeed\');
+  var feed = document.getElementById('battleFeed');
   if (!feed) return;
-  var items = feed.querySelectorAll(\'.battle-item\');
+  var items = feed.querySelectorAll('.battle-item');
   if (!items.length) return;
   var feedRect = feed.getBoundingClientRect();
   var currentIdx = 0;
@@ -3957,44 +3957,44 @@ function battleNavScroll(dir) {
     if (Math.abs(r.top - feedRect.top) < item.offsetHeight * 0.5) currentIdx = i;
   });
   var next = items[Math.max(0, Math.min(items.length - 1, currentIdx + dir))];
-  if (next) next.scrollIntoView({ behavior: \'smooth\', block: \'start\' });
+  if (next) next.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function _updateBattleNavArrows() {
-  var arrows = document.getElementById(\'battleNavArrows\');
+  var arrows = document.getElementById('battleNavArrows');
   if (!arrows) return;
-  var isBattle = document.getElementById(\'battleScreen\') && document.getElementById(\'battleScreen\').classList.contains(\'active\');
+  var isBattle = document.getElementById('battleScreen') && document.getElementById('battleScreen').classList.contains('active');
   var isDesktop = window.innerWidth >= 768;
-  arrows.style.display = (isBattle && isDesktop) ? \'flex\' : \'none\';
+  arrows.style.display = (isBattle && isDesktop) ? 'flex' : 'none';
 }
 
 (function() {
   var _wheelTimeout = null;
-  document.addEventListener(\'wheel\', function(e) {
-    var battleScreen = document.getElementById(\'battleScreen\');
-    if (!battleScreen || !battleScreen.classList.contains(\'active\')) return;
+  document.addEventListener('wheel', function(e) {
+    var battleScreen = document.getElementById('battleScreen');
+    if (!battleScreen || !battleScreen.classList.contains('active')) return;
     e.preventDefault();
     if (_wheelTimeout) return;
     _wheelTimeout = setTimeout(function() { _wheelTimeout = null; }, 650);
     battleNavScroll(e.deltaY > 0 ? 1 : -1);
   }, { passive: false });
 
-  document.addEventListener(\'keydown\', function(e) {
-    var battleScreen = document.getElementById(\'battleScreen\');
-    if (!battleScreen || !battleScreen.classList.contains(\'active\')) return;
-    if (e.key === \'ArrowDown\' || e.key === \'PageDown\') { e.preventDefault(); battleNavScroll(1); }
-    if (e.key === \'ArrowUp\' || e.key === \'PageUp\') { e.preventDefault(); battleNavScroll(-1); }
+  document.addEventListener('keydown', function(e) {
+    var battleScreen = document.getElementById('battleScreen');
+    if (!battleScreen || !battleScreen.classList.contains('active')) return;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); battleNavScroll(1); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); battleNavScroll(-1); }
   });
 
-  window.addEventListener(\'resize\', _updateBattleNavArrows);
+  window.addEventListener('resize', _updateBattleNavArrows);
 
   // Hook sur les nav buttons pour afficher/cacher les flèches
-  document.addEventListener(\'click\', function(e) {
-    var btn = e.target.closest(\'.nav-btn\');
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.nav-btn');
     if (btn) setTimeout(_updateBattleNavArrows, 120);
   });
 })();
-<\/script>
+</script>
 
 
 <!-- MODAL BOOST CLIP -->
@@ -4071,18 +4071,10 @@ function confirmBoost() {
   const offer = _boostOffers[_boostOfferIdx]
   const subject = encodeURIComponent('[VoltClip Boost] ' + offer.label)
   const body = encodeURIComponent(
-    'Bonjour,
-
-Je souhaite booster mon clip.
-
-' +
-    'Offre : ' + offer.name + ' — ' + offer.price + '
-' +
-    'ID vidéo : ' + (_boostVideoId || 'N/A') + '
-' +
-    'Compte : ' + (currentUser?.email || 'N/A') + '
-
-' +
+    'Bonjour,\n\nJe souhaite booster mon clip.\n\n' +
+    'Offre : ' + offer.name + ' — ' + offer.price + '\n' +
+    'ID vidéo : ' + (_boostVideoId || 'N/A') + '\n' +
+    'Compte : ' + (currentUser?.email || 'N/A') + '\n\n' +
     'Merci de me confirmer la procédure de paiement.'
   )
   window.open('mailto:hervecaporale17@gmail.com?subject=' + subject + '&body=' + body)
