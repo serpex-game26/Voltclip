@@ -1295,7 +1295,16 @@ async function loadBattles(append = false) {
     .order('created_at', { ascending: false })
     .range(battlePage * 10, battlePage * 10 + 9)
   if (currentBattleCategory) battleQuery = battleQuery.eq('category', currentBattleCategory)
-  const { data: battles, error } = await battleQuery
+  let { data: battles, error } = await battleQuery
+  if (!currentBattleCategory && battles?.length) {
+    const prefCat = _cachedProfile?.interests?.[0] || null
+    if (prefCat) {
+      battles = [
+        ...battles.filter(b => b.category === prefCat),
+        ...battles.filter(b => b.category !== prefCat)
+      ]
+    }
+  }
 
   if (error) console.warn('battles error:', error)
   if (!battles?.length) {
@@ -3299,24 +3308,7 @@ let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-1
   if(grid)grid.innerHTML=INTERESTS.map(i=>`
       <button onclick="toggleInterest(this,'${i.id}')" style="padding:8px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.15);background:none;color:rgba(255,255,255,.7);font-size:13px;cursor:pointer;transition:.15s">${i.label}</button>
     `).join(``);}function toggleInterest(btn,interest){selectedInterests.has(interest)?(selectedInterests.delete(interest),btn.style.background=`none`,btn.style.borderColor=`rgba(255,255,255,.15)`,btn.style.color=`rgba(255,255,255,.7)`):(selectedInterests.add(interest),btn.style.background=`linear-gradient(135deg,rgba(124,92,252,.3),rgba(252,92,125,.15))`,btn.style.borderColor=`#7c5cfc`,btn.style.color=`#fff`)}// Applique la catégorie préférée (premier intérêt) comme filtre battle actif
-async function applyPreferredBattleCategory(){
-  // Attendre que le profil soit chargé si nécessaire
-  if(!_cachedProfile&&currentUser){
-    const{data:prof}=await sb.from(`profiles`).select(`interests`).eq(`id`,currentUser.id).single();
-    if(prof&&!_cachedProfile)_cachedProfile=prof;
-  }
-  const interests=_cachedProfile?.interests||[];
-  if(!interests.length)return;
-  const VALID_IDS=new Set(['solo_danse','duo_danse','solo_vocal','duo_vocal','freestyle','humour','gaming','sketch']);
-  const firstId=VALID_IDS.has(interests[0])?interests[0]:null;
-  if(!firstId)return;
-  const matchBtn=document.querySelector(`.bcat-btn[onclick*="'${firstId}'"]`);
-  if(matchBtn&&!matchBtn.classList.contains('active')){
-    setBattleCategory(firstId,matchBtn);
-    // Scroll le filtre vers le bouton actif
-    matchBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }
-}
+function applyPreferredBattleCategory(){/* tri géré dans loadBattles */}
 async function saveInterests(){
   const arr=[...selectedInterests];
   if(!arr.length){toast(`Choisis au moins une catégorie !`);return;}
