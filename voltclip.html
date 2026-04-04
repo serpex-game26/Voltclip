@@ -1333,7 +1333,7 @@ async function loadBattles(append = false) {
       const adEl = document.createElement('div')
       adEl.className = 'battle-item battle-ad-slot'
       adEl.style.cssText = 'scroll-snap-align:start;scroll-snap-stop:always;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;height:100%;min-height:calc(100dvh - 106px);position:relative;overflow:hidden'
-      adEl.innerHTML = \`
+      adEl.innerHTML = `
         <div style="font-family:'Space Mono',monospace;color:rgba(255,255,255,0.3);font-size:10px;letter-spacing:.1em;margin-bottom:16px;text-transform:uppercase">Publicité</div>
         <div style="width:90%;max-width:360px;min-height:260px;background:#13131a;border:1px solid rgba(255,255,255,0.08);border-radius:16px;display:flex;align-items:center;justify-content:center;overflow:hidden">
           <ins class="adsbygoogle"
@@ -1344,7 +1344,7 @@ async function loadBattles(append = false) {
             data-full-width-responsive="true"></ins>
         </div>
         <div style="font-family:'Space Mono',monospace;color:rgba(255,255,255,0.2);font-size:9px;margin-top:12px">Swipe pour continuer les battles ⚔️</div>
-      \`
+      `
       feed.appendChild(adEl)
       // Activer AdSense sur ce slot
       try { window.adsbygoogle = window.adsbygoogle || []; window.adsbygoogle.push({}) } catch(e) {}
@@ -1556,10 +1556,10 @@ async function voteBattle(battleId, side, el) {
   // Streak de vote
   const _streak = parseInt(localStorage.getItem('vc_vote_streak') || '0') + 1
   localStorage.setItem('vc_vote_streak', _streak)
-  if (_streak === 3) setTimeout(() => toast('🔥 3 battles d'affilée !'), 800)
-  else if (_streak === 5) setTimeout(() => { toast('⚡ 5 battles — t'es chaud !'); navigator.vibrate && navigator.vibrate([20,10,20,10,40]) }, 800)
+  if (_streak === 3) setTimeout(() => toast('🔥 3 battles d\'affilée !'), 800)
+  else if (_streak === 5) setTimeout(() => { toast('⚡ 5 battles — t\'es chaud !'); navigator.vibrate && navigator.vibrate([20,10,20,10,40]) }, 800)
   else if (_streak === 10) setTimeout(() => { toast('🏆 10 battles ! Légende en cours…'); navigator.vibrate && navigator.vibrate([30,10,30,10,60]) }, 800)
-  else if (_streak > 0 && _streak % 10 === 0) setTimeout(() => toast('🔥 ' + _streak + ' battles d'affilée !'), 800)
+  else if (_streak > 0 && _streak % 10 === 0) setTimeout(() => toast('🔥 ' + _streak + ' battles d\'affilée !'), 800)
   
   // Message dopaminergique "Tu votes comme X% des gens"
   const _myPct = side === 'left' ? pctLeft : pctRight
@@ -3351,7 +3351,7 @@ const AGE_GATE_VERSION=`v2`;if(localStorage.getItem(`voltclip_age_version`)!==AG
 // Si déjà vérifié
 if(localStorage.getItem(`voltclip_age_ok`)===`1`)return;
 // Set max date = today - 15 years
-let maxDate=/* @__PURE__ */ new Date;maxDate.setFullYear(maxDate.getFullYear()-15),var _ag=document.getElementById(`ageGateModal`);_ag.style.display=`flex`;_ag.classList.add(`open`)}function submitAgeGate(){let errEl=document.getElementById(`ageGateErr`),day=document.getElementById(`ageDaySelect`).value,month=document.getElementById(`ageMonthSelect`).value,year=document.getElementById(`ageYearSelect`).value;if(!day||!month||!year){errEl.textContent=`Indique ta date de naissance complète`,errEl.style.display=`block`;return}let birth=new Date(parseInt(year),parseInt(month)-1,parseInt(day)),now=/* @__PURE__ */ new Date;if(now.getFullYear()-birth.getFullYear()-(now<new Date(now.getFullYear(),birth.getMonth(),birth.getDate())?1:0)<15){errEl.textContent=`🚫 Tu dois avoir au moins 15 ans pour accéder à VoltClip.`,errEl.style.display=`block`;return}let val=`${year}-${String(month).padStart(2,`0`)}-${String(day).padStart(2,`0`)}`;localStorage.setItem(`voltclip_age_ok`,`1`),var _ag2=document.getElementById(`ageGateModal`);_ag2.style.display=`none`;_ag2.classList.remove(`open`),currentUser&&sb.from(`profiles`).update({birthdate:val}).eq(`id`,currentUser.id).then(()=>{})}
+let maxDate=new Date();maxDate.setFullYear(maxDate.getFullYear()-15);const _ag=document.getElementById(`ageGateModal`);_ag.style.display=`flex`;_ag.classList.add(`open`)}function submitAgeGate(){let errEl=document.getElementById(`ageGateErr`),day=document.getElementById(`ageDaySelect`).value,month=document.getElementById(`ageMonthSelect`).value,year=document.getElementById(`ageYearSelect`).value;if(!day||!month||!year){errEl.textContent=`Indique ta date de naissance complète`,errEl.style.display=`block`;return}let birth=new Date(parseInt(year),parseInt(month)-1,parseInt(day)),now=/* @__PURE__ */ new Date;if(now.getFullYear()-birth.getFullYear()-(now<new Date(now.getFullYear(),birth.getMonth(),birth.getDate())?1:0)<15){errEl.textContent=`🚫 Tu dois avoir au moins 15 ans pour accéder à VoltClip.`,errEl.style.display=`block`;return}let val=`${year}-${String(month).padStart(2,`0`)}-${String(day).padStart(2,`0`)}`;localStorage.setItem(`voltclip_age_ok`,`1`);const _ag2=document.getElementById(`ageGateModal`);_ag2.style.display=`none`;_ag2.classList.remove(`open`);currentUser&&sb.from(`profiles`).update({birthdate:val}).eq(`id`,currentUser.id).then(()=>{})}
 // Remplir les selects jour et année au chargement
 (function initAgeSelects(){let daySelect=document.getElementById(`ageDaySelect`),yearSelect=document.getElementById(`ageYearSelect`);if(!daySelect||!yearSelect)return;for(let d=1;d<=31;d++){let opt=document.createElement(`option`);opt.value=d,opt.textContent=d,daySelect.appendChild(opt)}let currentYear=(/* @__PURE__ */ new Date()).getFullYear();for(let y=currentYear-5;y>=1920;y--){let opt=document.createElement(`option`);opt.value=y,opt.textContent=y,yearSelect.appendChild(opt)}})();// ══════════════════════════════════════════
 // UTILS
