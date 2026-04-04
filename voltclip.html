@@ -1295,8 +1295,9 @@ async function loadBattles(append = false) {
   const feed = document.getElementById('battleFeed')
   if (!append) feed.innerHTML = '<div class="loader-dots" style="margin-top:45vh"><span></span><span></span><span></span></div>'
 
+  // ── Étape 1 : récupérer les battles avec vidéos (sans join profiles, évite PGRST) ──
   let battleQuery = sb.from('battles')
-    .select('*, is_sponsored, video_left:video_left_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username)), video_right:video_right_id(video_url,thumbnail_url,user_id,category,profiles!videos_user_id_fkey(username))')
+    .select('*, video_left:video_left_id(video_url,thumbnail_url,user_id,category), video_right:video_right_id(video_url,thumbnail_url,user_id,category)')
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .range(battlePage * 20, battlePage * 20 + 19)
@@ -1309,6 +1310,19 @@ async function loadBattles(append = false) {
     battleLoading = false
     return
   }
+
+  // ── Étape 2 : récupérer les usernames en une seule requête ──
+  const allUserIds = [...new Set(battles.flatMap(b => [b.video_left?.user_id, b.video_right?.user_id].filter(Boolean)))]
+  let profileMap = {}
+  if (allUserIds.length) {
+    const { data: profs } = await sb.from('profiles').select('id,username').in('id', allUserIds)
+    profs?.forEach(p => { profileMap[p.id] = p.username })
+  }
+  // Injecter les usernames dans les objets vidéo
+  battles.forEach(b => {
+    if (b.video_left)  b.video_left.profiles  = { username: profileMap[b.video_left.user_id]  || 'user' }
+    if (b.video_right) b.video_right.profiles = { username: profileMap[b.video_right.user_id] || 'user' }
+  })
 
   if (battles.length < 20) battleAllLoaded = true
 
